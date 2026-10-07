@@ -62,7 +62,7 @@ export function mountHall(root: HTMLElement): () => void {
       </nav>
       <div class="hall-ask" data-ask></div>
       <footer class="hall-foot">
-        <p>工程支撑：本地 BGE-small 语义匹配 + table.ts 确定性路由；余弦相似度 ≥0.40 命中写入。卖点是约束表可审计、可验证 + 改锁可追溯回放，不是统一接口本身。</p>
+        <p>工程支撑：本地 BGE-small 语义匹配 + table.ts 确定性路由；槽位余弦相似度 ≥0.40 写入约束，题库检索 ≥0.55 才作答。卖点是约束表可审计、可验证 + 改锁可追溯回放，不是统一接口本身。</p>
         <div class="hall-foot-btns">
           <button type="button" class="chip is-on" data-calib>阈值标定曲线</button>
           <button type="button" class="text-btn" data-about>开源边界与诚实声明</button>

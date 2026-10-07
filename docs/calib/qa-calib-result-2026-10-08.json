@@ -1,0 +1,1446 @@
+{
+ "sweep": {
+  "dev": [
+   {
+    "t": 0.4,
+    "split": "dev",
+    "n_in": 27,
+    "n_ood": 20,
+    "correct": 27,
+    "wrong": 0,
+    "miss": 0,
+    "ood_accept": 18,
+    "ood_reject": 2,
+    "precision": 0.6,
+    "recall": 1.0,
+    "f1": 0.75
+   },
+   {
+    "t": 0.425,
+    "split": "dev",
+    "n_in": 27,
+    "n_ood": 20,
+    "correct": 27,
+    "wrong": 0,
+    "miss": 0,
+    "ood_accept": 17,
+    "ood_reject": 3,
+    "precision": 0.6136,
+    "recall": 1.0,
+    "f1": 0.7606
+   },
+   {
+    "t": 0.45,
+    "split": "dev",
+    "n_in": 27,
+    "n_ood": 20,
+    "correct": 27,
+    "wrong": 0,
+    "miss": 0,
+    "ood_accept": 16,
+    "ood_reject": 4,
+    "precision": 0.6279,
+    "recall": 1.0,
+    "f1": 0.7714
+   },
+   {
+    "t": 0.475,
+    "split": "dev",
+    "n_in": 27,
+    "n_ood": 20,
+    "correct": 27,
+    "wrong": 0,
+    "miss": 0,
+    "ood_accept": 10,
+    "ood_reject": 10,
+    "precision": 0.7297,
+    "recall": 1.0,
+    "f1": 0.8437
+   },
+   {
+    "t": 0.5,
+    "split": "dev",
+    "n_in": 27,
+    "n_ood": 20,
+    "correct": 27,
+    "wrong": 0,
+    "miss": 0,
+    "ood_accept": 4,
+    "ood_reject": 16,
+    "precision": 0.871,
+    "recall": 1.0,
+    "f1": 0.931
+   },
+   {
+    "t": 0.525,
+    "split": "dev",
+    "n_in": 27,
+    "n_ood": 20,
+    "correct": 27,
+    "wrong": 0,
+    "miss": 0,
+    "ood_accept": 2,
+    "ood_reject": 18,
+    "precision": 0.931,
+    "recall": 1.0,
+    "f1": 0.9643
+   },
+   {
+    "t": 0.55,
+    "split": "dev",
+    "n_in": 27,
+    "n_ood": 20,
+    "correct": 27,
+    "wrong": 0,
+    "miss": 0,
+    "ood_accept": 0,
+    "ood_reject": 20,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   {
+    "t": 0.575,
+    "split": "dev",
+    "n_in": 27,
+    "n_ood": 20,
+    "correct": 27,
+    "wrong": 0,
+    "miss": 0,
+    "ood_accept": 0,
+    "ood_reject": 20,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0
+   },
+   {
+    "t": 0.6,
+    "split": "dev",
+    "n_in": 27,
+    "n_ood": 20,
+    "correct": 24,
+    "wrong": 0,
+    "miss": 3,
+    "ood_accept": 0,
+    "ood_reject": 20,
+    "precision": 1.0,
+    "recall": 0.8889,
+    "f1": 0.9412
+   },
+   {
+    "t": 0.625,
+    "split": "dev",
+    "n_in": 27,
+    "n_ood": 20,
+    "correct": 24,
+    "wrong": 0,
+    "miss": 3,
+    "ood_accept": 0,
+    "ood_reject": 20,
+    "precision": 1.0,
+    "recall": 0.8889,
+    "f1": 0.9412
+   },
+   {
+    "t": 0.65,
+    "split": "dev",
+    "n_in": 27,
+    "n_ood": 20,
+    "correct": 22,
+    "wrong": 0,
+    "miss": 5,
+    "ood_accept": 0,
+    "ood_reject": 20,
+    "precision": 1.0,
+    "recall": 0.8148,
+    "f1": 0.898
+   },
+   {
+    "t": 0.675,
+    "split": "dev",
+    "n_in": 27,
+    "n_ood": 20,
+    "correct": 15,
+    "wrong": 0,
+    "miss": 12,
+    "ood_accept": 0,
+    "ood_reject": 20,
+    "precision": 1.0,
+    "recall": 0.5556,
+    "f1": 0.7143
+   },
+   {
+    "t": 0.7,
+    "split": "dev",
+    "n_in": 27,
+    "n_ood": 20,
+    "correct": 14,
+    "wrong": 0,
+    "miss": 13,
+    "ood_accept": 0,
+    "ood_reject": 20,
+    "precision": 1.0,
+    "recall": 0.5185,
+    "f1": 0.6829
+   }
+  ],
+  "holdout": [
+   {
+    "t": 0.4,
+    "split": "holdout",
+    "n_in": 34,
+    "n_ood": 20,
+    "correct": 30,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 20,
+    "ood_reject": 0,
+    "precision": 0.5556,
+    "recall": 0.8824,
+    "f1": 0.6818
+   },
+   {
+    "t": 0.425,
+    "split": "holdout",
+    "n_in": 34,
+    "n_ood": 20,
+    "correct": 30,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 18,
+    "ood_reject": 2,
+    "precision": 0.5769,
+    "recall": 0.8824,
+    "f1": 0.6977
+   },
+   {
+    "t": 0.45,
+    "split": "holdout",
+    "n_in": 34,
+    "n_ood": 20,
+    "correct": 30,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 16,
+    "ood_reject": 4,
+    "precision": 0.6,
+    "recall": 0.8824,
+    "f1": 0.7143
+   },
+   {
+    "t": 0.475,
+    "split": "holdout",
+    "n_in": 34,
+    "n_ood": 20,
+    "correct": 30,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 12,
+    "ood_reject": 8,
+    "precision": 0.6522,
+    "recall": 0.8824,
+    "f1": 0.75
+   },
+   {
+    "t": 0.5,
+    "split": "holdout",
+    "n_in": 34,
+    "n_ood": 20,
+    "correct": 30,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 9,
+    "ood_reject": 11,
+    "precision": 0.6977,
+    "recall": 0.8824,
+    "f1": 0.7792
+   },
+   {
+    "t": 0.525,
+    "split": "holdout",
+    "n_in": 34,
+    "n_ood": 20,
+    "correct": 30,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 7,
+    "ood_reject": 13,
+    "precision": 0.7317,
+    "recall": 0.8824,
+    "f1": 0.8
+   },
+   {
+    "t": 0.55,
+    "split": "holdout",
+    "n_in": 34,
+    "n_ood": 20,
+    "correct": 30,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 4,
+    "ood_reject": 16,
+    "precision": 0.7895,
+    "recall": 0.8824,
+    "f1": 0.8333
+   },
+   {
+    "t": 0.575,
+    "split": "holdout",
+    "n_in": 34,
+    "n_ood": 20,
+    "correct": 28,
+    "wrong": 2,
+    "miss": 4,
+    "ood_accept": 4,
+    "ood_reject": 16,
+    "precision": 0.8235,
+    "recall": 0.8235,
+    "f1": 0.8235
+   },
+   {
+    "t": 0.6,
+    "split": "holdout",
+    "n_in": 34,
+    "n_ood": 20,
+    "correct": 27,
+    "wrong": 1,
+    "miss": 6,
+    "ood_accept": 3,
+    "ood_reject": 17,
+    "precision": 0.871,
+    "recall": 0.7941,
+    "f1": 0.8308
+   },
+   {
+    "t": 0.625,
+    "split": "holdout",
+    "n_in": 34,
+    "n_ood": 20,
+    "correct": 26,
+    "wrong": 1,
+    "miss": 7,
+    "ood_accept": 1,
+    "ood_reject": 19,
+    "precision": 0.9286,
+    "recall": 0.7647,
+    "f1": 0.8387
+   },
+   {
+    "t": 0.65,
+    "split": "holdout",
+    "n_in": 34,
+    "n_ood": 20,
+    "correct": 23,
+    "wrong": 1,
+    "miss": 10,
+    "ood_accept": 1,
+    "ood_reject": 19,
+    "precision": 0.92,
+    "recall": 0.6765,
+    "f1": 0.7797
+   },
+   {
+    "t": 0.675,
+    "split": "holdout",
+    "n_in": 34,
+    "n_ood": 20,
+    "correct": 17,
+    "wrong": 1,
+    "miss": 16,
+    "ood_accept": 1,
+    "ood_reject": 19,
+    "precision": 0.8947,
+    "recall": 0.5,
+    "f1": 0.6415
+   },
+   {
+    "t": 0.7,
+    "split": "holdout",
+    "n_in": 34,
+    "n_ood": 20,
+    "correct": 15,
+    "wrong": 1,
+    "miss": 18,
+    "ood_accept": 0,
+    "ood_reject": 20,
+    "precision": 0.9375,
+    "recall": 0.4412,
+    "f1": 0.6
+   }
+  ],
+  "all": [
+   {
+    "t": 0.4,
+    "split": "all",
+    "n_in": 61,
+    "n_ood": 40,
+    "correct": 57,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 38,
+    "ood_reject": 2,
+    "precision": 0.5758,
+    "recall": 0.9344,
+    "f1": 0.7125
+   },
+   {
+    "t": 0.425,
+    "split": "all",
+    "n_in": 61,
+    "n_ood": 40,
+    "correct": 57,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 35,
+    "ood_reject": 5,
+    "precision": 0.5938,
+    "recall": 0.9344,
+    "f1": 0.7261
+   },
+   {
+    "t": 0.45,
+    "split": "all",
+    "n_in": 61,
+    "n_ood": 40,
+    "correct": 57,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 32,
+    "ood_reject": 8,
+    "precision": 0.6129,
+    "recall": 0.9344,
+    "f1": 0.7403
+   },
+   {
+    "t": 0.475,
+    "split": "all",
+    "n_in": 61,
+    "n_ood": 40,
+    "correct": 57,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 22,
+    "ood_reject": 18,
+    "precision": 0.6867,
+    "recall": 0.9344,
+    "f1": 0.7917
+   },
+   {
+    "t": 0.5,
+    "split": "all",
+    "n_in": 61,
+    "n_ood": 40,
+    "correct": 57,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 13,
+    "ood_reject": 27,
+    "precision": 0.7703,
+    "recall": 0.9344,
+    "f1": 0.8444
+   },
+   {
+    "t": 0.525,
+    "split": "all",
+    "n_in": 61,
+    "n_ood": 40,
+    "correct": 57,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 9,
+    "ood_reject": 31,
+    "precision": 0.8143,
+    "recall": 0.9344,
+    "f1": 0.8702
+   },
+   {
+    "t": 0.55,
+    "split": "all",
+    "n_in": 61,
+    "n_ood": 40,
+    "correct": 57,
+    "wrong": 4,
+    "miss": 0,
+    "ood_accept": 4,
+    "ood_reject": 36,
+    "precision": 0.8769,
+    "recall": 0.9344,
+    "f1": 0.9048
+   },
+   {
+    "t": 0.575,
+    "split": "all",
+    "n_in": 61,
+    "n_ood": 40,
+    "correct": 55,
+    "wrong": 2,
+    "miss": 4,
+    "ood_accept": 4,
+    "ood_reject": 36,
+    "precision": 0.9016,
+    "recall": 0.9016,
+    "f1": 0.9016
+   },
+   {
+    "t": 0.6,
+    "split": "all",
+    "n_in": 61,
+    "n_ood": 40,
+    "correct": 51,
+    "wrong": 1,
+    "miss": 9,
+    "ood_accept": 3,
+    "ood_reject": 37,
+    "precision": 0.9273,
+    "recall": 0.8361,
+    "f1": 0.8793
+   },
+   {
+    "t": 0.625,
+    "split": "all",
+    "n_in": 61,
+    "n_ood": 40,
+    "correct": 50,
+    "wrong": 1,
+    "miss": 10,
+    "ood_accept": 1,
+    "ood_reject": 39,
+    "precision": 0.9615,
+    "recall": 0.8197,
+    "f1": 0.885
+   },
+   {
+    "t": 0.65,
+    "split": "all",
+    "n_in": 61,
+    "n_ood": 40,
+    "correct": 45,
+    "wrong": 1,
+    "miss": 15,
+    "ood_accept": 1,
+    "ood_reject": 39,
+    "precision": 0.9574,
+    "recall": 0.7377,
+    "f1": 0.8333
+   },
+   {
+    "t": 0.675,
+    "split": "all",
+    "n_in": 61,
+    "n_ood": 40,
+    "correct": 32,
+    "wrong": 1,
+    "miss": 28,
+    "ood_accept": 1,
+    "ood_reject": 39,
+    "precision": 0.9412,
+    "recall": 0.5246,
+    "f1": 0.6737
+   },
+   {
+    "t": 0.7,
+    "split": "all",
+    "n_in": 61,
+    "n_ood": 40,
+    "correct": 29,
+    "wrong": 1,
+    "miss": 31,
+    "ood_accept": 0,
+    "ood_reject": 40,
+    "precision": 0.9667,
+    "recall": 0.4754,
+    "f1": 0.6374
+   }
+  ]
+ },
+ "e2e": {
+  "dev": [
+   27,
+   27,
+   20,
+   20
+  ],
+  "holdout": [
+   30,
+   34,
+   16,
+   20
+  ]
+ },
+ "e2e_errors": [
+  [
+   "holdout",
+   "回答是AI现编的吗",
+   "bge",
+   "为什么用小模型，不直接接网上的大模型？",
+   0.5721,
+   "为什么用小模型，不直接接网上的大模型？"
+  ],
+  [
+   "holdout",
+   "能AI画一幅落霞孤鹜吗",
+   "bge",
+   "「落霞与孤鹜齐飞」写的是什么时候？",
+   0.7236,
+   "「落霞与孤鹜齐飞」写的是什么时候？"
+  ],
+  [
+   "holdout",
+   "王勃写的是哪个季节的景色",
+   "bge",
+   "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   0.5676,
+   "能不能帮我生成一张滕王阁或梅瓶的照片？"
+  ],
+  [
+   "holdout",
+   "为什么祠堂在围屋正中",
+   "bge",
+   "围屋和土楼是一回事吗？",
+   0.5767,
+   "围屋和土楼是一回事吗？"
+  ],
+  [
+   "holdout",
+   "滕王阁门票多少钱",
+   "bge",
+   "滕王是谁？阁为何而建？",
+   0.6245,
+   "滕王是谁？阁为何而建？"
+  ],
+  [
+   "holdout",
+   "鄱阳湖有多大面积",
+   "bge",
+   "彭蠡是哪里？",
+   0.5884,
+   "彭蠡是哪里？"
+  ],
+  [
+   "holdout",
+   "围屋现在还有人住吗",
+   "bge",
+   "围屋和土楼是一回事吗？",
+   0.624,
+   "围屋和土楼是一回事吗？"
+  ],
+  [
+   "holdout",
+   "青花瓷一件值多少钱",
+   "bge",
+   "青花的蓝色从哪来？",
+   0.6875,
+   "青花的蓝色从哪来？"
+  ]
+ ],
+ "rows": [
+  {
+   "q": "你们是不是套了ChatGPT",
+   "raw": 0.6684,
+   "rawDoc": "这是 ChatGPT 套壳吗？用了网上的大模型吗？",
+   "e2eVia": "bge",
+   "e2eHit": "这是 ChatGPT 套壳吗？用了网上的大模型吗？",
+   "e2eOk": true
+  },
+  {
+   "q": "这个用的是哪家大模型",
+   "raw": 0.6415,
+   "rawDoc": "这是 ChatGPT 套壳吗？用了网上的大模型吗？",
+   "e2eVia": "bge",
+   "e2eHit": "这是 ChatGPT 套壳吗？用了网上的大模型吗？",
+   "e2eOk": true
+  },
+  {
+   "q": "能给我画一张滕王阁的图吗",
+   "raw": 0.7952,
+   "rawDoc": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eVia": "bge",
+   "e2eHit": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eOk": true
+  },
+  {
+   "q": "帮我生成梅瓶照片",
+   "raw": 0.822,
+   "rawDoc": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eVia": "bge",
+   "e2eHit": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eOk": true
+  },
+  {
+   "q": "这个瓶子是故宫的藏品吗",
+   "raw": 0.6684,
+   "rawDoc": "展柜里的梅瓶是博物馆藏品吗？",
+   "e2eVia": "bge",
+   "e2eHit": "展柜里的梅瓶是博物馆藏品吗？",
+   "e2eOk": true
+  },
+  {
+   "q": "展品是真的文物吗",
+   "raw": 0.6731,
+   "rawDoc": "展柜里的梅瓶是博物馆藏品吗？",
+   "e2eVia": "bge",
+   "e2eHit": "展柜里的梅瓶是博物馆藏品吗？",
+   "e2eOk": true
+  },
+  {
+   "q": "为什么不用大模型",
+   "raw": 0.6749,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "bge",
+   "e2eHit": "为什么用小模型，不直接接网上的大模型？",
+   "e2eOk": true
+  },
+  {
+   "q": "围屋跟福建土楼有什么区别",
+   "raw": 0.7846,
+   "rawDoc": "围屋和土楼是一回事吗？",
+   "e2eVia": "bge",
+   "e2eHit": "围屋和土楼是一回事吗？",
+   "e2eOk": true
+  },
+  {
+   "q": "土楼和围屋一样吗",
+   "raw": 0.8102,
+   "rawDoc": "围屋和土楼是一回事吗？",
+   "e2eVia": "bge",
+   "e2eHit": "围屋和土楼是一回事吗？",
+   "e2eOk": true
+  },
+  {
+   "q": "祠堂为什么放在中间",
+   "raw": 0.575,
+   "rawDoc": "祖堂为什么在中轴？",
+   "e2eVia": "bge",
+   "e2eHit": "祖堂为什么在中轴？",
+   "e2eOk": true
+  },
+  {
+   "q": "祖堂在哪个位置",
+   "raw": 0.5812,
+   "rawDoc": "祖堂为什么在中轴？",
+   "e2eVia": "bge",
+   "e2eHit": "祖堂为什么在中轴？",
+   "e2eOk": true
+  },
+  {
+   "q": "炮楼是干嘛的",
+   "raw": 0.5854,
+   "rawDoc": "角楼有什么用？",
+   "e2eVia": "bge",
+   "e2eHit": "角楼有什么用？",
+   "e2eOk": true
+  },
+  {
+   "q": "角楼的作用",
+   "raw": 0.6572,
+   "rawDoc": "角楼有什么用？",
+   "e2eVia": "bge",
+   "e2eHit": "角楼有什么用？",
+   "e2eOk": true
+  },
+  {
+   "q": "时辰怎么影响房间",
+   "raw": 0.7365,
+   "rawDoc": "时辰和房间怎么互相约束？",
+   "e2eVia": "bge",
+   "e2eHit": "时辰和房间怎么互相约束？",
+   "e2eOk": true
+  },
+  {
+   "q": "为什么宋朝没有粉彩",
+   "raw": 0.6982,
+   "rawDoc": "为什么宋代梅瓶不能锁成粉彩？",
+   "e2eVia": "bge",
+   "e2eHit": "为什么宋代梅瓶不能锁成粉彩？",
+   "e2eOk": true
+  },
+  {
+   "q": "宋代梅瓶能用粉彩吗",
+   "raw": 0.8063,
+   "rawDoc": "为什么宋代梅瓶不能锁成粉彩？",
+   "e2eVia": "bge",
+   "e2eHit": "为什么宋代梅瓶不能锁成粉彩？",
+   "e2eOk": true
+  },
+  {
+   "q": "影青这个名字怎么来的",
+   "raw": 0.762,
+   "rawDoc": "影青为什么叫影青？",
+   "e2eVia": "bge",
+   "e2eHit": "影青为什么叫影青？",
+   "e2eOk": true
+  },
+  {
+   "q": "青花瓷的蓝色是什么做的",
+   "raw": 0.7488,
+   "rawDoc": "青花的蓝色从哪来？",
+   "e2eVia": "bge",
+   "e2eHit": "青花的蓝色从哪来？",
+   "e2eOk": true
+  },
+  {
+   "q": "祭红釉为什么珍贵",
+   "raw": 0.6605,
+   "rawDoc": "祭红为什么难得？",
+   "e2eVia": "bge",
+   "e2eHit": "祭红为什么难得？",
+   "e2eOk": true
+  },
+  {
+   "q": "梅瓶原来用来装什么",
+   "raw": 0.6637,
+   "rawDoc": "梅瓶最早是干什么的？",
+   "e2eVia": "bge",
+   "e2eHit": "梅瓶最早是干什么的？",
+   "e2eOk": true
+  },
+  {
+   "q": "落霞与孤鹜齐飞是什么季节",
+   "raw": 0.8428,
+   "rawDoc": "「落霞与孤鹜齐飞」写的是什么时候？",
+   "e2eVia": "bge",
+   "e2eHit": "「落霞与孤鹜齐飞」写的是什么时候？",
+   "e2eOk": true
+  },
+  {
+   "q": "彭蠡在哪里",
+   "raw": 0.732,
+   "rawDoc": "彭蠡是哪里？",
+   "e2eVia": "bge",
+   "e2eHit": "彭蠡是哪里？",
+   "e2eOk": true
+  },
+  {
+   "q": "彭蠡是现在的鄱阳湖吗",
+   "raw": 0.7789,
+   "rawDoc": "彭蠡是哪里？",
+   "e2eVia": "bge",
+   "e2eHit": "彭蠡是哪里？",
+   "e2eOk": true
+  },
+  {
+   "q": "滕王阁是谁建的",
+   "raw": 0.735,
+   "rawDoc": "滕王是谁？阁为何而建？",
+   "e2eVia": "bge",
+   "e2eHit": "滕王是谁？阁为何而建？",
+   "e2eOk": true
+  },
+  {
+   "q": "滕王是哪个人",
+   "raw": 0.6335,
+   "rawDoc": "滕王是谁？阁为何而建？",
+   "e2eVia": "bge",
+   "e2eHit": "滕王是谁？阁为何而建？",
+   "e2eOk": true
+  },
+  {
+   "q": "衡阳的大雁为什么不往南飞了",
+   "raw": 0.7349,
+   "rawDoc": "雁阵为什么「声断衡阳」？",
+   "e2eVia": "bge",
+   "e2eHit": "雁阵为什么「声断衡阳」？",
+   "e2eOk": true
+  },
+  {
+   "q": "雁阵惊寒是什么意思",
+   "raw": 0.7272,
+   "rawDoc": "雁阵为什么「声断衡阳」？",
+   "e2eVia": "bge",
+   "e2eHit": "雁阵为什么「声断衡阳」？",
+   "e2eOk": true
+  },
+  {
+   "q": "背后是不是调用了大模型接口",
+   "raw": 0.7157,
+   "rawDoc": "这是 ChatGPT 套壳吗？用了网上的大模型吗？",
+   "e2eVia": "bge",
+   "e2eHit": "这是 ChatGPT 套壳吗？用了网上的大模型吗？",
+   "e2eOk": true
+  },
+  {
+   "q": "回答是AI现编的吗",
+   "raw": 0.5721,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "bge",
+   "e2eHit": "为什么用小模型，不直接接网上的大模型？",
+   "e2eOk": true
+  },
+  {
+   "q": "可以给我出一张瓷器的图吗",
+   "raw": 0.6715,
+   "rawDoc": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eVia": "bge",
+   "e2eHit": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eOk": true
+  },
+  {
+   "q": "能AI画一幅落霞孤鹜吗",
+   "raw": 0.7236,
+   "rawDoc": "「落霞与孤鹜齐飞」写的是什么时候？",
+   "e2eVia": "bge",
+   "e2eHit": "「落霞与孤鹜齐飞」写的是什么时候？",
+   "e2eOk": true
+  },
+  {
+   "q": "这些瓷器是实物扫描的吗",
+   "raw": 0.5858,
+   "rawDoc": "展柜里的梅瓶是博物馆藏品吗？",
+   "e2eVia": "bge",
+   "e2eHit": "展柜里的梅瓶是博物馆藏品吗？",
+   "e2eOk": true
+  },
+  {
+   "q": "梅瓶是从博物馆借来的吗",
+   "raw": 0.7572,
+   "rawDoc": "展柜里的梅瓶是博物馆藏品吗？",
+   "e2eVia": "bge",
+   "e2eHit": "展柜里的梅瓶是博物馆藏品吗？",
+   "e2eOk": true
+  },
+  {
+   "q": "为啥选这么小的模型",
+   "raw": 0.6645,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "bge",
+   "e2eHit": "为什么用小模型，不直接接网上的大模型？",
+   "e2eOk": true
+  },
+  {
+   "q": "不联网的模型够用吗",
+   "raw": 0.6621,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "bge",
+   "e2eHit": "为什么用小模型，不直接接网上的大模型？",
+   "e2eOk": true
+  },
+  {
+   "q": "粉彩是什么时候出现的",
+   "raw": 0.6399,
+   "rawDoc": "为什么宋代梅瓶不能锁成粉彩？",
+   "e2eVia": "bge",
+   "e2eHit": "为什么宋代梅瓶不能锁成粉彩？",
+   "e2eOk": true
+  },
+  {
+   "q": "宋朝人会画粉彩吗",
+   "raw": 0.6682,
+   "rawDoc": "为什么宋代梅瓶不能锁成粉彩？",
+   "e2eVia": "bge",
+   "e2eHit": "为什么宋代梅瓶不能锁成粉彩？",
+   "e2eOk": true
+  },
+  {
+   "q": "青白瓷为什么也叫影青",
+   "raw": 0.8014,
+   "rawDoc": "影青为什么叫影青？",
+   "e2eVia": "bge",
+   "e2eHit": "影青为什么叫影青？",
+   "e2eOk": true
+  },
+  {
+   "q": "影青釉是什么颜色",
+   "raw": 0.7213,
+   "rawDoc": "影青为什么叫影青？",
+   "e2eVia": "bge",
+   "e2eHit": "影青为什么叫影青？",
+   "e2eOk": true
+  },
+  {
+   "q": "青花用的什么颜料",
+   "raw": 0.7,
+   "rawDoc": "青花的蓝色从哪来？",
+   "e2eVia": "bge",
+   "e2eHit": "青花的蓝色从哪来？",
+   "e2eOk": true
+  },
+  {
+   "q": "青花蓝是钴料吗",
+   "raw": 0.7856,
+   "rawDoc": "青花的蓝色从哪来？",
+   "e2eVia": "bge",
+   "e2eHit": "青花的蓝色从哪来？",
+   "e2eOk": true
+  },
+  {
+   "q": "祭红釉难烧在哪里",
+   "raw": 0.7135,
+   "rawDoc": "祭红为什么难得？",
+   "e2eVia": "bge",
+   "e2eHit": "祭红为什么难得？",
+   "e2eOk": true
+  },
+  {
+   "q": "鲜红釉为什么少见",
+   "raw": 0.626,
+   "rawDoc": "祭红为什么难得？",
+   "e2eVia": "bge",
+   "e2eHit": "祭红为什么难得？",
+   "e2eOk": true
+  },
+  {
+   "q": "梅瓶是装酒的吗",
+   "raw": 0.6631,
+   "rawDoc": "梅瓶最早是干什么的？",
+   "e2eVia": "bge",
+   "e2eHit": "梅瓶最早是干什么的？",
+   "e2eOk": true
+  },
+  {
+   "q": "梅瓶的用途是什么",
+   "raw": 0.6777,
+   "rawDoc": "梅瓶最早是干什么的？",
+   "e2eVia": "bge",
+   "e2eHit": "梅瓶最早是干什么的？",
+   "e2eOk": true
+  },
+  {
+   "q": "王勃写的是哪个季节的景色",
+   "raw": 0.5676,
+   "rawDoc": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eVia": "bge",
+   "e2eHit": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eOk": true
+  },
+  {
+   "q": "落霞孤鹜是在傍晚吗",
+   "raw": 0.7855,
+   "rawDoc": "「落霞与孤鹜齐飞」写的是什么时候？",
+   "e2eVia": "bge",
+   "e2eHit": "「落霞与孤鹜齐飞」写的是什么时候？",
+   "e2eOk": true
+  },
+  {
+   "q": "彭蠡泽指的是什么地方",
+   "raw": 0.7121,
+   "rawDoc": "彭蠡是哪里？",
+   "e2eVia": "bge",
+   "e2eHit": "彭蠡是哪里？",
+   "e2eOk": true
+  },
+  {
+   "q": "彭蠡和鄱阳湖什么关系",
+   "raw": 0.7173,
+   "rawDoc": "彭蠡是哪里？",
+   "e2eVia": "bge",
+   "e2eHit": "彭蠡是哪里？",
+   "e2eOk": true
+  },
+  {
+   "q": "滕王阁最早是谁修的",
+   "raw": 0.6911,
+   "rawDoc": "滕王是谁？阁为何而建？",
+   "e2eVia": "bge",
+   "e2eHit": "滕王是谁？阁为何而建？",
+   "e2eOk": true
+  },
+  {
+   "q": "李元婴是谁",
+   "raw": 0.5645,
+   "rawDoc": "滕王是谁？阁为何而建？",
+   "e2eVia": "bge",
+   "e2eHit": "滕王是谁？阁为何而建？",
+   "e2eOk": true
+  },
+  {
+   "q": "声断衡阳之浦什么意思",
+   "raw": 0.7014,
+   "rawDoc": "雁阵为什么「声断衡阳」？",
+   "e2eVia": "bge",
+   "e2eHit": "雁阵为什么「声断衡阳」？",
+   "e2eOk": true
+  },
+  {
+   "q": "为什么说大雁到衡阳为止",
+   "raw": 0.7301,
+   "rawDoc": "雁阵为什么「声断衡阳」？",
+   "e2eVia": "bge",
+   "e2eHit": "雁阵为什么「声断衡阳」？",
+   "e2eOk": true
+  },
+  {
+   "q": "客家围屋和土楼有什么不同",
+   "raw": 0.7517,
+   "rawDoc": "围屋和土楼是一回事吗？",
+   "e2eVia": "bge",
+   "e2eHit": "围屋和土楼是一回事吗？",
+   "e2eOk": true
+  },
+  {
+   "q": "赣南围屋就是土楼吗",
+   "raw": 0.8174,
+   "rawDoc": "围屋和土楼是一回事吗？",
+   "e2eVia": "bge",
+   "e2eHit": "围屋和土楼是一回事吗？",
+   "e2eOk": true
+  },
+  {
+   "q": "为什么祠堂在围屋正中",
+   "raw": 0.5767,
+   "rawDoc": "围屋和土楼是一回事吗？",
+   "e2eVia": "bge",
+   "e2eHit": "围屋和土楼是一回事吗？",
+   "e2eOk": true
+  },
+  {
+   "q": "中轴线上是什么建筑",
+   "raw": 0.6081,
+   "rawDoc": "祖堂为什么在中轴？",
+   "e2eVia": "bge",
+   "e2eHit": "祖堂为什么在中轴？",
+   "e2eOk": true
+  },
+  {
+   "q": "围屋四角的炮楼有什么用",
+   "raw": 0.6556,
+   "rawDoc": "角楼有什么用？",
+   "e2eVia": "bge",
+   "e2eHit": "角楼有什么用？",
+   "e2eOk": true
+  },
+  {
+   "q": "炮楼为什么建在角上",
+   "raw": 0.6411,
+   "rawDoc": "角楼有什么用？",
+   "e2eVia": "bge",
+   "e2eHit": "角楼有什么用？",
+   "e2eOk": true
+  },
+  {
+   "q": "房间和时辰为什么要配对",
+   "raw": 0.7178,
+   "rawDoc": "时辰和房间怎么互相约束？",
+   "e2eVia": "bge",
+   "e2eHit": "时辰和房间怎么互相约束？",
+   "e2eOk": true
+  },
+  {
+   "q": "为什么晚上不能去禾坪",
+   "raw": 0.5589,
+   "rawDoc": "时辰和房间怎么互相约束？",
+   "e2eVia": "bge",
+   "e2eHit": "时辰和房间怎么互相约束？",
+   "e2eOk": true
+  },
+  {
+   "q": "今天股市怎么样",
+   "raw": 0.469,
+   "rawDoc": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "帮我写一首诗",
+   "raw": 0.537,
+   "rawDoc": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "北京天气",
+   "raw": 0.4516,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "你是谁",
+   "raw": 0.529,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "怎么减肥",
+   "raw": 0.5111,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "推荐一部电影",
+   "raw": 0.3761,
+   "rawDoc": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "1加1等于几",
+   "raw": 0.4975,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "明天会下雨吗",
+   "raw": 0.4828,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "苹果手机多少钱",
+   "raw": 0.4565,
+   "rawDoc": "这是 ChatGPT 套壳吗？用了网上的大模型吗？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "给我讲个笑话",
+   "raw": 0.478,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "Python怎么安装",
+   "raw": 0.5164,
+   "rawDoc": "这是 ChatGPT 套壳吗？用了网上的大模型吗？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "世界杯冠军是谁",
+   "raw": 0.4646,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "红烧肉怎么做",
+   "raw": 0.4969,
+   "rawDoc": "祭红为什么难得？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "火车票怎么买",
+   "raw": 0.4219,
+   "rawDoc": "这是 ChatGPT 套壳吗？用了网上的大模型吗？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "北京有什么好玩的",
+   "raw": 0.4625,
+   "rawDoc": "为什么宋代梅瓶不能锁成粉彩？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "特朗普是谁",
+   "raw": 0.3869,
+   "rawDoc": "展柜里的梅瓶是博物馆藏品吗？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "最近有什么新闻",
+   "raw": 0.471,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "帮我翻译hello",
+   "raw": 0.495,
+   "rawDoc": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "高考数学怎么复习",
+   "raw": 0.4381,
+   "rawDoc": "这是 ChatGPT 套壳吗？用了网上的大模型吗？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "如何学英语",
+   "raw": 0.4825,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "兵马俑是哪个朝代的",
+   "raw": 0.4567,
+   "rawDoc": "为什么宋代梅瓶不能锁成粉彩？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "故宫有多少间房",
+   "raw": 0.4764,
+   "rawDoc": "展柜里的梅瓶是博物馆藏品吗？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "滕王阁门票多少钱",
+   "raw": 0.6245,
+   "rawDoc": "滕王是谁？阁为何而建？",
+   "e2eVia": "bge",
+   "e2eHit": "滕王是谁？阁为何而建？",
+   "e2eOk": true
+  },
+  {
+   "q": "景德镇怎么坐高铁去",
+   "raw": 0.491,
+   "rawDoc": "祭红为什么难得？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "鄱阳湖有多大面积",
+   "raw": 0.5884,
+   "rawDoc": "彭蠡是哪里？",
+   "e2eVia": "bge",
+   "e2eHit": "彭蠡是哪里？",
+   "e2eOk": true
+  },
+  {
+   "q": "围屋现在还有人住吗",
+   "raw": 0.624,
+   "rawDoc": "围屋和土楼是一回事吗？",
+   "e2eVia": "bge",
+   "e2eHit": "围屋和土楼是一回事吗？",
+   "e2eOk": true
+  },
+  {
+   "q": "青花瓷一件值多少钱",
+   "raw": 0.6875,
+   "rawDoc": "青花的蓝色从哪来？",
+   "e2eVia": "bge",
+   "e2eHit": "青花的蓝色从哪来？",
+   "e2eOk": true
+  },
+  {
+   "q": "王勃活了多少岁",
+   "raw": 0.526,
+   "rawDoc": "滕王是谁？阁为何而建？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "赣南脐橙什么时候上市",
+   "raw": 0.4884,
+   "rawDoc": "滕王是谁？阁为何而建？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "宋词和唐诗有什么区别",
+   "raw": 0.506,
+   "rawDoc": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "今天几号",
+   "raw": 0.4502,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "帮我订个酒店",
+   "raw": 0.5361,
+   "rawDoc": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "怎么写简历",
+   "raw": 0.5188,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "狗为什么摇尾巴",
+   "raw": 0.4357,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "推荐一首歌",
+   "raw": 0.4484,
+   "rawDoc": "能不能帮我生成一张滕王阁或梅瓶的照片？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "电脑蓝屏怎么办",
+   "raw": 0.5416,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "什么是量子计算",
+   "raw": 0.4592,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "足球比赛规则",
+   "raw": 0.421,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "咖啡怎么冲",
+   "raw": 0.4649,
+   "rawDoc": "为什么用小模型，不直接接网上的大模型？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  },
+  {
+   "q": "地球到月球多远",
+   "raw": 0.4247,
+   "rawDoc": "「落霞与孤鹜齐飞」写的是什么时候？",
+   "e2eVia": "none",
+   "e2eHit": "",
+   "e2eOk": false
+  }
+ ]
+}

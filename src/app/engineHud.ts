@@ -4,7 +4,7 @@ import type { Compat } from "./table";
 
 const MAX_LINES = 5;
 const BGE_MIB = "22.9";
-const THRESH = "0.40";
+const THRESH = "槽位 0.40 · 作答 0.55";
 
 export type LookupTag = "瓷" | "阁" | "客";
 

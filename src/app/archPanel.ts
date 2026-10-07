@@ -161,6 +161,12 @@ export function archPanelHtml(opts?: { compact?: boolean }): string {
         </table>
         <p class="arch-thresh-note" data-thresh-note></p>
         <p class="arch-thresh-biz" data-thresh-biz></p>
+        <p class="arch-thresh-h" data-qa-h>问展作答阈值 · qa-calib</p>
+        <table class="thresh-table" data-qa-table>
+          <thead><tr><th>阈值</th><th>dev 召回/精确</th><th>holdout 召回/精确</th><th>holdout 题库外误答</th></tr></thead>
+          <tbody data-qa-body><tr><td colspan="4">qa-calib.json 未加载</td></tr></tbody>
+        </table>
+        <p class="arch-thresh-note" data-qa-note></p>
       </div>
       <div class="arch-model" data-arch-model>
         <p class="arch-model-h">模型选型对照（诚实量级；1.8B 为公开量级对照，非本机实测）</p>
@@ -193,7 +199,7 @@ export function archPanelHtml(opts?: { compact?: boolean }): string {
           </tbody>
         </table>
         <p class="arch-model-note" data-model-note>
-          问句经本地 BGE-small 嵌入后，与约束表原型向量做余弦相似度，≥0.40 则命中并写入约束。
+          问句经本地 BGE-small 嵌入后，与约束表原型向量做余弦相似度，≥0.40 则命中并写入约束；题库检索另设作答阈值 0.55。
         </p>
       </div>
     </section>
@@ -604,7 +610,35 @@ function paintModelCompare(root: HTMLElement, data: BenchData): void {
   }
 }
 
+type QaRow = { t: number; n_ood: number; ood_accept: number; precision: number; recall: number };
+type QaCalib = { threshold: number; n: number; note?: string; timestamp?: string; dev: QaRow[]; holdout: QaRow[] };
+
+async function fillQaCalib(root: HTMLElement): Promise<void> {
+  const body = root.querySelector("[data-qa-body]") as HTMLElement | null;
+  const note = root.querySelector("[data-qa-note]") as HTMLElement | null;
+  const head = root.querySelector("[data-qa-h]") as HTMLElement | null;
+  if (!body) return;
+  try {
+    const res = await fetch("/qa-calib.json", { cache: "no-store" });
+    if (!res.ok) throw new Error(String(res.status));
+    const d = (await res.json()) as QaCalib;
+    if (head) head.textContent = `问展作答阈值 · qa-calib（n=${d.n}）`;
+    const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
+    body.innerHTML = d.dev
+      .map((r, i) => {
+        const h = d.holdout[i];
+        const on = Math.abs(r.t - d.threshold) < 1e-9;
+        return `<tr${on ? ' class="is-pick"' : ""}><td>${r.t.toFixed(3)}</td><td>${pct(r.recall)} / ${pct(r.precision)}</td><td>${pct(h.recall)} / ${pct(h.precision)}</td><td>${h.ood_accept}/${h.n_ood}</td></tr>`;
+      })
+      .join("");
+    if (note) note.textContent = `${d.note ?? ""}${d.timestamp ? ` · ${d.timestamp}` : ""}`;
+  } catch {
+    body.innerHTML = '<tr><td colspan="4">qa-calib.json 未加载</td></tr>';
+  }
+}
+
 export async function fillThreshTable(root: HTMLElement): Promise<void> {
+  void fillQaCalib(root);
   const wrap = root.querySelector("[data-arch-thresh]") as HTMLElement | null;
   const body = root.querySelector("[data-thresh-body]") as HTMLElement | null;
   const note = root.querySelector("[data-thresh-note]") as HTMLElement | null;

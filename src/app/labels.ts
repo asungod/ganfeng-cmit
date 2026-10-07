@@ -115,7 +115,7 @@ export function mountAsk(
     <header class="ask-h">
       <span class="kicker">问展 · 本地讲解员</span>
       <h3>就当前展柜提问</h3>
-      <p>本地 BGE-small 嵌入 + 约束表路由；余弦相似度 ≥0.40 命中写入；题库检索钉出处。</p>
+      <p>本地 BGE-small 嵌入 + 约束表路由：槽位余弦相似度 ≥0.40 写入约束；题库检索最高分 ≥0.55 才作答并钉出处，否则拒答。</p>
       <p class="ask-status" data-agent-status>提问后加载本地检索模型 · 先可用词面检索</p>
       <div class="engine-status" data-engine-status>
         <span class="bge-chip" data-bge-chip>BGE · idle</span>

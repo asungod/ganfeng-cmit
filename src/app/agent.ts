@@ -28,7 +28,7 @@ function grams(text: string): Map<string, number> {
 
 const GENERIC_KEYWORDS = new Set(["为什么", "谁", "哪里", "什么时候", "用", "名字", "真的", "用途", "区别", "约束", "难得"]);
 
-/** 题库检索门槛（余弦，含主题词加权）。2026-10-08 用 27 条题库内改写问 / 20 条题库外问自测（见 docs/qa-calib-2026-10-08.json）：改写问最低 0.575 且 27/27 命中正确条目，题库外 20/20 拒答。自建小样本，仅作参考。 */
+/** 题库作答阈值（余弦，含主题词加权）。标定见 docs/calib/：n=101（题库内 61 / 题库外 40）。0.55 在 dev 47 问上选定（dev 召回 100%、题库外 0 误答）；holdout 54 问检验：召回 88.2%、精确 78.9%，同主题难例 4/10 误答。均为自拟问句，非独立评测。 */
 export const DOC_SCORE_THRESH = 0.55;
 
 function lexScore(query: string, item: QAItem): number {
@@ -154,6 +154,8 @@ class ExhibitAgent {
   private qVectors: Float32Array[] | null = null;
   /** 最近一次向量检索的最高分（阈值判定前），仅供 ?calib 校准与答辩图表读取。 */
   lastRawBest = 0;
+  /** 与 lastRawBest 对应的题库原问（同样只供标定读取）。 */
+  lastRawDoc = "";
   private protoVectors: Float32Array[] | null = null;
   private lastQ = "";
   private listeners = new Set<(s: AgentStatus) => void>();
@@ -495,6 +497,7 @@ class ExhibitAgent {
       }
     }
     this.lastRawBest = best;
+    this.lastRawDoc = bestI >= 0 ? allDocs[bestI].item.question : "";
     if (bestI < 0 || best < DOC_SCORE_THRESH) return null;
     return finish(allDocs[bestI], q, "bge", best, current);
   }
