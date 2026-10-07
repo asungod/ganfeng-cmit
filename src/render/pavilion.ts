@@ -243,7 +243,7 @@ function makeWater(): THREE.Group {
   g.add(m);
   const path = new THREE.Mesh(
     new THREE.PlaneGeometry(3.4, 22),
-    new THREE.MeshBasicMaterial({ color: 0xffd0a0, transparent: true, opacity: 0.38, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ color: 0xffd0a0, transparent: true, opacity: 0.5, depthWrite: false, alphaMap: glitterAlpha() }),
   );
   path.rotation.x = -Math.PI / 2;
   path.position.set(-6.4, 0.06, -4.2);
@@ -256,6 +256,40 @@ function makeWater(): THREE.Group {
   rim.position.set(0, 0.05, -16);
   g.add(rim);
   return g;
+}
+
+function glitterAlpha(): THREE.Texture | null {
+  // 落日水面反光：横向两侧淡出 + 细碎波光条纹，避免一整块亮板
+  if (typeof document === "undefined") return null;
+  const c = document.createElement("canvas");
+  c.width = 256;
+  c.height = 1024;
+  const ctx = c.getContext("2d");
+  if (!ctx) return null;
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, 256, 1024);
+  ctx.filter = "blur(3px)";
+  ctx.scale(2, 2);
+  let seed = 11;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  for (let i = 0; i < 300; i++) {
+    const y = rnd() * 512;
+    const spread = 18 + (y / 512) * 40;
+    const x = 64 + (rnd() - 0.5) * 2 * spread;
+    const v = Math.round(120 + rnd() * 135);
+    ctx.fillStyle = `rgb(${v},${v},${v})`;
+    ctx.fillRect(x - 6 - rnd() * 8, y, 12 + rnd() * 16, 1.5 + rnd() * 2);
+  }
+  ctx.filter = "none";
+  const fade = ctx.createLinearGradient(0, 0, 128, 0);
+  fade.addColorStop(0, "rgba(0,0,0,1)");
+  fade.addColorStop(0.3, "rgba(0,0,0,0)");
+  fade.addColorStop(0.7, "rgba(0,0,0,0)");
+  fade.addColorStop(1, "rgba(0,0,0,1)");
+  ctx.fillStyle = fade;
+  ctx.fillRect(0, 0, 128, 512);
+  const t = new THREE.CanvasTexture(c);
+  return t;
 }
 
 function makeHills(): THREE.Group {
@@ -523,20 +557,42 @@ function curvedRoof(w: number, d: number, rise: number, tile: THREE.Material, go
 }
 
 function makeBoats(): THREE.Group {
+  // 乌篷小舟：侧面月牙形船身挤出 + 半圆篷 + 细桅，替代胶囊体
   const g = new THREE.Group();
   g.name = "boats";
-  const hull = mat(0x1a120e, 0.8, 0);
-  for (const [x, z, s] of [
-    [-4.2, 3.6, 1],
-    [-2.6, 4.4, 0.72],
-    [-5.1, 4.8, 0.55],
-  ] as [number, number, number][]) {
-    const b = new THREE.Mesh(new THREE.CapsuleGeometry(0.18 * s, 1.1 * s, 4, 8), hull);
-    b.rotation.z = Math.PI / 2;
-    b.position.set(x, 0.1, z);
-    const mast = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.9 * s, 0.04), hull);
-    mast.position.set(x, 0.5 * s, z);
-    g.add(b, mast);
+  const hull = mat(0x2a1a12, 0.78, 0);
+  const awning = mat(0x15100c, 0.9, 0);
+  const prof = new THREE.Shape();
+  prof.moveTo(-0.75, 0.16);
+  prof.quadraticCurveTo(-0.45, -0.1, 0, -0.12);
+  prof.quadraticCurveTo(0.45, -0.1, 0.75, 0.2);
+  prof.lineTo(0.62, 0.1);
+  prof.lineTo(-0.62, 0.08);
+  prof.closePath();
+  const hullGeo = new THREE.ExtrudeGeometry(prof, { depth: 0.3, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.03, bevelSegments: 2, curveSegments: 12 });
+  hullGeo.translate(0, 0, -0.15);
+  const awnGeo = new THREE.CylinderGeometry(0.17, 0.17, 0.42, 12, 1, true, 0, Math.PI);
+  awnGeo.rotateZ(Math.PI / 2);
+  awnGeo.rotateY(Math.PI / 2);
+  for (const [x, z, s, r] of [
+    [-4.2, 3.6, 1, 0.3],
+    [-2.6, 4.4, 0.72, -0.5],
+    [-5.1, 4.8, 0.55, 0.9],
+  ] as [number, number, number, number][]) {
+    const boat = new THREE.Group();
+    const h = new THREE.Mesh(hullGeo, hull);
+    h.castShadow = true;
+    const aw = new THREE.Mesh(awnGeo, awning);
+    aw.rotation.y = Math.PI / 2;
+    aw.position.set(0.05, 0.1, 0);
+    aw.scale.set(1, 1, 1);
+    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.018, 0.8, 6), hull);
+    mast.position.set(-0.35, 0.5, 0);
+    boat.add(h, aw, mast);
+    boat.scale.setScalar(s);
+    boat.rotation.y = r;
+    boat.position.set(x, 0.06, z);
+    g.add(boat);
   }
   return g;
 }
