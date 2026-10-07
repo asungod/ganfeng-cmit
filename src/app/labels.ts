@@ -5,11 +5,21 @@ import { agent, statusLabel, type SlotFillResult, PROTO_SCORE_THRESH } from "./a
 import { reportSlotMs } from "./engineHud";
 import { intentJson, slotLabel, slotValueLabel } from "./intent";
 
+function citeStamp(c: Citation): string {
+  if (c.status === "verified") return '<span class="cite-stamp is-verified">已核</span>';
+  if (c.status === "design") return '<span class="cite-stamp is-design">本展说明</span>';
+  if (c.status === "pending") return '<span class="cite-stamp is-pending">待核</span>';
+  return '<span class="cite-stamp">示例</span>';
+}
+
 export function citationCard(c: Citation, open = false): string {
+  const urlLine = c.url
+    ? `<p class="cite-page">出处网址：<a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.url)}</a> · 访问 2026-10-08</p>`
+    : '<p class="cite-page">无可公开查证网址</p>';
   return `
     <article class="cite ${open ? "is-open" : ""}" data-cite="${c.id}">
       <button type="button" class="cite-chip" data-toggle-cite="${c.id}">
-        <span class="cite-stamp">示例</span>
+        ${citeStamp(c)}
         <span class="cite-title">${esc(c.title)}</span>
         <span class="cite-src">${esc(c.source)}</span>
       </button>
@@ -18,8 +28,8 @@ export function citationCard(c: Citation, open = false): string {
         <p class="cite-excerpt">${esc(c.excerpt)}</p>
         <p class="cite-src-line">${esc(c.source)}</p>
         <p class="cite-note">${esc(c.note)}</p>
-        <p class="cite-page">通行本整理，无馆藏页码</p>
-        ${c.publicDomain ? '<p class="cite-pd">公有领域 / 或据公开说明整理</p>' : ""}
+        ${urlLine}
+        ${c.publicDomain ? '<p class="cite-pd">原文公有领域</p>' : ""}
       </div>
     </article>
   `;

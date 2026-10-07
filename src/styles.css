@@ -2272,3 +2272,55 @@ a { color: var(--gold); }
 .ciyu.askpipe-shot .e2e-trace { display: block; }
 .ciyu.askpipe-shot .audit-panel { display: block; }
 .ciyu.matrix-compact .audit-panel { font-size: 0.68rem; }
+
+/* —— 出处状态章 —— */
+.cite-stamp.is-verified { color: var(--celadon); }
+.cite-stamp.is-design { color: var(--gold); }
+.cite-stamp.is-pending { color: var(--cinnabar); }
+.cite-url { font-size: 0.68rem; color: var(--mist); word-break: break-all; }
+.cite-url a { color: var(--celadon); }
+
+/* —— 审计面板：展示 → 验证 —— */
+.ev {
+  margin-top: 0.45rem;
+  padding-top: 0.4rem;
+  border-top: 1px dashed rgba(198, 161, 91, 0.35);
+  max-height: 22rem;
+  overflow-y: auto;
+}
+.ev b { color: var(--gold); font-weight: 600; margin-right: 0.25rem; }
+.ev-status { padding: 0.2rem 0.35rem; border-left: 2px solid var(--mist); }
+.ev-status.is-verified { border-left-color: var(--celadon); }
+.ev-status.is-design { border-left-color: var(--gold); }
+.ev-status.is-pending { border-left-color: var(--cinnabar); }
+.ev-src { margin: 0.3rem 0; padding-left: 1rem; }
+.ev-src-i { margin: 0.25rem 0; }
+.ev-src-i q { font-family: var(--serif); color: var(--paper); }
+.ev-src-by { display: block; font-size: 0.64rem; color: var(--mist); word-break: break-all; }
+.ev-src-by a { color: var(--celadon); }
+.ev-partial { color: var(--cinnabar); font-style: normal; }
+.ev-none { color: var(--mist); }
+.ev-cases { margin: 0.25rem 0 0; padding-left: 1.1rem; }
+.ev-case { margin: 0.3rem 0; }
+.ev-tag {
+  display: inline-block;
+  padding: 0 0.3rem;
+  margin-right: 0.25rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  border: 1px solid currentColor;
+}
+.ev-tag.tag-hit { color: var(--cinnabar); }
+.ev-tag.tag-edge { color: var(--gold); }
+.ev-tag.tag-exc { color: var(--celadon); }
+.ev-try {
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.45rem;
+  font-size: 0.64rem;
+  cursor: pointer;
+}
+.ev-note { display: block; color: var(--mist); font-size: 0.64rem; }
+.ev-drift { margin-left: 0.3rem; color: var(--cinnabar); font-style: normal; }
+.ev-verdict { margin-left: 0.35rem; font-size: 0.66rem; }
+.ev-verdict.is-pass { color: var(--celadon); }
+.ev-verdict.is-fail { color: var(--cinnabar); }

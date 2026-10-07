@@ -24,7 +24,7 @@ export function mountHall(root: HTMLElement): () => void {
         <h1 class="hall-brand" aria-label="赣风"><span>赣</span><span>风</span></h1>
         <p class="hall-sub">可对话的数字展</p>
         <p class="hall-lede">
-          智能交互创新在于：冲突组合触发约束表规则，规则本身可展开审计，改锁结果在矩阵上 LIVE 回放（冲格×→规则条目→改锁格）。
+          智能交互创新在于：冲突组合触发约束表规则，规则本身可展开审计，改锁过程在矩阵上可追溯回放（冲格×→规则条目→改锁格）。
         </p>
         <p class="hall-lede-sub">
           本地 BGE-small 语义匹配 + table.ts 确定性路由为工程支撑（非卖点）；三线共用同一查找接口是实现。
@@ -62,7 +62,7 @@ export function mountHall(root: HTMLElement): () => void {
       </nav>
       <div class="hall-ask" data-ask></div>
       <footer class="hall-foot">
-        <p>工程支撑：本地 BGE-small 语义匹配 + table.ts 确定性路由；余弦相似度 ≥0.40 命中写入。卖点是约束表可审计 + 改锁 LIVE 回放，不是统一接口本身。</p>
+        <p>工程支撑：本地 BGE-small 语义匹配 + table.ts 确定性路由；余弦相似度 ≥0.40 命中写入。卖点是约束表可审计、可验证 + 改锁可追溯回放，不是统一接口本身。</p>
         <div class="hall-foot-btns">
           <button type="button" class="chip is-on" data-calib>阈值标定曲线</button>
           <button type="button" class="text-btn" data-about>开源边界与诚实声明</button>
@@ -72,7 +72,7 @@ export function mountHall(root: HTMLElement): () => void {
         <div class="about-inner">
           <h2>智能交互在约束与出处上</h2>
           <ul>
-            <li><b>交互创新</b>：冲突组合触发约束表规则，规则本身可展开审计，改锁结果在矩阵上 LIVE 回放（冲格×→规则条目→改锁格）。点宋 + 粉彩即可复现；格子改成「合」后粉彩可以留在宋。</li>
+            <li><b>交互创新</b>：冲突组合触发约束表规则，规则本身可展开审计，改锁过程在矩阵上可追溯回放（冲格×→规则条目→改锁格）。点宋 + 粉彩即可复现；格子改成「合」后粉彩可以留在宋。</li>
             <li>工程支撑（非卖点）：本地 BGE-small 语义匹配 + table.ts 确定性路由（ONNX q8 ${BGE_ONNX_LABEL}）；三线共用同一查找接口是实现。via bge-slot / lex-slot；讲解员只在内容包检索。程序材质 · CPU/WASM · 无 GPU 无付费 API。不上 Qwen-1.8B（公开量级对照）。</li>
             <li>瓷语矩阵点格子可改规则；阁序意象矩阵钉回原句；客家时辰×空间矩阵约束动线。LatheGeometry 实时生成（segs 160），支持瞬时/慢放。</li>
             <li>独立出处卡片，含引用标记。三条线内容、约束矩阵、引用条与动线为原创。</li>

@@ -10,6 +10,7 @@ import {
   compatOf,
   eras,
   fallbackGlaze,
+  glazeByEra,
   glazes,
   porcelainCitations,
   porcelainQA,
@@ -26,6 +27,8 @@ import {
 import { PorcelainVitrine } from "../render/vase";
 import { ambience } from "../render/ambience";
 import { guide, lines } from "../app/guide";
+import { markTry, renderEvidence } from "../app/evidence";
+import { porcelainRule } from "../data/evidenceRules";
 
 export function mountPorcelain(root: HTMLElement): () => void {
   resetMatrix();
@@ -298,7 +301,7 @@ export function mountPorcelain(root: HTMLElement): () => void {
         : `当前格「${eName}×${gName}」= ${status}（无改锁）`;
     const raw = `{ era: "${eraId}", glaze: "${rejected ?? glazeId}", status: "${c}", fallback: "${fbId ?? ""}" }`;
     body.innerHTML = `
-      <p class="audit-path"><b>回放路径</b> ${path}</p>
+      <p class="audit-path"><b>可追溯回放</b> ${path}</p>
       <p class="audit-row"><b>冲格 / 当前</b> ${eName} × ${fromName} → ${status}</p>
       <p class="audit-rule"><b>规则原文</b> ${whyText}</p>
       <p class="audit-cite"><b>出处</b> ${citeName}</p>
@@ -308,6 +311,13 @@ export function mountPorcelain(root: HTMLElement): () => void {
           : `<p class="audit-fb"><b>改锁</b> —</p>`
       }
       <pre class="audit-raw" data-audit-raw>${raw}</pre>
+      ${renderEvidence(
+        "ciyu",
+        porcelainRule(eraId, (rejected ?? glazeId) as GlazeId),
+        (a, b) => glazeByEra[a as EraId][b as GlazeId],
+        (a, b) => compatOf(a as EraId, b as GlazeId),
+        (a, b) => `${eras.find((x) => x.id === a)?.name ?? a} × ${glazes.find((x) => x.id === b)?.name ?? b}`,
+      )}
     `;
     if (rejected || c === "conflict") {
       panel.open = true;
@@ -474,23 +484,14 @@ export function mountPorcelain(root: HTMLElement): () => void {
             : glaze === "fencai"
               ? "粉彩"
               : "五彩";
-    const dim =
-      shape === "meiping"
-        ? "高 32cm"
-        : shape === "yuhuchun"
-          ? "高 29cm"
-          : shape === "bowl"
-            ? "高 7cm"
-            : shape === "dish"
-              ? "口径 32cm"
-              : "高 38cm";
+    const dim = "示意模型 · 无实物尺寸";
     const note =
       glaze === "qinghua"
         ? "釉下钴料、缠枝莲纹。程序复原示意器型与纹样，非馆藏原件。"
         : glaze === "yingqing"
           ? "青白釉、薄胎映影。程序复原示意器型与釉色，非馆藏原件。"
           : glaze === "jihong"
-            ? "铜红釉、口沿灯草白。程序复原示意器型与釉色，非馆藏原件。"
+            ? "铜红釉、口沿灯草口。程序复原示意器型与釉色，非馆藏原件。"
             : glaze === "fencai"
               ? "釉上粉彩、玻璃白打底。程序复原示意器型与纹样，非馆藏原件。"
               : "釉上五彩、硬彩对比。程序复原示意器型与纹样，非馆藏原件。";
@@ -756,6 +757,17 @@ export function mountPorcelain(root: HTMLElement): () => void {
     }
     if (t.closest("[data-replay-rewrite]")) {
       paintSolveLine();
+      return;
+    }
+    const tryBtn = t.closest("[data-try-a]") as HTMLElement | null;
+    if (tryBtn?.dataset.tryA && tryBtn.dataset.tryB) {
+      resetMatrix();
+      era = tryBtn.dataset.tryA as EraId;
+      glaze = tryBtn.dataset.tryB as GlazeId;
+      pickEra = era;
+      pickGlaze = glaze;
+      markTry("ciyu", era, glaze);
+      void apply(true);
       return;
     }
     if (t.closest("[data-reset-matrix]")) {

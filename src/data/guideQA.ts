@@ -6,7 +6,8 @@ export const guideCitations: Citation[] = [
     title: "本展的生成边界",
     source: "赣风 · 开源边界与诚实声明",
     excerpt: "无付费 API，无 GPU。所谓生成是精选静帧、程序材质与可见管线。问展只根据内容包作答。",
-    note: "示例说明，不是馆方官方释文。",
+    note: "本展自述，不是馆方官方释文。",
+    status: "design",
   },
   {
     id: "honest-vase",
@@ -14,6 +15,7 @@ export const guideCitations: Citation[] = [
     source: "瓷语展柜说明",
     excerpt: "眼前梅瓶是程序器型与釉面，用来讲约束，不是某馆藏品照片。",
     note: "近看会露出程序材质。",
+    status: "design",
   },
 ];
 
@@ -38,7 +40,7 @@ export const guideQA: QAItem[] = [
     id: "q-real-vase",
     question: "展柜里的梅瓶是博物馆藏品吗？",
     answer:
-      "不是馆藏原件。这是程序复原的梅瓶，用来把器型、釉色、朝代锁在一起。引用条给的是工艺文献与常识，不是某馆的官方释文。",
+      "不是馆藏原件。这是程序复原的梅瓶，用来把器型、釉色、朝代锁在一起。引用条给的是故宫博物院词条等可查证出处的原文摘录，展柜本身不是馆藏。",
     citationIds: ["honest-vase"],
     keywords: ["馆藏", "真的", "文物", "原件", "梅瓶"],
   },

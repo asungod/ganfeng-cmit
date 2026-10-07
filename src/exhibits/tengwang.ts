@@ -22,6 +22,8 @@ import {
 import { PavilionScene } from "../render/pavilion";
 import { ambience } from "../render/ambience";
 import { guide, lines } from "../app/guide";
+import { markTry, renderEvidence } from "../app/evidence";
+import { tengwangRule } from "../data/evidenceRules";
 
 export function mountTengwang(root: HTMLElement): () => void {
   let mood: MoodId = "luoxia";
@@ -189,13 +191,20 @@ export function mountTengwang(root: HTMLElement): () => void {
             ? `「${mName}」情境与意象「${fromName}」冲：改锁为「${toName}」，不另造无原文锚点的画面。`
             : `该意象与情境判定为${status}。`;
         auditBody.innerHTML = `
-          <p class="audit-path"><b>回放路径</b> ${
+          <p class="audit-path"><b>可追溯回放</b> ${
             rejected || c === "conflict"
               ? `冲格「${mName}×${fromName}」× → 规则条目 → 改锁格「${mName}×${toName}」`
               : `当前格「${mName}×${fName}」= ${status}`
           }</p>
           <p class="audit-rule"><b>规则原文</b> ${why}</p>
           <pre class="audit-raw">{ mood: "${pickMood}", motif: "${rejected ?? pickFocus}", status: "${c}", fallback: "${rejected ? focus : ""}" }</pre>
+          ${renderEvidence(
+            "gexu",
+            tengwangRule(pickMood, (rejected ?? pickFocus) as ImageId),
+            (a, b) => motifMoodCompat(b as ImageId, a as MoodId),
+            (a, b) => motifMoodCompat(b as ImageId, a as MoodId),
+            (a, b) => `${moods.find((x) => x.id === a)?.name ?? a} × ${motifs.find((x) => x.id === b)?.name ?? b}`,
+          )}
         `;
         if (rejected || c === "conflict") {
           panel.open = true;
@@ -418,6 +427,16 @@ export function mountTengwang(root: HTMLElement): () => void {
     }
     if (t.closest("[data-replay-rewrite]")) {
       paintSolveLine();
+      return;
+    }
+    const tryBtn = t.closest("[data-try-a]") as HTMLElement | null;
+    if (tryBtn?.dataset.tryA && tryBtn.dataset.tryB) {
+      mood = tryBtn.dataset.tryA as MoodId;
+      focus = tryBtn.dataset.tryB as ImageId;
+      pickMood = mood;
+      pickFocus = focus;
+      markTry("gexu", mood, focus);
+      void apply("focus");
       return;
     }
     const cell = t.closest("[data-mx-mood]") as HTMLElement | null;

@@ -48,7 +48,7 @@ export const moods: Mood[] = [
     id: "yuzhou",
     name: "渔舟唱晚",
     line: "渔舟唱晚，响穷彭蠡之滨。",
-    blurb: "声在画外。彭蠡即鄱阳，渔火与橹声把江面从「看」变成「听」。",
+    blurb: "声在画外。彭蠡是鄱阳湖一带的古称，渔歌把江面从「看」变成「听」。",
   },
   {
     id: "yanzhen",
@@ -148,35 +148,46 @@ export const tengwangCitations: Citation[] = [
   {
     id: "xu-public",
     title: "《滕王阁序》",
-    source: "王勃（唐）· 公有领域",
+    source: "王勃（唐）·《秋日登洪府滕王阁饯别序》· 维基文库（公有领域）",
     excerpt:
-      "唐高宗时王勃省父过南昌，于滕王阁宴上作《秋日登洪府滕王阁饯别序》。文中写节令、江景、建筑与羁旅，落霞一联为后世传诵。",
-    note: "原文公有领域。本展摘句为示例导览，不作学术校勘声明。",
+      "「落霞与孤鹜齐飞，秋水共长天一色。渔舟唱晚，响穷彭蠡之滨；雁阵惊寒，声断衡阳之浦。」本展每个热点都钉回原文中的一句。",
+    note: "原文公有领域。写作年龄有「十四岁」与「上元二年」两说，本展不取具体年份。",
     publicDomain: true,
+    status: "verified",
+    sourceId: "ws-tengwang",
+    url: "https://zh.wikisource.org/zh-hans/滕王阁序",
   },
   {
     id: "pengli",
     title: "彭蠡",
-    source: "据公开地理说明整理",
-    excerpt:
-      "彭蠡即今鄱阳湖一带古称。渔舟唱晚「响穷彭蠡之滨」，把听觉边界推到湖岸，而不是停在阁前栏杆。",
-    note: "示例资料。",
+    source: "生态中国网《中国最大淡水湖泊—鄱阳湖简介》（2009）",
+    excerpt: "「鄱阳湖在古代有过彭蠡泽、彭泽、彭湖、扬澜、宫亭湖等多种称谓。」",
+    note: "原文摘录。早期文献的彭蠡泽范围与今鄱阳湖不完全相同，本展写作「鄱阳湖一带的古称」。",
+    status: "verified",
+    sourceId: "eco-poyang",
+    url: "http://www.eco.gov.cn/news_info/22194.html",
   },
   {
     id: "hengyang",
     title: "衡阳之浦",
-    source: "据公开典故说明整理",
+    source: "孟国栋、孙晓磊《也说“衡阳雁”》，《光明日报》2020-12-07",
     excerpt:
-      "传说南飞之雁至衡阳回雁峰而止。声断，是空间的切断，也是季节的切断。与孤鹜不同：阵是集体的寒。",
-    note: "示例资料。",
+      "「“衡阳雁”意象之所以生成，当与“雁不过衡阳”的观念有关。……南岳衡山有七十二峰，最南端即位于衡阳的回雁峰。……大雁确能飞至衡阳更南之地。」",
+    note: "原文摘录。「雁到衡阳而止」是文学意象，不是鸟类迁徙的事实。",
+    status: "verified",
+    sourceId: "gmw-hengyang",
+    url: "https://news.gmw.cn/2020-12/07/content_34435329.htm",
   },
   {
     id: "pavilion",
     title: "滕王阁",
-    source: "据公开史地说明整理",
+    source: "维基百科「滕王阁」（引《旧唐书·滕王元婴传》）",
     excerpt:
-      "阁在南昌赣江之滨，唐永徽中滕王李元婴始建，历代废兴。今阁为1989年重建。本展画面是诗文意象的程序绘画，不是实地测绘。",
-    note: "示例资料。建筑外形为示意剪影。",
+      "「始建于唐永徽四年。为当时任洪州都督的唐高祖李渊之子李元婴所建。……于1989年10月8日建成。」",
+    note: "二手资料，已核对条目原文。本展画面是诗文意象的程序绘画，不是实地测绘。",
+    status: "verified",
+    sourceId: "wiki-tengwangge",
+    url: "https://zh.wikipedia.org/zh-cn/滕王阁",
   },
 ];
 
@@ -193,7 +204,7 @@ export const tengwangQA: QAItem[] = [
     id: "q-pengli",
     question: "彭蠡是哪里？",
     answer:
-      "彭蠡是鄱阳湖的古称。渔舟的声音被写到湖滨为止，所以画面里的船应是江—湖系统里的渔舟，而不是现代游轮。",
+      "彭蠡是鄱阳湖一带的古称（早期文献的范围与今天的湖面不完全一样）。渔舟的歌声「响穷彭蠡之滨」，所以画面里的船是湖滨的渔舟，而不是现代游轮。",
     citationIds: ["pengli", "xu-public"],
     keywords: ["彭蠡", "鄱阳", "渔舟", "哪里"],
   },
@@ -201,7 +212,7 @@ export const tengwangQA: QAItem[] = [
     id: "q-tengwang-who",
     question: "滕王是谁？阁为何而建？",
     answer:
-      "滕王是唐高祖之子李元婴。阁因他得名，建于南昌赣江侧。王勃写的是宴集与饯别，飞阁流丹是他当时立足的那座高阁——历代重建，名字仍把人钉在原句上。",
+      "滕王是唐高祖李渊之子李元婴。阁始建于唐永徽四年（653），因他的封号得名，在南昌赣江东岸。历代屡毁屡建，今天的阁于1989年10月8日重建落成。王勃写的是宴集与饯别，「飞阁流丹」是他当时立足的那座高阁。",
     citationIds: ["pavilion", "xu-public"],
     keywords: ["滕王", "李元婴", "谁", "重建"],
   },
@@ -209,7 +220,7 @@ export const tengwangQA: QAItem[] = [
     id: "q-yanzhen",
     question: "雁阵为什么「声断衡阳」？",
     answer:
-      "典故里南飞的雁到衡阳回雁峰不再南去，声音在那里断开。它和孤鹜是两种冷：一只是单独，一阵是集体的季节。",
+      "古人有「雁不过衡阳」的观念：衡山七十二峰最南端是衡阳回雁峰，被当作雁南飞的终点。这是文学意象，实际上大雁能飞到更南的地方。王勃借它写声音在远方断开。",
     citationIds: ["hengyang", "xu-public"],
     keywords: ["雁阵", "衡阳", "惊寒", "声断"],
   },
@@ -229,7 +240,12 @@ function moodRow(ok: ImageId[], conflict: ImageId[] = []): Record<ImageId, Compa
   return row;
 }
 
-/** 意象 × 情境。合=属于该联；跨联硬冲=conflict；其余勉。经共享 lookup。 */
+/**
+ * 意象 × 情境（文本锚定 + 设计约定）。经共享 lookup。
+ * 合 = 意象出自该情境锁定的那句原文（维基文库原文可核）；
+ * 冲 = 出自另一句，或同联对句但指向另一个地名锚点（渔舟→彭蠡之滨 / 雁阵→衡阳之浦）——本展一个情境只锁一个地名锚点；
+ * 其余为勉（同一段景物，可看但不作为锁定焦点）。冲不表示史实上「不能同时出现」。
+ */
 export const motifByMood: Record<MoodId, Record<ImageId, Compat>> = {
   luoxia: moodRow(["luoxia", "guwu", "qiushui", "changtian"], ["yuzhou", "yanzhen"]),
   yuzhou: moodRow(["yuzhou"], ["yanzhen", "luoxia", "guwu"]),

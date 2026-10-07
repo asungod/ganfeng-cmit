@@ -26,6 +26,8 @@ import {
 import { ambience } from "../render/ambience";
 import { guide, lines } from "../app/guide";
 import { RoomView } from "../render/roomview";
+import { markTry, renderEvidence } from "../app/evidence";
+import { hakkaRule } from "../data/evidenceRules";
 
 export function mountHakka(root: HTMLElement): () => void {
   let room: RoomId = "menlou";
@@ -210,13 +212,20 @@ export function mountHakka(root: HTMLElement): () => void {
       const fromH = rejected ? hours.find((x) => x.id === rejected)?.name ?? rejected : hName;
       const toH = rejected ? hours.find((x) => x.id === hour)?.name ?? hour : hName;
       auditBody.innerHTML = `
-        <p class="audit-path"><b>回放路径</b> ${
+        <p class="audit-path"><b>可追溯回放</b> ${
           rejected || c === "conflict"
             ? `冲格「${rName}×${fromH}」× → 规则条目 → 改锁格「${rName}×${toH}」`
             : `当前格「${rName}×${hName}」= ${compatWord(c)}`
         }</p>
         <p class="audit-rule"><b>规则原文</b> ${why.why}</p>
         <pre class="audit-raw">{ room: "${showRoom}", hour: "${rejected ?? showHour}", status: "${c}", fallback: "${rejected ? hour : ""}" }</pre>
+        ${renderEvidence(
+          "kejia",
+          hakkaRule(showRoom, (rejected ?? showHour) as HourId),
+          (a, b) => hourCompat(a as RoomId, b as HourId),
+          (a, b) => hourCompat(a as RoomId, b as HourId),
+          (a, b) => `${matrixRooms.find((x) => x.id === a)?.name ?? a} × ${hours.find((x) => x.id === b)?.name ?? b}`,
+        )}
       `;
       if (rejected || c === "conflict") {
         panel.open = true;
@@ -422,6 +431,18 @@ export function mountHakka(root: HTMLElement): () => void {
     }
     if (t.closest("[data-prev]")) {
       step(-1);
+      return;
+    }
+    const tryBtn = t.closest("[data-try-a]") as HTMLElement | null;
+    if (tryBtn?.dataset.tryA && tryBtn.dataset.tryB) {
+      hour = tryBtn.dataset.tryB as HourId;
+      pickHour = hour;
+      pickRoom = tryBtn.dataset.tryA as RoomId;
+      markTry("kejia", pickRoom, hour);
+      walking = true;
+      void enter(pickRoom, true).finally(() => {
+        walking = false;
+      });
       return;
     }
     const cell = t.closest("[data-mx-hour]") as HTMLElement | null;
