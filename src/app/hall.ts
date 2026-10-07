@@ -18,7 +18,7 @@ export function mountHall(root: HTMLElement): () => void {
       <div class="hall-frame hall-frame-inner" aria-hidden="true"></div>
       <header class="hall-top">
         <p class="eyebrow">全国大学生数字媒体科技作品及创意竞赛</p>
-        <p class="eyebrow-sub">2025 指定命题 · AIGC 智能交互类</p>
+        <p class="eyebrow-sub">2026 指定命题 · 科技+创意，讲好中国故事</p>
       </header>
       <div class="hall-title">
         <h1 class="hall-brand" aria-label="赣风"><span>赣</span><span>风</span></h1>

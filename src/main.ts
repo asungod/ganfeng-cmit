@@ -1,3 +1,4 @@
+import "./fonts.css";
 import "./styles.css";
 import "./hall-layout.css";
 import { parseRoute } from "./app/router";

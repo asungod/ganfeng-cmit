@@ -8,12 +8,12 @@
 - 博物馆夜间展陈：暗场、展签、动线、展柜灯光。不是某馆官网的视觉复制。
 - three.js 官方示例：LatheGeometry 做瓶、RoomEnvironment 做反光、OrbitControls。器型轮廓、釉面画布、展陈布局为自写。
 - 滕王阁序：公有领域原文摘句。导览句子、热点位置、画布节令为自写。
-- 公开陶瓷工艺说明、天工开物、景德镇陶录：公有领域文献与常识性工艺。条目经过改写并标明示例资料，不作馆方释文。
+- 公开陶瓷工艺说明（故宫博物院词条等）、天工开物：只摘短句并标明出处与访问日期（src/data/sources.ts）；判定规则是本展内容包规则，不作馆方释文。
 - 赣南围屋公开介绍：门楼、禾坪、祖堂、角楼这一类空间语法。平面是示意，不对应某一座文保测绘。
 
 使用的开源库见 package.json：Vite（MIT，开发与打包）、TypeScript（Apache-2.0）、three.js（MIT，瓷语展柜）、@huggingface/transformers（Apache-2.0，浏览器内嵌 BGE-small-zh 检索）。
 
-字体通过 Google Fonts 加载：Noto Serif SC、Noto Sans SC、Ma Shan Zheng（SIL OFL）。无网时回退系统字体。
+字体为本地子集化的 Noto Serif SC、Noto Sans SC、Ma Shan Zheng（SIL OFL 1.1，见 public/fonts/），完全离线，不连字体 CDN。第三方清单见 THIRD_PARTY.md。
 
 ## 本项目原创
 
@@ -32,4 +32,4 @@
 
 ## 许可
 
-应用代码 MIT。内容包中的滕王阁序原文属于公有领域。其余工艺与民居说明为示例整理，参赛与二次使用时请继续标明「示例资料，非馆方官方」。
+应用代码 MIT。内容包中的滕王阁序原文属于公有领域。事实性说明已绑定公开出处（见 src/data/sources.ts、/审计面板）；未核实条目界面标「待核」或「示例」。

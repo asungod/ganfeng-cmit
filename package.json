@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "赣风·可对话的数字展 — CMIT AIGC 智能交互演示",
+  "description": "赣风·可对话的数字展 — CMIT 2026 指定命题「科技+创意，讲好中国故事」",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
