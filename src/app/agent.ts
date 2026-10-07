@@ -26,12 +26,19 @@ function grams(text: string): Map<string, number> {
   return m;
 }
 
+const GENERIC_KEYWORDS = new Set(["为什么", "谁", "哪里", "什么时候", "用", "名字", "真的", "用途", "区别", "约束", "难得"]);
+
+/** 题库检索门槛（余弦，含主题词加权）。2026-10-08 用 27 条题库内改写问 / 20 条题库外问自测（见 docs/qa-calib-2026-10-08.json）：改写问最低 0.575 且 27/27 命中正确条目，题库外 20/20 拒答。自建小样本，仅作参考。 */
+export const DOC_SCORE_THRESH = 0.55;
+
 function lexScore(query: string, item: QAItem): number {
   const q = query.trim();
   if (!q) return 0;
   let s = 0;
   for (const k of item.keywords) {
-    if (k && q.includes(k)) s += 2.4;
+    if (!k || !q.includes(k)) continue;
+    // 泛化词（为什么 / 谁 / 哪里…）单独出现不足以命中，避免「特朗普是谁」落到滕王条目
+    s += GENERIC_KEYWORDS.has(k) ? 0.6 : k.length > 1 ? 2.4 : 1.4;
   }
   const qg = grams(q);
   const dg = grams(`${item.question}${item.answer}${item.keywords.join("")}`);
@@ -144,6 +151,9 @@ class ExhibitAgent {
   private booting = false;
   private extractor: Extractor | null = null;
   private vectors: Float32Array[] | null = null;
+  private qVectors: Float32Array[] | null = null;
+  /** 最近一次向量检索的最高分（阈值判定前），仅供 ?calib 校准与答辩图表读取。 */
+  lastRawBest = 0;
   private protoVectors: Float32Array[] | null = null;
   private lastQ = "";
   private listeners = new Set<(s: AgentStatus) => void>();
@@ -207,10 +217,14 @@ class ExhibitAgent {
       )) as unknown as Extractor;
       this.extractor = pipe;
       this.vectors = [];
+      this.qVectors = [];
       for (const doc of allDocs) {
         const text = `${doc.item.question}。${doc.item.answer}。${doc.item.keywords.join(" ")}`;
         const out = await pipe(text, { pooling: "mean", normalize: true });
         this.vectors.push(Float32Array.from(out.data));
+        // 只用问题本身再编码一次：改写问更接近原问题，避免被答案里提到的其他釉色带偏
+        const outQ = await pipe(doc.item.question, { pooling: "mean", normalize: true });
+        this.qVectors.push(Float32Array.from(outQ.data));
       }
       this.protoVectors = [];
       for (const p of SLOT_PROTOS) {
@@ -223,6 +237,7 @@ class ExhibitAgent {
       console.warn("exhibit agent: BGE unavailable, lexical fallback", err);
       this.extractor = null;
       this.vectors = null;
+      this.qVectors = null;
       this.protoVectors = null;
       this.loadMs = Math.round(performance.now() - tLoad);
       this.set("fallback");
@@ -297,6 +312,11 @@ class ExhibitAgent {
   private expandFollowUp(q: string): string | null {
     if (!this.lastQ) return null;
     if (q.length > 14) return null;
+    // 问句自带展品主题词（影青、祭红、围屋…）时不是追问，不拼接上一问
+    const hasSubject = allDocs.some((d) =>
+      d.item.keywords.some((k) => k.length > 1 && !GENERIC_KEYWORDS.has(k) && q.includes(k)),
+    );
+    if (hasSubject) return null;
     if (/那|还有|为什么|呢$|这个|它|她|他/.test(q)) return `${this.lastQ} ${q}`;
     return null;
   }
@@ -464,14 +484,18 @@ class ExhibitAgent {
     let bestI = -1;
     let best = 0;
     for (let i = 0; i < allDocs.length; i++) {
-      let s = cosine(qv, this.vectors[i]);
+      let s = Math.max(cosine(qv, this.vectors[i]), this.qVectors?.[i] ? cosine(qv, this.qVectors[i]) : 0);
       if (current && allDocs[i].line === current) s += 0.04;
+      // 词面主题词加权：问句含该条的主题词（滕王、影青…）时每个 +0.04，最多 +0.08
+      const hits = allDocs[i].item.keywords.filter((k) => k.length > 1 && !GENERIC_KEYWORDS.has(k) && q.includes(k)).length;
+      s += 0.04 * Math.min(2, hits);
       if (s > best) {
         best = s;
         bestI = i;
       }
     }
-    if (bestI < 0 || best < 0.42) return null;
+    this.lastRawBest = best;
+    if (bestI < 0 || best < DOC_SCORE_THRESH) return null;
     return finish(allDocs[bestI], q, "bge", best, current);
   }
 

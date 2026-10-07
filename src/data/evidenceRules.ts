@@ -114,15 +114,15 @@ export function tengwangRule(mood: MoodId, _motif: ImageId): EvRule {
 }
 
 const ROOM_SRC: Record<MatrixRoomId, string[]> = {
-  menlou: ["ln-guanxi"],
-  heping: ["ln-guanxi"],
+  menlou: ["ln-guanxi", "gn-minju"],
+  heping: ["ln-guanxi", "gn-minju"],
   zutang: ["ln-guanxi"],
   jiaolou: ["ln-guanxi", "ln-weiwu"],
 };
 
 const ROOM_CLAIM: Record<MatrixRoomId, string> = {
   menlou: "门楼是围屋入口（空间示意）。时辰搭配「晨合、夜勉」是本展叙事约定。",
-  heping: "禾坪是晒谷的公共空地（乌石围「围前有禾坪」）。「夜里不晒谷 → 夜判冲、改锁暮」是本展叙事约定。",
+  heping: "禾坪在屋前，是洗涤、凉晒物件的场所（乌石围「围前有禾坪」）。「夜里不凉晒 → 夜判冲、改锁暮」是本展叙事约定。",
   zutang: "关西新围「中轴线是祠堂」。「暮合（黄昏点香）、午勉（日光过白）」是本展叙事约定。",
   jiaolou: "关西新围「四角各建有一座10米高的炮楼」。「夜合（值守）」是本展叙事约定。",
 };
@@ -134,7 +134,7 @@ export function hakkaRule(room: MatrixRoomId, _hour: HourId): EvRule {
     claim: ROOM_CLAIM[room],
     sourceIds: ROOM_SRC[room],
     cases: [
-      { a: "heping", b: "night", tag: "命中", label: "禾坪 × 夜", note: "夜里不晒谷，改锁暮" },
+      { a: "heping", b: "night", tag: "命中", label: "禾坪 × 夜", note: "夜里不凉晒，改锁暮" },
       { a: "zutang", b: "noon", tag: "边界", label: "祖堂 × 午", note: "日光过白，判勉" },
       { a: "jiaolou", b: "night", tag: "例外", label: "角楼 × 夜", note: "规则不触发" },
     ],

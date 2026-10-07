@@ -9,7 +9,7 @@ const MARK: Record<ImageId, THREE.Vector3> = {
   changtian: new THREE.Vector3(1.5, 8.5, -10),
   yuzhou: new THREE.Vector3(-4.2, 0.12, 3.6),
   yanzhen: new THREE.Vector3(6.5, 7.2, -12),
-  feige: new THREE.Vector3(7.4, 3.6, -7.2),
+  feige: new THREE.Vector3(3.4, 4.0, -12.5),
   hantan: new THREE.Vector3(-6.8, 0.04, 1.4),
 };
 
@@ -36,7 +36,7 @@ export class PavilionScene {
   private fog: THREE.FogExp2;
   private glow: THREE.Mesh;
   private markers = new Map<ImageId, THREE.Object3D>();
-  private look = new THREE.Vector3(7.4, 2.4, -7.2);
+  private look = new THREE.Vector3(3.4, 2.4, -12.5);
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -62,7 +62,7 @@ export class PavilionScene {
     this.controls.autoRotate = true;
     this.controls.autoRotateSpeed = 0.18;
     this.controls.minDistance = 5;
-    this.controls.maxDistance = 14;
+    this.controls.maxDistance = 30;
     this.controls.minPolarAngle = Math.PI * 0.32;
     this.controls.maxPolarAngle = Math.PI * 0.49;
     this.controls.target.copy(this.look);
@@ -92,7 +92,9 @@ export class PavilionScene {
     this.scene.add(this.water);
     this.scene.add(makeHills());
     const pavilion = makePavilion();
-    pavilion.position.set(7.4, 0, -7.2);
+    pavilion.position.set(3.4, 0, -12.5);
+    pavilion.rotation.y = -0.42;
+    pavilion.scale.setScalar(0.85);
     this.scene.add(pavilion);
     this.markers.set("feige", pavilion);
 
@@ -132,6 +134,7 @@ export class PavilionScene {
 
     this.resize();
     this.applyMood();
+    this.controls.target.copy(this.look);
     this.loop();
   }
 
@@ -207,7 +210,7 @@ export class PavilionScene {
     this.look.copy(MARK[this.focus]);
     if (this.focus === "qiushui" || this.focus === "hantan") this.look.y = 0.4;
     if (this.focus === "changtian") this.look.set(2, 5.5, -8);
-    if (this.focus === "feige") this.look.set(7.4, 3.2, -7.2);
+    if (this.focus === "feige") this.look.set(3.4, 3.0, -12.5);
   }
 }
 
@@ -256,132 +259,266 @@ function makeWater(): THREE.Group {
 }
 
 function makeHills(): THREE.Group {
+  // 层叠山脊（远淡近浓），替代早期的压扁球体，避免“积木感”
   const g = new THREE.Group();
-  const far = mat(0x3a2430, 0.95, 0);
-  const near = mat(0x21151a, 0.92, 0);
-  for (const [x, z, s, y, c] of [
-    [-18, -22, 14, 3.2, far],
-    [-6, -26, 18, 4.4, far],
-    [8, -24, 16, 3.8, far],
-    [20, -20, 12, 2.8, far],
-    [-14, -14, 9, 2.2, near],
-    [16, -15, 10, 2.4, near],
-  ] as [number, number, number, number, THREE.MeshStandardMaterial][]) {
-    const hill = new THREE.Mesh(new THREE.SphereGeometry(1, 18, 12), c);
-    hill.scale.set(s, y, s * 0.7);
-    hill.position.set(x, y * 0.15, z);
-    hill.castShadow = true;
-    g.add(hill);
+  const layers: { z: number; base: number; amp: number; color: number; seed: number; gap?: [number, number] }[] = [
+    { z: -34, base: 2.6, amp: 3.4, color: 0x4a3040, seed: 1.7 },
+    { z: -27, base: 1.8, amp: 2.8, color: 0x382430, seed: 4.1 },
+    { z: -20, base: 0.9, amp: 2.0, color: 0x28181f, seed: 7.3, gap: [-13, 2] },
+    { z: -14, base: 0.4, amp: 1.5, color: 0x1c1116, seed: 9.9, gap: [-16, 11] },
+  ];
+  for (const L of layers) {
+    const shape = new THREE.Shape();
+    const x0 = -70;
+    const x1 = 70;
+    shape.moveTo(x0, -1);
+    for (let x = x0; x <= x1; x += 0.6) {
+      const n =
+        Math.sin(x * 0.11 + L.seed) * 0.5 +
+        Math.sin(x * 0.27 + L.seed * 2.3) * 0.28 +
+        Math.sin(x * 0.63 + L.seed * 0.7) * 0.12 +
+        Math.abs(Math.sin(x * 0.045 + L.seed)) * 0.6;
+      let y = L.base + L.amp * Math.max(0, n);
+      if (L.gap && x > L.gap[0] && x < L.gap[1]) {
+        const k = Math.min(x - L.gap[0], L.gap[1] - x) / 3;
+        y *= Math.max(0.05, 1 - Math.min(1, k));
+      }
+      shape.lineTo(x, y);
+    }
+    shape.lineTo(x1, -1);
+    shape.closePath();
+    const m = new THREE.Mesh(
+      new THREE.ShapeGeometry(shape, 1),
+      new THREE.MeshStandardMaterial({ color: L.color, roughness: 0.95, metalness: 0, side: THREE.DoubleSide }),
+    );
+    m.position.z = L.z;
+    m.castShadow = L.z > -22;
+    g.add(m);
   }
   return g;
 }
 
 function makePavilion(): THREE.Group {
   const g = new THREE.Group();
-  const stone = mat(0x3a342c, 0.88, 0.08);
-  const wood = mat(0x2b1812, 0.72, 0.04);
-  const dan = mat(0x8c2d24, 0.55, 0.08);
-  const gold = mat(0xc6a15b, 0.4, 0.35);
+  const stone = mat(0x4a433a, 0.9, 0.04);
+  const stoneDark = mat(0x302a24, 0.92, 0.02);
+  const wood = mat(0x3a1c14, 0.7, 0.04);
+  const dan = mat(0x9a2e22, 0.5, 0.06);
+  const gold = mat(0xc6a15b, 0.42, 0.35);
+  const tile = new THREE.MeshStandardMaterial({ color: 0x2c3632, roughness: 0.48, metalness: 0.18, side: THREE.DoubleSide });
 
-  const terrace = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.55, 6.4), stone);
-  terrace.position.y = 0.28;
+  // 高台：两级台基 + 正面踏步
+  const base = new THREE.Mesh(new THREE.BoxGeometry(8.6, 0.5, 7.6), stoneDark);
+  base.position.y = 0.25;
+  base.receiveShadow = true;
+  g.add(base);
+  const terrace = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.6, 6.4), stone);
+  terrace.position.y = 0.8;
   terrace.castShadow = true;
   terrace.receiveShadow = true;
   g.add(terrace);
-  const plinth = new THREE.Mesh(new THREE.BoxGeometry(8.4, 0.22, 7.4), stone);
-  plinth.position.y = 0.02;
-  g.add(plinth);
-  const lampMat = new THREE.MeshStandardMaterial({ color: 0xffc070, emissive: 0xff7a30, emissiveIntensity: 0.9, roughness: 0.4 });
-  for (const [lx, lz] of [[-3.1, 2.8], [3.1, 2.8], [-3.1, -2.8], [3.1, -2.8]] as [number, number][]) {
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 1.6, 6), wood);
+  for (let i = 0; i < 5; i++) {
+    const step = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.22, 0.32), stone);
+    step.position.set(0, 0.11 + i * 0.22, 3.2 + 0.9 - i * 0.28);
+    g.add(step);
+  }
+  balustrade(g, 7.2, 6.4, 1.1, stone, 0.32);
+
+  const lampMat = new THREE.MeshStandardMaterial({ color: 0xffc070, emissive: 0xff7a30, emissiveIntensity: 1.1, roughness: 0.4 });
+  for (const [lx, lz] of [[-3.9, 3.4], [3.9, 3.4], [-1.3, 4.2], [1.3, 4.2]] as [number, number][]) {
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 1.2, 6), wood);
     pole.position.set(lx, 1.1, lz);
-    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), lampMat);
-    lamp.position.set(lx, 1.95, lz);
+    const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 0.26, 8), lampMat);
+    lamp.position.set(lx, 1.8, lz);
     g.add(pole, lamp);
   }
 
+  const paper = new THREE.MeshStandardMaterial({ color: 0xffe2b0, emissive: 0xc07030, emissiveIntensity: 0.6, roughness: 0.6 });
   const stories = [
-    { y: 1.15, w: 4.6, d: 4.2, h: 1.35, roofW: 6.6, roofD: 5.8, peak: false },
-    { y: 2.7, w: 3.7, d: 3.4, h: 1.15, roofW: 5.4, roofD: 4.8, peak: false },
-    { y: 4.05, w: 2.8, d: 2.6, h: 1.0, roofW: 4.2, roofD: 3.8, peak: true },
+    { y0: 1.1, w: 4.8, d: 4.3, h: 1.45, roofW: 7.0, roofD: 6.3, rise: 1.0 },
+    { y0: 3.0, w: 3.9, d: 3.5, h: 1.2, roofW: 5.8, roofD: 5.2, rise: 0.95 },
+    { y0: 4.65, w: 3.0, d: 2.7, h: 1.05, roofW: 4.6, roofD: 4.2, rise: 1.35 },
   ];
   for (const s of stories) {
-    const body = new THREE.Mesh(new THREE.BoxGeometry(s.w, s.h, s.d), wood);
-    body.position.y = s.y;
+    const yc = s.y0 + s.h / 2;
+    // 平座（楼层台面）
+    const floor = new THREE.Mesh(new THREE.BoxGeometry(s.w + 0.7, 0.14, s.d + 0.7), wood);
+    floor.position.y = s.y0 + 0.07;
+    floor.castShadow = true;
+    g.add(floor);
+    if (s !== stories[0]) balustrade(g, s.w + 0.6, s.d + 0.6, s.y0 + 0.14, dan, 0.36);
+    // 内收的墙身
+    const body = new THREE.Mesh(new THREE.BoxGeometry(s.w * 0.78, s.h, s.d * 0.78), wood);
+    body.position.y = yc;
     body.castShadow = true;
     g.add(body);
-    const paper = new THREE.MeshStandardMaterial({ color: 0xffe2b0, emissive: 0xc07030, emissiveIntensity: 0.55, roughness: 0.6 });
-    for (const wx of [-0.28, 0, 0.28]) {
-      const win = new THREE.Mesh(new THREE.BoxGeometry(s.w * 0.16, s.h * 0.42, 0.06), paper);
-      win.position.set(s.w * wx, s.y + 0.04, s.d * 0.5 + 0.02);
-      g.add(win);
+    // 四面格扇窗
+    const bw = s.w * 0.78;
+    const bd = s.d * 0.78;
+    for (const face of [0, 1, 2, 3]) {
+      const along = face % 2 === 0 ? bw : bd;
+      const n = 4;
+      for (let i = 0; i < n; i++) {
+        const off = (i - (n - 1) / 2) * (along / n);
+        const win = new THREE.Mesh(new THREE.BoxGeometry((along / n) * 0.72, s.h * 0.56, 0.04), paper);
+        const out = (face % 2 === 0 ? bd : bw) / 2 + 0.02;
+        if (face === 0) win.position.set(off, yc + 0.05, out);
+        if (face === 1) { win.position.set(out, yc + 0.05, off); win.rotation.y = Math.PI / 2; }
+        if (face === 2) win.position.set(off, yc + 0.05, -out);
+        if (face === 3) { win.position.set(-out, yc + 0.05, off); win.rotation.y = Math.PI / 2; }
+        g.add(win);
+      }
     }
-    for (const sx of [-1, 1]) {
-      for (const sz of [-1, 1]) {
-        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.1, s.h, 8), dan);
-        col.position.set(sx * s.w * 0.42, s.y, sz * s.d * 0.42);
+    // 回廊檐柱：每面 5 柱
+    const cw = s.w * 0.5;
+    const cd = s.d * 0.5;
+    for (let i = 0; i < 5; i++) {
+      const k = -1 + (i * 2) / 4;
+      for (const [x, z] of [[k * cw, cd], [k * cw, -cd], [cw, k * cd], [-cw, k * cd]] as [number, number][]) {
+        const col = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.085, s.h, 10), dan);
+        col.position.set(x, yc, z);
+        col.castShadow = true;
         g.add(col);
       }
     }
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(s.w + 0.5, 0.08, s.d + 0.5), gold);
-    rail.position.y = s.y - s.h * 0.48;
-    g.add(rail);
-    const roof = hipRoof(s.roofW, s.roofD, s.peak ? 0.95 : 0.62, s.peak, dan, gold);
-    roof.position.y = s.y + s.h * 0.5 + 0.04;
+    // 额枋 + 斗拱层
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(s.w + 0.16, 0.12, s.d + 0.16), dan);
+    beam.position.y = s.y0 + s.h - 0.06;
+    g.add(beam);
+    brackets(g, s.w + 0.3, s.d + 0.3, s.y0 + s.h + 0.06, gold);
+    const roof = curvedRoof(s.roofW, s.roofD, s.rise, tile, gold, s === stories[2]);
+    roof.position.y = s.y0 + s.h + 0.16;
     g.add(roof);
   }
   return g;
 }
 
-function hipRoof(w: number, d: number, rise: number, peak: boolean, dan: THREE.MeshStandardMaterial, gold: THREE.MeshStandardMaterial): THREE.Group {
+function balustrade(g: THREE.Group, w: number, d: number, y: number, m: THREE.Material, hgt: number): void {
+  const hw = w / 2;
+  const hd = d / 2;
+  for (const [len, x, z, rot] of [
+    [w, 0, hd, 0],
+    [w, 0, -hd, 0],
+    [d, hw, 0, Math.PI / 2],
+    [d, -hw, 0, Math.PI / 2],
+  ] as [number, number, number, number][]) {
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(len, 0.05, 0.06), m);
+    rail.position.set(x, y + hgt, z);
+    rail.rotation.y = rot;
+    g.add(rail);
+    const lower = rail.clone();
+    lower.position.y = y + hgt * 0.4;
+    g.add(lower);
+    const n = Math.max(3, Math.round(len / 0.45));
+    for (let i = 0; i <= n; i++) {
+      const t = -len / 2 + (len * i) / n;
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.06, hgt + 0.06, 0.06), m);
+      if (rot === 0) post.position.set(t, y + hgt / 2, z);
+      else post.position.set(x, y + hgt / 2, t);
+      g.add(post);
+    }
+  }
+}
+
+function brackets(g: THREE.Group, w: number, d: number, y: number, m: THREE.Material): void {
+  const hw = w / 2;
+  const hd = d / 2;
+  const geo = new THREE.BoxGeometry(0.16, 0.12, 0.16);
+  const cap = new THREE.BoxGeometry(0.26, 0.06, 0.12);
+  const per = (len: number) => Math.max(4, Math.round(len / 0.42));
+  const put = (x: number, z: number, rot: number) => {
+    const b = new THREE.Mesh(geo, m);
+    b.position.set(x, y, z);
+    const c = new THREE.Mesh(cap, m);
+    c.position.set(x, y + 0.09, z);
+    c.rotation.y = rot;
+    g.add(b, c);
+  };
+  for (let i = 0; i <= per(w); i++) {
+    const x = -hw + (w * i) / per(w);
+    put(x, hd, 0);
+    put(x, -hd, 0);
+  }
+  for (let i = 1; i < per(d); i++) {
+    const z = -hd + (d * i) / per(d);
+    put(hw, z, Math.PI / 2);
+    put(-hw, z, Math.PI / 2);
+  }
+}
+
+// 曲面屋顶：举折（上陡下缓）+ 翼角起翘，取代平直四坡面
+function curvedRoof(w: number, d: number, rise: number, tile: THREE.Material, gold: THREE.Material, top: boolean): THREE.Group {
   const g = new THREE.Group();
   const hw = w / 2;
   const hd = d / 2;
-  const lift = 0.28;
-  const rx = peak ? 0 : hw * 0.22;
+  const N = 36;
+  const lift = top ? 0.5 : 0.42;
+  const pos: number[] = [];
+  const idx: number[] = [];
+  const P = (u: number, v: number): [number, number, number] => {
+    const x = u * hw;
+    const z = v * hd;
+    const dist = Math.min(hw - Math.abs(x), hd - Math.abs(z));
+    const q = Math.min(1, dist / Math.min(hw, hd));
+    const corner = Math.pow(Math.abs(u) * Math.abs(v), 5);
+    const edge = Math.pow(Math.max(Math.abs(u), Math.abs(v)), 8);
+    const y = rise * Math.pow(q, 1.7) + lift * corner + 0.06 * edge;
+    const spread = 1 + 0.07 * corner;
+    return [x * spread, y, z * spread];
+  };
+  for (let j = 0; j <= N; j++) {
+    for (let i = 0; i <= N; i++) {
+      pos.push(...P(-1 + (2 * i) / N, -1 + (2 * j) / N));
+    }
+  }
+  for (let j = 0; j < N; j++) {
+    for (let i = 0; i < N; i++) {
+      const a = j * (N + 1) + i;
+      const b = a + 1;
+      const c = a + N + 1;
+      const e = c + 1;
+      idx.push(a, c, b, b, c, e);
+    }
+  }
   const geo = new THREE.BufferGeometry();
-  const v: number[] = [];
-  const push = (a: number[]) => v.push(...a);
-  const ridgeL: [number, number, number] = [-rx, rise, 0];
-  const ridgeR: [number, number, number] = [rx, rise, 0];
-  const fl: [number, number, number] = [-hw, lift, hd];
-  const fr: [number, number, number] = [hw, lift, hd];
-  const bl: [number, number, number] = [-hw, lift, -hd];
-  const br: [number, number, number] = [hw, lift, -hd];
-  const tri = (a: [number, number, number], b: [number, number, number], c: [number, number, number]) => push([...a, ...b, ...c]);
-  tri(fl, fr, ridgeR); tri(fl, ridgeR, ridgeL);
-  tri(br, bl, ridgeL); tri(br, ridgeL, ridgeR);
-  tri(fl, ridgeL, bl);
-  tri(fr, br, ridgeR);
-  geo.setAttribute("position", new THREE.Float32BufferAttribute(v, 3));
+  geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  geo.setIndex(idx);
   geo.computeVertexNormals();
-  const roof = new THREE.Mesh(geo, dan);
+  const roof = new THREE.Mesh(geo, tile);
   roof.castShadow = true;
+  roof.receiveShadow = true;
   g.add(roof);
-  for (const [x, z] of [[-hw, hd], [hw, hd], [-hw, -hd], [hw, -hd]] as [number, number][]) {
-    const wing = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.55, 4), dan);
-    wing.position.set(x * 1.04, lift + 0.35, z * 1.04);
-    wing.rotation.z = x < 0 ? 0.55 : -0.55;
-    wing.rotation.x = z > 0 ? -0.35 : 0.35;
-    wing.castShadow = true;
-    g.add(wing);
+  // 檐口金线：沿四边取样，随起翘一起弯
+  const pts: THREE.Vector3[] = [];
+  const M = 64;
+  for (let k = 0; k < M * 4; k++) {
+    const t = (k % M) / M;
+    const side = Math.floor(k / M);
+    const [u, v] = side === 0 ? [-1 + 2 * t, 1] : side === 1 ? [1, 1 - 2 * t] : side === 2 ? [1 - 2 * t, -1] : [-1, -1 + 2 * t];
+    const [x, y, z] = P(u, v);
+    pts.push(new THREE.Vector3(x, y - 0.02, z));
   }
-  const eave = new THREE.Mesh(new THREE.BoxGeometry(w * 1.06, 0.07, d * 1.06), gold);
-  eave.position.y = 0.02;
-  g.add(eave);
-  const tile = mat(0x6a241c, 0.62, 0.12);
-  for (let i = 1; i <= 4; i++) {
-    const k = i / 5;
-    const row = new THREE.Mesh(new THREE.BoxGeometry(w * (1 - k * 0.18), 0.03, d * (1 - k * 0.18)), tile);
-    row.position.y = lift + (rise - lift) * k + 0.04;
-    g.add(row);
+  const curve = new THREE.CatmullRomCurve3(pts, true);
+  g.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 256, 0.045, 6, true), gold));
+  // 正脊 / 宝顶
+  if (top) {
+    const finial = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 12), gold);
+    finial.position.y = rise + 0.18;
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.08, 0.3, 8), gold);
+    stem.position.y = rise + 0.02;
+    g.add(finial, stem);
+  } else {
+    const len = Math.max(0.4, (hw - hd) * 2 + 0.3);
+    const ridge = new THREE.Mesh(new THREE.BoxGeometry(len, 0.12, 0.14), gold);
+    ridge.position.y = rise + 0.04;
+    g.add(ridge);
+    for (const sx of [-1, 1]) {
+      const chi = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.3, 6), gold);
+      chi.position.set((sx * len) / 2, rise + 0.2, 0);
+      chi.rotation.z = -sx * 0.35;
+      g.add(chi);
+    }
   }
-  const ridge = new THREE.Mesh(new THREE.BoxGeometry(Math.max(0.35, rx * 2 + 0.4), 0.1, 0.14), gold);
-  ridge.position.y = rise + 0.08;
-  g.add(ridge);
-  const chiwen = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.32, 5), gold);
-  chiwen.position.set(0, rise + 0.28, 0);
-  g.add(chiwen);
   return g;
 }
 

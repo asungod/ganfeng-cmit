@@ -38,7 +38,7 @@ export const hours: Hour[] = [
   {
     id: "dawn",
     name: "晨",
-    blurb: "禾坪未晒谷，门楼有雾。脚步声先于人出现。",
+    blurb: "禾坪尚空，门楼有雾。脚步声先于人出现。",
     light: "冷青，墙面刚被天光刮过。",
   },
   {
@@ -65,10 +65,10 @@ export const rooms: Room[] = [
   {
     id: "menlou",
     name: "门楼",
-    role: "唯一的正式入口。内外之间先经过一道被观察的门槛。",
+    role: "围屋的正式入口。围门常设三重：外钉铁板的板门、闸门、日常便门（万幼楠《客家民居与赣南围屋》）。",
     walk: "从村路靠近，先看见厚墙与门额，再看见门。可走，不是传送。",
     sound: "石阶、门枢、远处水牛。晨有鸡。",
-    dialect: { term: "屋家", gloss: "家里、家园", hint: "【待核】客家方言词条，未找到可公开查证的出处，保留为示例。" },
+    dialect: { term: "三重围门", gloss: "板门（外钉铁板）、闸门、日常便门", hint: "「围门一般有三重」见万幼楠《客家民居与赣南围屋》（客家摇篮网，2014）。本展门楼为示意。" },
     x: 42,
     y: 86,
     w: 16,
@@ -77,10 +77,10 @@ export const rooms: Room[] = [
   {
     id: "heping",
     name: "禾坪",
-    role: "晒谷、节庆的公共空地。实例中禾坪常在围前（龙南乌石围「围前有禾坪」）；本展平面为示意，把它接在门楼之后以便连续动线。",
+    role: "屋前用于洗涤、凉晒的场地（万幼楠《客家民居与赣南围屋》）。实例中禾坪常在围前（龙南乌石围「围前有禾坪」）；本展平面为示意，把它接在门楼之后以便连续动线。",
     walk: "空间忽然打开。这是围屋留给「外」的一块平地。",
     sound: "晒席、麻雀、正午的蝉。",
-    dialect: { term: "晒谷", gloss: "把稻谷摊在禾坪上晒", hint: "【待核】词条为示例；禾坪见乌石围「围前有禾坪」。" },
+    dialect: { term: "禾坪", gloss: "屋前洗涤、凉晒物件的场所", hint: "原文：水塘、禾坪「既是居民洗涤、凉晒物件的场所」。见万幼楠《客家民居与赣南围屋》（客家摇篮网，2014）。" },
     x: 28,
     y: 68,
     w: 44,
@@ -89,10 +89,10 @@ export const rooms: Room[] = [
   {
     id: "tianjing",
     name: "天井",
-    role: "雨水、天光、通风。围屋向天开的一口。（本展整理，待核）",
+    role: "雨水、天光。赣南民居在巷中留竖向天井「以采光排水」，天井「狭小而深」；本展把它画在围心（示意）。",
     walk: "穿过禾坪，地面微降，四壁把天裁成方形。",
     sound: "雨天有滴阶；晴天有风从巷道灌入。",
-    dialect: { term: "采光", gloss: "让天进到围心里", hint: "【待核】天井功能描述为本展整理，未单独核实。" },
+    dialect: { term: "竖向天井", gloss: "巷中留天井，以采光排水", hint: "赣南的天井「狭小而深」。见万幼楠《客家民居与赣南围屋》（客家摇篮网，2014）。" },
     x: 36,
     y: 48,
     w: 28,
@@ -104,7 +104,7 @@ export const rooms: Room[] = [
     role: "中轴上的祭祀与宗族中心（关西新围「围屋中轴线是祠堂」）。所有房间的朝向都在回答它。",
     walk: "沿中轴走到底。牌位、香、左右对称。人在这里放慢。",
     sound: "晨昏有香；其余时候是极静的木头。",
-    dialect: { term: "敬祖", gloss: "祭祀祖先", hint: "【待核】方言词条为示例；祖堂居中轴的说法见关西新围出处。" },
+    dialect: { term: "厅 · 堂", gloss: "赣南客家人一般称堂为「厅」，堂专指祠堂", hint: "见万幼楠《客家民居与赣南围屋》（客家摇篮网，2014）。" },
     x: 38,
     y: 30,
     w: 24,
@@ -113,10 +113,10 @@ export const rooms: Room[] = [
   {
     id: "zhengwu",
     name: "正屋",
-    role: "祖堂两侧的正房，长辈与礼仪性起居。（本展整理，待核）",
+    role: "以正厅为中轴的主体房屋：前厅、后厅与两侧厢房、正房合成「正屋」，所有横屋围绕它展开。",
     walk: "从祖堂退到两翼。比横屋更近中轴，也更正式。",
     sound: "坐椅挪动、钟、偶尔的咳嗽。",
-    dialect: { term: "阿公阿婆", gloss: "祖父祖母", hint: "【待核】称谓与居住分配均为示例，未找到可公开查证的出处。" },
+    dialect: { term: "正屋", gloss: "前厅、后厅与厢房、正房合成的主体房屋", hint: "见万幼楠《客家民居与赣南围屋》（客家摇篮网，2014）。" },
     x: 20,
     y: 30,
     w: 16,
@@ -125,10 +125,10 @@ export const rooms: Room[] = [
   {
     id: "hengwu",
     name: "横屋",
-    role: "两侧纵深的居住与附属空间，生活在此展开。（本展整理，待核）",
+    role: "正屋两侧扩建的房屋，各房门朝巷开；做饭、睡觉的日常是本展的叙事描写。",
     walk: "离开中轴，进入可以做饭、睡觉、说话的尺度。",
     sound: "灶、碗、孩童。午后有人午睡。",
-    dialect: { term: "食饭", gloss: "吃饭", hint: "【待核】方言词条为示例。" },
+    dialect: { term: "横屋", gloss: "正屋两侧扩建，各房门朝巷开", hint: "见万幼楠《客家民居与赣南围屋》（客家摇篮网，2014）。" },
     x: 8,
     y: 36,
     w: 10,
@@ -140,7 +140,7 @@ export const rooms: Room[] = [
     role: "转角的防御节点（文献称「炮楼」，如关西新围四角各建一座）。炮眼朝外，楼梯陡。",
     walk: "沿外墙走到角。视野突然离开宗族，对着田与路。",
     sound: "风比别处大。夜里风声会改调。",
-    dialect: { term: "炮眼", gloss: "墙上的射击/观察孔", hint: "「炮楼、炮孔」见龙南市政府围屋介绍；词条释义为本展整理。" },
+    dialect: { term: "火角 · 敌楼", gloss: "炮楼的俗称", hint: "「围屋四角构筑有朝外和往上凸出的炮楼（俗称火角、敌楼）」。见万幼楠《客家民居与赣南围屋》（客家摇篮网，2014）。" },
     x: 8,
     y: 8,
     w: 14,
@@ -149,10 +149,10 @@ export const rooms: Room[] = [
   {
     id: "xiangdao",
     name: "巷道",
-    role: "外墙内侧的环形通道。连接横屋与角楼，也是战时的内部动线。（本展整理，待核）",
+    role: "正屋与横屋之间的走道称「巷」；围屋顶层另有沿外墙内侧的环形走廊，俗称「外走马」，利于战时调兵。本展把两者合成一条示意动线，连接横屋与角楼。",
     walk: "人顺着墙根走，肩会擦到冷砖。这是「可走」最具体的一段。",
     sound: "回声短，脚步被墙翻倍。",
-    dialect: { term: "转", gloss: "走、回、绕", hint: "【待核】方言词条为示例。" },
+    dialect: { term: "外走马", gloss: "顶层沿外墙内侧的环形走廊，战时调兵用", hint: "见万幼楠《客家民居与赣南围屋》（客家摇篮网，2014）。" },
     x: 78,
     y: 20,
     w: 14,
@@ -216,6 +216,19 @@ export const hakkaCitations: Citation[] = [
   },
 ];
 
+
+hakkaCitations.push({
+  id: "minju",
+  title: "正屋、横屋、巷与天井",
+  source: "万幼楠《客家民居与赣南围屋》· 客家摇篮网（2014-06-09）",
+  excerpt:
+    "「便在正屋两侧扩建“横屋”……正屋与横屋间留一走衢，称“巷”……巷中相应留竖向天井，以采光排水。横屋各房间门均朝巷道开。」",
+  note: "原文摘录。房间术语与俗称（火角、敌楼、外走马、禾坪）均出自此文；本展平面为示意。",
+  status: "verified",
+  sourceId: "gn-minju",
+  url: "http://www.gnhakka.com/n493/n534/c6120/content.html",
+});
+
 export const hakkaQA: QAItem[] = [
   {
     id: "q-tulou",
@@ -245,7 +258,7 @@ export const hakkaQA: QAItem[] = [
     id: "q-walk",
     question: "时辰和房间怎么互相约束？",
     answer:
-      "这张表是本展的叙事约定，不是史料：暮×祖堂为合（黄昏点香），夜×角楼为合（防御值守），禾坪×夜为冲（夜里不晒谷，改锁暮），祖堂×午为勉（日光过白），门楼×晨为合。空间本身（中轴祠堂、四角炮楼）有出处，时辰搭配是设计。",
+      "这张表是本展的叙事约定，不是史料：暮×祖堂为合（黄昏点香），夜×角楼为合（防御值守），禾坪×夜为冲（夜里不凉晒，改锁暮），祖堂×午为勉（日光过白），门楼×晨为合。空间本身（中轴祠堂、四角炮楼）有出处，时辰搭配是设计。",
     citationIds: ["axis", "defense"],
     keywords: ["时辰", "房间", "约束", "暮", "祖堂", "夜", "角楼", "禾坪", "午"],
   },
@@ -297,7 +310,7 @@ export function hourWhy(room: MatrixRoomId, hour: HourId): { why: string; citeId
     return { why: `角楼×夜合（防御）。${HONEST_HOUR}`, citeId: "defense" };
   }
   if (room === "heping" && hour === "night") {
-    return { why: `禾坪×夜冲（无晒谷，改锁暮）。${HONEST_HOUR}`, citeId: "axis" };
+    return { why: `禾坪×夜冲（夜里不凉晒，改锁暮）。${HONEST_HOUR}`, citeId: "axis" };
   }
   if (room === "menlou" && hour === "dawn") {
     return { why: `门楼×晨合。${HONEST_HOUR}`, citeId: "axis" };
@@ -313,7 +326,7 @@ export function hourLockMessage(room: RoomId, hour: HourId, next: HourId): strin
   const rName = rooms.find((x) => x.id === room)!.name;
   const hName = hours.find((x) => x.id === hour)!.name;
   const nName = hours.find((x) => x.id === next)!.name;
-  const extra = room === "heping" && hour === "night" ? "无晒谷。" : "";
+  const extra = room === "heping" && hour === "night" ? "夜里不凉晒。" : "";
   return `${rName}与「${hName}」在本内容包中判定为冲突。${extra}已改锁为「${nName}」，不另造一座建筑。`;
 }
 

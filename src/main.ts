@@ -12,7 +12,7 @@ import { guide } from "./app/guide";
 import type { Route } from "./data/types";
 import { demoLookupLine, mountEngineHud, pushLookupLog } from "./app/engineHud";
 
-const app = document.getElementById("app") as HTMLDivElement;
+let app = document.getElementById("app") as HTMLDivElement;
 
 let unmount: (() => void) | null = null;
 function mount(route: Route): void {
@@ -20,7 +20,11 @@ function mount(route: Route): void {
   if (!/fallback/.test(location.hash)) setAskForceLex(false);
   guide.stop();
   unmount?.();
-  app.innerHTML = "";
+  // 换一个新的空容器：各展柜挂在 root 上的 click/input 监听随旧节点一起丢弃，
+  // 避免切换展柜后旧展柜的处理器继续响应（真机浏览器回归中发现的异常来源）。
+  const fresh = app.cloneNode(false) as HTMLDivElement;
+  app.replaceWith(fresh);
+  app = fresh;
   // Demo lookup line first so route switch still proves the logger even if a 3D context fails.
   const demo = demoLookupLine(route === "hall" ? "hall" : route);
   if (demo) pushLookupLog(demo);

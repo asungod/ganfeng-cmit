@@ -795,9 +795,13 @@ export function mountPorcelain(root: HTMLElement): () => void {
       void apply(true);
     } else if (g?.dataset.glaze) {
       glaze = g.dataset.glaze as GlazeId;
+      pickEra = era;
+      pickGlaze = glaze;
       void apply(true);
     } else if (er?.dataset.era) {
       era = er.dataset.era as EraId;
+      pickEra = era;
+      pickGlaze = glaze;
       void apply(true);
     }
   });

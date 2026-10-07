@@ -1,0 +1,66 @@
+ciyu yingqing {"lab":"song×yingqing","verdict":"实测 合 ✓ 与依据一致","raw":"{ era: \"song\", glaze: \"yingqing\", status: \"ok\", fallback: \"\" }"}
+ciyu yingqing {"lab":"ming×yingqing","verdict":"实测 勉 ✓ 与依据一致","raw":"{ era: \"ming\", glaze: \"yingqing\", status: \"stretch\", fallback: \"\" }"}
+ciyu yingqing {"lab":"qing×yingqing","verdict":"实测 勉 ✓ 与依据一致","raw":"{ era: \"qing\", glaze: \"yingqing\", status: \"stretch\", fallback: \"\" }"}
+ciyu jihong {"lab":"song×jihong","verdict":"实测 冲 ✓ 与依据一致","raw":"{ era: \"song\", glaze: \"jihong\", status: \"conflict\", fallback: \"yingqing\" }"}
+ciyu jihong {"lab":"yuan×jihong","verdict":"实测 勉 ✓ 与依据一致","raw":"{ era: \"yuan\", glaze: \"jihong\", status: \"stretch\", fallback: \"\" }"}
+ciyu jihong {"lab":"ming×jihong","verdict":"实测 合 ✓ 与依据一致","raw":"{ era: \"ming\", glaze: \"jihong\", status: \"ok\", fallback: \"\" }"}
+ciyu wucai {"lab":"song×wucai","verdict":"实测 冲 ✓ 与依据一致","raw":"{ era: \"song\", glaze: \"wucai\", status: \"conflict\", fallback: \"yingqing\" }"}
+ciyu wucai {"lab":"yuan×wucai","verdict":"实测 冲 ✓ 与依据一致","raw":"{ era: \"yuan\", glaze: \"wucai\", status: \"conflict\", fallback: \"qinghua\" }"}
+ciyu wucai {"lab":"ming×wucai","verdict":"实测 合 ✓ 与依据一致","raw":"{ era: \"ming\", glaze: \"wucai\", status: \"ok\", fallback: \"\" }"}
+ciyu ASK: Engine: BGE · ready | 引
+           
+             出处卡片
+             粉彩
+             故宫博物院 · 「粉彩」词条
+           
+         
+      本答走：本地轻量检索
+      宋代梅瓶能用粉彩吗
+      故宫博物院的词条写明：粉彩「创烧于康熙晚期，成
+ciyu ASK-OOD: 本答走：未收录
+      今天股市怎么样
+      题库未收录这一问。讲解员只在本展内容包里检索，不把句子送去外部大模型，以免无出处的话混进展柜。
+gexu sanyan {"lab":"sanyan×yuzhou","verdict":"实测 冲 ✓ 与依据一致","raw":"{ mood: \"sanyan\", motif: \"yuzhou\", status: \"conflict\", fallback: \"hantan\" }"}
+gexu sanyan {"lab":"sanyan×luoxia","verdict":"实测 勉 ✓ 与依据一致","raw":"{ mood: \"sanyan\", motif: \"luoxia\", status: \"stretch\", fallback: \"\" }"}
+gexu sanyan {"lab":"sanyan×hantan","verdict":"实测 合 ✓ 与依据一致","raw":"{ mood: \"sanyan\", motif: \"hantan\", status: \"ok\", fallback: \"\" }"}
+gexu luoxia {"lab":"luoxia×guwu","verdict":"实测 合 ✓ 与依据一致","raw":"{ mood: \"luoxia\", motif: \"guwu\", status: \"ok\", fallback: \"\" }"}
+gexu luoxia {"lab":"luoxia×yuzhou","verdict":"实测 冲 ✓ 与依据一致","raw":"{ mood: \"luoxia\", motif: \"yuzhou\", status: \"conflict\", fallback: \"luoxia\" }"}
+gexu luoxia {"lab":"luoxia×yanzhen","verdict":"实测 冲 ✓ 与依据一致","raw":"{ mood: \"luoxia\", motif: \"yanzhen\", status: \"conflict\", fallback: \"luoxia\" }"}
+gexu yuzhou {"lab":"yuzhou×yanzhen","verdict":"实测 冲 ✓ 与依据一致","raw":"{ mood: \"yuzhou\", motif: \"yanzhen\", status: \"conflict\", fallback: \"yuzhou\" }"}
+gexu yuzhou {"lab":"yuzhou×luoxia","verdict":"实测 冲 ✓ 与依据一致","raw":"{ mood: \"yuzhou\", motif: \"luoxia\", status: \"conflict\", fallback: \"yuzhou\" }"}
+gexu yuzhou {"lab":"yuzhou×yuzhou","verdict":"实测 合 ✓ 与依据一致","raw":"{ mood: \"yuzhou\", motif: \"yuzhou\", status: \"ok\", fallback: \"\" }"}
+gexu yanzhen {"lab":"yanzhen×yuzhou","verdict":"实测 冲 ✓ 与依据一致","raw":"{ mood: \"yanzhen\", motif: \"yuzhou\", status: \"conflict\", fallback: \"yanzhen\" }"}
+gexu yanzhen {"lab":"yanzhen×qiushui","verdict":"实测 勉 ✓ 与依据一致","raw":"{ mood: \"yanzhen\", motif: \"qiushui\", status: \"stretch\", fallback: \"\" }"}
+gexu yanzhen {"lab":"yanzhen×yanzhen","verdict":"实测 合 ✓ 与依据一致","raw":"{ mood: \"yanzhen\", motif: \"yanzhen\", status: \"ok\", fallback: \"\" }"}
+gexu ASK: Engine: BGE · ready | 引
+           
+             出处卡片
+             彭蠡
+             生态中国网《中国最大淡水湖泊—鄱阳湖简介》（2009）
+           
+         
+      本答走：题库原问
+      彭蠡是哪里？
+      彭蠡是鄱阳湖一带的古称（早期文
+gexu ASK-OOD: 本答走：未收录
+      今天股市怎么样
+      题库未收录这一问。讲解员只在本展内容包里检索，不把句子送去外部大模型，以免无出处的话混进展柜。
+kejia  {"lab":"heping×night","verdict":"实测 冲 ✓ 与依据一致","raw":"{ room: \"heping\", hour: \"night\", status: \"conflict\", fallback: \"dusk\" }"}
+kejia  {"lab":"zutang×noon","verdict":"实测 勉 ✓ 与依据一致","raw":"{ room: \"zutang\", hour: \"noon\", status: \"stretch\", fallback: \"\" }"}
+kejia  {"lab":"jiaolou×night","verdict":"实测 合 ✓ 与依据一致","raw":"{ room: \"jiaolou\", hour: \"night\", status: \"ok\", fallback: \"\" }"}
+kejia ASK: Engine: BGE · ready | 引
+           
+             出处卡片
+             赣南围屋与福建土楼
+             龙南市人民政府《世界围屋之都》（2026）；文化和旅游部官网（2008）
+           
+         
+      本答走：题库原问
+      围屋和土楼是一回事吗？
+
+kejia ASK-OOD: 本答走：未收录
+      今天股市怎么样
+      题库未收录这一问。讲解员只在本展内容包里检索，不把句子送去外部大模型，以免无出处的话混进展柜。
+TRY total 24 bad 0 []
+LOGS:
+

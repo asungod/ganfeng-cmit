@@ -155,7 +155,7 @@ export function mountHakka(root: HTMLElement): () => void {
         return k === i ? `【${n}】` : n;
       })
       .join(" → ");
-    el.textContent += " · 知识为示例整理";
+    el.textContent += " · 平面为示意，术语见出处";
   }
 
   function paintHours(): void {
@@ -364,6 +364,7 @@ export function mountHakka(root: HTMLElement): () => void {
       <p class="sound-line">声景：${hourSounds[hour]} ${r.sound}</p>
       ${lockNote ? `<p class="lock-warn">${lockNote}</p>` : ""}
       <div class="dialect">
+        <p class="dialect-k">本地称谓 · 建筑术语（出处已核）</p>
         <span class="dialect-term">${r.dialect.term}</span>
         <span class="dialect-gloss">${r.dialect.gloss}</span>
         <p>${r.dialect.hint}</p>
@@ -456,7 +457,7 @@ export function mountHakka(root: HTMLElement): () => void {
       });
       return;
     }
-    const hr = t.closest("[data-hour]") as HTMLElement | null;
+    const hr = t.closest("button[data-hour]") as HTMLElement | null;
     if (hr?.dataset.hour) {
       hour = hr.dataset.hour as HourId;
       pickHour = hour;

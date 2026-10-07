@@ -53,6 +53,10 @@ export class RoomView {
     vig.addColorStop(1, this.hour === "night" ? "rgba(0,0,0,0.62)" : "rgba(8,6,4,0.38)");
     ctx.fillStyle = vig;
     ctx.fillRect(0, 0, w, h);
+    ctx.globalAlpha = 0.07;
+    ctx.fillStyle = grain(ctx, "film", "#808080");
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalAlpha = 1;
   }
 }
 
@@ -94,25 +98,128 @@ function roomScene(
   }
   ctx.globalAlpha = 1;
 
-  ctx.fillStyle = pal.wall;
-
+  // 地面：透视方砖缝 + 颗粒
+  ctx.save();
   ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(w * 0.22, h * 0.16);
+  ctx.moveTo(0, h);
   ctx.lineTo(w * 0.22, fl);
-  ctx.lineTo(0, h);
-  ctx.closePath();
-  ctx.fill();
-  ctx.beginPath();
-  ctx.moveTo(w, 0);
-  ctx.lineTo(w * 0.78, h * 0.16);
   ctx.lineTo(w * 0.78, fl);
   ctx.lineTo(w, h);
   ctx.closePath();
-  ctx.fill();
+  ctx.clip();
+  ctx.fillStyle = grain(ctx, "floor", pal.floor);
+  ctx.fillRect(0, fl, w, h - fl);
+  ctx.strokeStyle = shade(pal.floor, 0.6);
+  ctx.globalAlpha = 0.4;
+  for (let i = 1; i < 9; i++) {
+    const k = Math.pow(i / 9, 1.8);
+    const y = fl + (h - fl) * k;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  const fg = ctx.createLinearGradient(0, fl, 0, h);
+  fg.addColorStop(0, "rgba(255,214,160,0.10)");
+  fg.addColorStop(1, "rgba(0,0,0,0.38)");
+  ctx.fillStyle = fg;
+  ctx.fillRect(0, fl, w, h - fl);
+  ctx.restore();
 
-  ctx.fillStyle = shade(pal.wall, 1.08);
+  // 两侧夯土墙：分层夯筑线朝灭点收拢
+  for (const side of [0, 1]) {
+    const ex = side === 0 ? 0 : w;
+    const ix = side === 0 ? w * 0.22 : w * 0.78;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(ex, 0);
+    ctx.lineTo(ix, h * 0.16);
+    ctx.lineTo(ix, fl);
+    ctx.lineTo(ex, h);
+    ctx.closePath();
+    ctx.clip();
+    ctx.fillStyle = grain(ctx, "earth", pal.wall);
+    ctx.fillRect(Math.min(ex, ix), 0, Math.abs(ix - ex), h);
+    ctx.strokeStyle = shade(pal.wall, 0.78);
+    ctx.lineWidth = 1.2;
+    for (let i = 1; i < 14; i++) {
+      const f = i / 14;
+      ctx.globalAlpha = 0.28 + (i % 3) * 0.08;
+      ctx.beginPath();
+      ctx.moveTo(ex, f * h);
+      ctx.lineTo(ix, h * 0.16 + f * (fl - h * 0.16));
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    const lg = ctx.createLinearGradient(ex, 0, ix, 0);
+    lg.addColorStop(0, "rgba(0,0,0,0.42)");
+    lg.addColorStop(1, "rgba(0,0,0,0.04)");
+    ctx.fillStyle = lg;
+    ctx.fillRect(Math.min(ex, ix), 0, Math.abs(ix - ex), h);
+    ctx.restore();
+  }
+
+  // 正面墙
+  ctx.fillStyle = grain(ctx, "earth", shade(pal.wall, 1.08));
   ctx.fillRect(w * 0.22, h * 0.16, w * 0.56, fl - h * 0.16);
+  const bg = ctx.createLinearGradient(0, h * 0.16, 0, fl);
+  bg.addColorStop(0, "rgba(0,0,0,0.30)");
+  bg.addColorStop(0.5, "rgba(0,0,0,0.04)");
+  bg.addColorStop(1, "rgba(0,0,0,0.22)");
+  ctx.fillStyle = bg;
+  ctx.fillRect(w * 0.22, h * 0.16, w * 0.56, fl - h * 0.16);
+
+  // 顶：室内为椽子屋顶；禾坪、天井露天
+  const open = room === "heping" || room === "tianjing";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(w, 0);
+  ctx.lineTo(w * 0.78, h * 0.16);
+  ctx.lineTo(w * 0.22, h * 0.16);
+  ctx.closePath();
+  if (open) {
+    const sg = ctx.createLinearGradient(0, 0, 0, h * 0.16);
+    sg.addColorStop(0, shade(pal.sky, 0.82));
+    sg.addColorStop(1, pal.sky);
+    ctx.fillStyle = sg;
+    ctx.fill();
+  } else {
+    ctx.fillStyle = shade(pal.wood, 0.75);
+    ctx.fill();
+    ctx.save();
+    ctx.clip();
+    ctx.strokeStyle = shade(pal.wood, 1.5);
+    ctx.lineWidth = 3;
+    for (let i = 0; i <= 16; i++) {
+      const k = i / 16;
+      ctx.globalAlpha = 0.55;
+      ctx.beginPath();
+      ctx.moveTo(w * k, 0);
+      ctx.lineTo(w * (0.22 + 0.56 * k), h * 0.16);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  // 墙角与墙脚的暗部（环境光遮蔽）
+  ctx.save();
+  ctx.strokeStyle = "rgba(0,0,0,0.55)";
+  ctx.shadowColor = "rgba(0,0,0,0.7)";
+  ctx.shadowBlur = 18;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(0, h);
+  ctx.lineTo(w * 0.22, fl);
+  ctx.lineTo(w * 0.78, fl);
+  ctx.lineTo(w, h);
+  ctx.moveTo(w * 0.22, h * 0.16);
+  ctx.lineTo(w * 0.22, fl);
+  ctx.moveTo(w * 0.78, h * 0.16);
+  ctx.lineTo(w * 0.78, fl);
+  ctx.stroke();
+  ctx.restore();
 
   ctx.strokeStyle = pal.wood;
   ctx.lineWidth = 6;
@@ -192,7 +299,7 @@ function yard(ctx: CanvasRenderingContext2D, w: number, h: number, fl: number, p
   ctx.fillStyle = pal.lamp;
   ctx.font = "12px 'Noto Serif SC', serif";
   ctx.textAlign = "center";
-  ctx.fillText("晒谷", w * 0.5, fl - 14);
+  ctx.fillText("凉晒", w * 0.5, fl - 14);
 }
 
 function well(ctx: CanvasRenderingContext2D, w: number, h: number, fl: number, pal: Pal, t: number): void {
@@ -290,11 +397,9 @@ function hall(ctx: CanvasRenderingContext2D, w: number, h: number, fl: number, p
   ctx.fillRect(w * 0.74 - 10, h * 0.26, 10, h * 0.28);
   ctx.fillStyle = pal.lamp;
   ctx.font = "11px 'Noto Serif SC', serif";
-  ctx.save();
-  ctx.translate(w * 0.245 + 5, h * 0.4);
-  ctx.rotate(-Math.PI / 2);
-  ctx.fillText("慎终追远", 0, 0);
-  ctx.restore();
+  ctx.textAlign = "center";
+  // 竖排：逐字直立排列（不旋转）
+  [..."慎终追远"].forEach((ch, i) => ctx.fillText(ch, w * 0.24 + 5, h * 0.31 + i * 14));
   ctx.fillStyle = "#c6a15b";
   ctx.fillRect(w * 0.32, fl - 8, w * 0.36, 6);
 }
@@ -391,6 +496,68 @@ function chamber(ctx: CanvasRenderingContext2D, w: number, h: number, fl: number
     ctx.textAlign = "center";
     ctx.fillText("厢房", w * 0.5, h * 0.4);
   }
+}
+
+// 程序生成的材质颗粒（夯土 / 地面 / 胶片噪点），按颜色缓存，避免平涂的“插画感”
+const grainCache = new Map<string, CanvasPattern>();
+function grain(ctx: CanvasRenderingContext2D, kind: "earth" | "floor" | "film", color: string): CanvasPattern | string {
+  const key = kind + color;
+  const hit = grainCache.get(key);
+  if (hit) return hit;
+  if (typeof document === "undefined") return color;
+  const S = 256;
+  const c = document.createElement("canvas");
+  c.width = S;
+  c.height = S;
+  const g = c.getContext("2d");
+  if (!g) return color;
+  g.fillStyle = color;
+  g.fillRect(0, 0, S, S);
+  const img = g.getImageData(0, 0, S, S);
+  const d = img.data;
+  let seed = kind === "earth" ? 7 : kind === "floor" ? 13 : 29;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const amp = kind === "film" ? 120 : kind === "earth" ? 26 : 22;
+  for (let y = 0; y < S; y++) {
+    const band = kind === "earth" ? Math.sin((y / S) * Math.PI * 2 * 8) * 3 : 0;
+    for (let x = 0; x < S; x++) {
+      const i = (y * S + x) * 4;
+      const n = (rnd() - 0.5) * amp + band;
+      d[i] = Math.max(0, Math.min(255, d[i] + n));
+      d[i + 1] = Math.max(0, Math.min(255, d[i + 1] + n));
+      d[i + 2] = Math.max(0, Math.min(255, d[i + 2] + n * 0.9));
+    }
+  }
+  g.putImageData(img, 0, 0);
+  if (kind !== "film") {
+    // 斑驳：少量大块明暗与细裂
+    g.filter = "blur(10px)";
+    for (let k = 0; k < 10; k++) {
+      g.fillStyle = rnd() > 0.5 ? "rgba(0,0,0,0.06)" : "rgba(255,240,220,0.035)";
+      g.beginPath();
+      g.ellipse(rnd() * S, rnd() * S, 10 + rnd() * 40, 6 + rnd() * 18, rnd() * 3, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.filter = "none";
+    g.strokeStyle = "rgba(0,0,0,0.18)";
+    g.lineWidth = 0.8;
+    for (let k = 0; k < 5; k++) {
+      let x = rnd() * S;
+      let y = rnd() * S;
+      g.beginPath();
+      g.moveTo(x, y);
+      for (let j = 0; j < 6; j++) {
+        x += (rnd() - 0.5) * 18;
+        y += rnd() * 12;
+        g.lineTo(x, y);
+      }
+      g.stroke();
+    }
+  }
+  const pat = ctx.createPattern(c, "repeat");
+  if (!pat) return color;
+  grainCache.set(key, pat);
+  return pat;
 }
 
 function shade(hex: string, k: number): string {
