@@ -20,6 +20,7 @@ const gl = (s: string): string => s.split(/\s*([·×，、\/]|→)\s*/).map((p) 
 
 type Rule = [RegExp, (...m: string[]) => string];
 const RULES: Rule[] = [
+  [/^瞬时档 · segs (\d+) · elapsed —（本帧 WebGL 不可用，未测 lathe ms）(.*)$/, (_, n, rest) => `Instant profile · segs ${n} · elapsed — (WebGL unavailable this frame; lathe ms not measured)${rest}`],
   [/^\[0ms\] table\.ts lookup (.+?)×(.+?) → (合|勉|冲)(?: → 改锁(.+))?$/, (_, a, b, c, d) => `[0ms] table.ts lookup ${g(a)} × ${g(b)} → ${C(c)}${d ? ` → resolved to ${g(d)}` : ""}`],
   [/^\[0ms\] 语义匹配 (.*)$/, (_, r) => `[0ms] semantic match ${r.replace("访客直入", "direct visit").replace(/语义命中/g, "hit")}`],
   [/^声景：(.+)$/, (_, a) => `Soundscape: ${splitTr(a)}`],
