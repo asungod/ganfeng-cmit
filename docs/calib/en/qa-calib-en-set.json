@@ -1,0 +1,365 @@
+{
+ "note": "English Ask-the-Exhibit calibration set (developer-written, 2026-10-16). In-bank paraphrases are worded differently from the variants in src/data/qaEn.ts. dev = first paraphrase per item + dev OOD; holdout = second paraphrase + holdout OOD (5 same-topic hard negatives). Not real visitor questions.",
+ "in_domain": [
+  [
+   "dev",
+   "Are you just ChatGPT behind the scenes?",
+   [
+    "q-chatgpt"
+   ]
+  ],
+  [
+   "dev",
+   "Could you draw the pavilion for me?",
+   [
+    "q-photo"
+   ]
+  ],
+  [
+   "dev",
+   "Is that vase an actual piece from a museum collection?",
+   [
+    "q-real-vase"
+   ]
+  ],
+  [
+   "dev",
+   "Why didn't you use a bigger AI model?",
+   [
+    "q-why-small"
+   ]
+  ],
+  [
+   "dev",
+   "Why can't a Song vase get famille rose decoration?",
+   [
+    "q-song-fencai"
+   ]
+  ],
+  [
+   "dev",
+   "Where does the name yingqing come from?",
+   [
+    "q-yingqing-name"
+   ]
+  ],
+  [
+   "dev",
+   "How do they get the blue colour on blue-and-white porcelain?",
+   [
+    "q-qinghua-cobalt"
+   ]
+  ],
+  [
+   "dev",
+   "Why was copper red glaze so difficult to fire?",
+   [
+    "q-jihong-hard"
+   ]
+  ],
+  [
+   "dev",
+   "What did people use a meiping for?",
+   [
+    "q-meiping-use"
+   ]
+  ],
+  [
+   "dev",
+   "At what time of day does the lone duck line take place?",
+   [
+    "q-luoxia"
+   ]
+  ],
+  [
+   "dev",
+   "Where exactly is Pengli located?",
+   [
+    "q-pengli"
+   ]
+  ],
+  [
+   "dev",
+   "Who was the Prince of Teng?",
+   [
+    "q-tengwang-who"
+   ]
+  ],
+  [
+   "dev",
+   "Why does the poem say the geese stop at Hengyang?",
+   [
+    "q-yanzhen"
+   ]
+  ],
+  [
+   "dev",
+   "Is a Hakka weiwu the same as a Fujian tulou?",
+   [
+    "q-tulou"
+   ]
+  ],
+  [
+   "dev",
+   "Why is the ancestral hall placed in the middle axis?",
+   [
+    "q-zutang"
+   ]
+  ],
+  [
+   "dev",
+   "What were the corner towers used for?",
+   [
+    "q-jiaolou"
+   ]
+  ],
+  [
+   "dev",
+   "Why does the threshing yard conflict with night?",
+   [
+    "q-walk"
+   ]
+  ],
+  [
+   "holdout",
+   "Is the guide powered by an online AI chatbot?",
+   [
+    "q-chatgpt"
+   ]
+  ],
+  [
+   "holdout",
+   "Please create a picture of a porcelain vase",
+   [
+    "q-photo"
+   ]
+  ],
+  [
+   "holdout",
+   "Is the porcelain on display authentic?",
+   [
+    "q-real-vase"
+   ]
+  ],
+  [
+   "holdout",
+   "What is the reason for choosing a tiny model?",
+   [
+    "q-why-small"
+   ]
+  ],
+  [
+   "holdout",
+   "Is famille rose possible on Song dynasty porcelain?",
+   [
+    "q-song-fencai"
+   ]
+  ],
+  [
+   "holdout",
+   "Why is qingbai also called yingqing?",
+   [
+    "q-yingqing-name"
+   ]
+  ],
+  [
+   "holdout",
+   "Which mineral gives qinghua its blue?",
+   [
+    "q-qinghua-cobalt"
+   ]
+  ],
+  [
+   "holdout",
+   "What makes sacrificial red rare?",
+   [
+    "q-jihong-hard"
+   ]
+  ],
+  [
+   "holdout",
+   "Was the meiping used for holding wine?",
+   [
+    "q-meiping-use"
+   ]
+  ],
+  [
+   "holdout",
+   "Is the sunset clouds line set in the evening?",
+   [
+    "q-luoxia"
+   ]
+  ],
+  [
+   "holdout",
+   "Does Pengli refer to Poyang Lake?",
+   [
+    "q-pengli"
+   ]
+  ],
+  [
+   "holdout",
+   "Why was Tengwang Pavilion constructed?",
+   [
+    "q-tengwang-who"
+   ]
+  ],
+  [
+   "holdout",
+   "What is the meaning of the geese line about Hengyang?",
+   [
+    "q-yanzhen"
+   ]
+  ],
+  [
+   "holdout",
+   "How are southern Jiangxi walled houses different from tulou?",
+   [
+    "q-tulou"
+   ]
+  ],
+  [
+   "holdout",
+   "What role does the ancestral hall play in the walled house?",
+   [
+    "q-zutang"
+   ]
+  ],
+  [
+   "holdout",
+   "Why are there towers at the corners of the walled house?",
+   [
+    "q-jiaolou"
+   ]
+  ],
+  [
+   "holdout",
+   "How are the hours matched to rooms?",
+   [
+    "q-walk"
+   ]
+  ]
+ ],
+ "out_of_domain": [
+  [
+   "dev",
+   "What's the weather in Beijing today?"
+  ],
+  [
+   "dev",
+   "How is the stock market doing?"
+  ],
+  [
+   "dev",
+   "Write me a poem about love"
+  ],
+  [
+   "dev",
+   "Who won the World Cup?"
+  ],
+  [
+   "dev",
+   "How do I cook rice?"
+  ],
+  [
+   "dev",
+   "What is the capital of France?"
+  ],
+  [
+   "dev",
+   "Recommend a good movie"
+  ],
+  [
+   "dev",
+   "How do I learn Python?"
+  ],
+  [
+   "dev",
+   "Translate hello into Japanese"
+  ],
+  [
+   "dev",
+   "What time is it now?"
+  ],
+  [
+   "dev",
+   "Who is the president of the United States?"
+  ],
+  [
+   "dev",
+   "How far is the Moon?"
+  ],
+  [
+   "dev",
+   "Tell me a joke"
+  ],
+  [
+   "dev",
+   "What is the price of Bitcoin?"
+  ],
+  [
+   "dev",
+   "How do I fix my laptop?"
+  ],
+  [
+   "holdout",
+   "How much is a ticket to Tengwang Pavilion?"
+  ],
+  [
+   "holdout",
+   "How much is a blue-and-white vase worth?"
+  ],
+  [
+   "holdout",
+   "Do people still live in the walled houses?"
+  ],
+  [
+   "holdout",
+   "How big is Poyang Lake?"
+  ],
+  [
+   "holdout",
+   "What are the opening hours of the Palace Museum?"
+  ],
+  [
+   "holdout",
+   "How do I book a hotel in Nanchang?"
+  ],
+  [
+   "holdout",
+   "What is the best smartphone this year?"
+  ],
+  [
+   "holdout",
+   "Explain quantum computing"
+  ],
+  [
+   "holdout",
+   "How many calories are in an apple?"
+  ],
+  [
+   "holdout",
+   "What is the rule for offside in football?"
+  ],
+  [
+   "holdout",
+   "How do I make coffee?"
+  ],
+  [
+   "holdout",
+   "Who painted the Mona Lisa?"
+  ],
+  [
+   "holdout",
+   "What is machine learning?"
+  ],
+  [
+   "holdout",
+   "Where can I buy porcelain online?"
+  ],
+  [
+   "holdout",
+   "How tall is Mount Everest?"
+  ]
+ ]
+}

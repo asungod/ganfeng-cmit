@@ -3,3 +3,5 @@ dist
 .DS_Store
 *.local
 release/
+release-bin/
+launcher/single/app/

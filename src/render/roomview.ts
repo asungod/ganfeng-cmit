@@ -1,4 +1,8 @@
 import type { HourId, RoomId } from "../data/hakka";
+import { getLang } from "../app/i18n";
+import { tr } from "../i18n/contentEn";
+/** Canvas scene labels: English in EN mode (inscriptions such as 慎终追远 stay Chinese). */
+const cv = (s: string): string => (getLang() === "en" ? tr(s) ?? s : s);
 
 type Pal = { sky: string; wall: string; wood: string; floor: string; lamp: string; dark: string };
 
@@ -247,7 +251,7 @@ function roomScene(
   ctx.globalAlpha = 0.9;
   ctx.font = "600 22px 'Noto Serif SC', serif";
   ctx.textAlign = "center";
-  ctx.fillText(names[room], w * 0.5, h * 0.13);
+  ctx.fillText(cv(names[room]), w * 0.5, h * 0.13);
   ctx.globalAlpha = 1;
 }
 
@@ -299,7 +303,7 @@ function yard(ctx: CanvasRenderingContext2D, w: number, h: number, fl: number, p
   ctx.fillStyle = pal.lamp;
   ctx.font = "12px 'Noto Serif SC', serif";
   ctx.textAlign = "center";
-  ctx.fillText("凉晒", w * 0.5, fl - 14);
+  ctx.fillText(cv("凉晒"), w * 0.5, fl - 14);
 }
 
 function well(ctx: CanvasRenderingContext2D, w: number, h: number, fl: number, pal: Pal, t: number): void {
@@ -338,7 +342,7 @@ function well(ctx: CanvasRenderingContext2D, w: number, h: number, fl: number, p
   ctx.fillStyle = pal.lamp;
   ctx.font = "12px 'Noto Serif SC', serif";
   ctx.textAlign = "center";
-  ctx.fillText("天井采光", w * 0.5, h * 0.34);
+  ctx.fillText(cv("天井采光"), w * 0.5, h * 0.34);
 }
 
 function hall(ctx: CanvasRenderingContext2D, w: number, h: number, fl: number, pal: Pal, t: number): void {
@@ -433,7 +437,7 @@ function tower(ctx: CanvasRenderingContext2D, w: number, h: number, fl: number, 
   ctx.fillStyle = pal.lamp;
   ctx.font = "12px 'Noto Serif SC', serif";
   ctx.textAlign = "center";
-  ctx.fillText("炮眼 · 瞭望", w * 0.5, h * 0.2);
+  ctx.fillText(cv("炮眼 · 瞭望"), w * 0.5, h * 0.2);
 }
 
 function lane(ctx: CanvasRenderingContext2D, w: number, h: number, fl: number, pal: Pal, _t: number): void {
@@ -494,7 +498,7 @@ function chamber(ctx: CanvasRenderingContext2D, w: number, h: number, fl: number
     ctx.fillStyle = pal.lamp;
     ctx.font = "12px 'Noto Serif SC', serif";
     ctx.textAlign = "center";
-    ctx.fillText("厢房", w * 0.5, h * 0.4);
+    ctx.fillText(cv("厢房"), w * 0.5, h * 0.4);
   }
 }
 

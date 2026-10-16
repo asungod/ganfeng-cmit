@@ -12,6 +12,7 @@ import { guide } from "./app/guide";
 import type { Route } from "./data/types";
 import { demoLookupLine, mountEngineHud, pushLookupLog } from "./app/engineHud";
 import { getLang, onLang, t, toggleLang } from "./app/i18n";
+import { startEnContent } from "./i18n/domTranslate";
 
 let app = document.getElementById("app") as HTMLDivElement;
 
@@ -94,9 +95,15 @@ function ensureChrome(): void {
     const el = e.target as HTMLElement;
     if (el.closest("[data-lang]")) {
       toggleLang();
+      // Back to Chinese: reload so every translated node returns to its original text.
+      if (getLang() === "zh") {
+        location.reload();
+        return;
+      }
       paintChrome(bar);
-      // Remount current route so Ask / audit / sys chrome pick up strings.
+      // Remount current route so Ask / audit / sys chrome pick up strings, then translate content.
       window.dispatchEvent(new HashChangeEvent("hashchange"));
+      startEnContent();
       return;
     }
     if (el.closest("[data-mute]")) {
@@ -126,3 +133,4 @@ boot();
 ensureChrome();
 mountEngineHud();
 mount(parseRoute(location.hash));
+if (getLang() === "en") startEnContent();

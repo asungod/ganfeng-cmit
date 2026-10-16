@@ -25,6 +25,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ["@huggingface/transformers"],
   },
+  base: "./",
   build: {
     chunkSizeWarningLimit: 1600,
   },

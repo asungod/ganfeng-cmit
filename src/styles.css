@@ -2326,3 +2326,5 @@ a { color: var(--gold); }
 .ev-verdict.is-pass { color: var(--celadon); }
 .ev-verdict.is-fail { color: var(--cinnabar); }
 .dialect-k { margin: 0 0 0.25rem; font-size: 0.68rem; letter-spacing: 0.12em; color: var(--celadon); }
+
+.en-tr { display: block; margin-top: .25em; font-size: .92em; opacity: .85; font-style: italic; }

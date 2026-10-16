@@ -1,4 +1,5 @@
 import type { QAItem, Route } from "../data/types";
+import { QA_EN } from "../data/qaEn";
 import { allDocs, citationsOf, type Doc } from "./corpus";
 import { ask, type AskResult } from "./ask";
 import { getLang, routeName, t } from "./i18n";
@@ -15,6 +16,17 @@ type Extractor = {
 };
 
 const QUERY_PREFIX = "为这个句子生成表示以用于检索：";
+/** EN-mode answer threshold (cosine vs hand-written English variants + EN keyword bonus).
+ *  Calibrated separately on docs/calib/en (dev picks, holdout checks). BGE-small-zh is a Chinese model. */
+export const EN_SCORE_THRESH = 0.8;
+/** A query counts as English when it has Latin letters and no CJK characters. */
+export function isEnglishQuery(q: string): boolean {
+  return /[A-Za-z]/.test(q) && !/[\u4e00-\u9fff]/.test(q);
+}
+function enKwHits(q: string, kw: string[]): number {
+  const s = ` ${q.toLowerCase().replace(/[^a-z0-9\- ]+/g, " ")} `;
+  return kw.filter((k) => s.includes(` ${k} `) || s.includes(` ${k}s `)).length;
+}
 
 function grams(text: string): Map<string, number> {
   const s = text.toLowerCase().replace(/\s+/g, "");
@@ -153,6 +165,10 @@ class ExhibitAgent {
   private extractor: Extractor | null = null;
   private vectors: Float32Array[] | null = null;
   private qVectors: Float32Array[] | null = null;
+  private enVectors: Float32Array[][] | null = null;
+  /** EN path raw best score (calibration only). */
+  lastRawBestEn = 0;
+  lastRawDocEn = "";
   /** 最近一次向量检索的最高分（阈值判定前），仅供 ?calib 校准与答辩图表读取。 */
   lastRawBest = 0;
   /** 与 lastRawBest 对应的题库原问（同样只供标定读取）。 */
@@ -204,10 +220,10 @@ class ExhibitAgent {
       env.allowLocalModels = true;
       env.allowRemoteModels = false;
       env.useBrowserCache = true;
-      env.localModelPath = "/models/";
+      env.localModelPath = new URL("models/", document.baseURI).href;
       const wasm = env.backends.onnx?.wasm;
       if (wasm) {
-        wasm.wasmPaths = "/ort/";
+        wasm.wasmPaths = new URL("ort/", document.baseURI).href;
         // single-thread avoids asyncify worker path that Vite mishandles as SPA HTML
         wasm.numThreads = 1;
         wasm.proxy = false;
@@ -228,6 +244,15 @@ class ExhibitAgent {
         // 只用问题本身再编码一次：改写问更接近原问题，避免被答案里提到的其他釉色带偏
         const outQ = await pipe(doc.item.question, { pooling: "mean", normalize: true });
         this.qVectors.push(Float32Array.from(outQ.data));
+      }
+      this.enVectors = [];
+      for (const doc of allDocs) {
+        const vs: Float32Array[] = [];
+        for (const v of QA_EN[doc.item.id]?.q ?? []) {
+          const o = await pipe(v, { pooling: "mean", normalize: true });
+          vs.push(Float32Array.from(o.data));
+        }
+        this.enVectors.push(vs);
       }
       this.protoVectors = [];
       for (const p of SLOT_PROTOS) {
@@ -265,6 +290,15 @@ class ExhibitAgent {
     if (exact.ok && pack.some((p) => p.question === q0)) {
       this.lastQ = q0;
       return { ...exact, via: "slip" };
+    }
+
+    if (isEnglishQuery(q0)) {
+      if (!this.forceLex && this.status === "idle") this.warmup();
+      if (!this.forceLex && (this.status === "loading" || this.booting)) await this.waitReady(20000);
+      const en = await this.byEnglish(q0, current);
+      this.lastQ = q0;
+      if (en) return en;
+      return { ok: false, question: q0, answer: t("ask.refuse"), citations: [], via: "none" };
     }
 
     const follow = this.expandFollowUp(q0);
@@ -500,6 +534,33 @@ class ExhibitAgent {
     this.lastRawDoc = bestI >= 0 ? allDocs[bestI].item.question : "";
     if (bestI < 0 || best < DOC_SCORE_THRESH) return null;
     return finish(allDocs[bestI], q, "bge", best, current);
+  }
+
+  /** EN queries: BGE cosine against English question variants (+0.04 per EN keyword, max +0.08);
+   *  if the model is unavailable, English keywords alone (≥2 hits) can answer. */
+  async byEnglish(q: string, current?: Route): Promise<AskResult | null> {
+    let bestI = -1;
+    let best = 0;
+    if (!this.forceLex && this.extractor && this.enVectors) {
+      const out = await this.extractor(q, { pooling: "mean", normalize: true });
+      const qv = Float32Array.from(out.data);
+      for (let i = 0; i < allDocs.length; i++) {
+        let s = 0;
+        for (const v of this.enVectors[i] ?? []) s = Math.max(s, cosine(qv, v));
+        if (current && allDocs[i].line === current) s += 0.02;
+        s += 0.04 * Math.min(2, enKwHits(q, QA_EN[allDocs[i].item.id]?.kw ?? []));
+        if (s > best) { best = s; bestI = i; }
+      }
+      this.lastRawBestEn = best;
+      this.lastRawDocEn = bestI >= 0 ? allDocs[bestI].item.id : "";
+      if (bestI >= 0 && best >= EN_SCORE_THRESH) return finish(allDocs[bestI], q, "bge", best, current);
+      return null;
+    }
+    for (let i = 0; i < allDocs.length; i++) {
+      const h = enKwHits(q, QA_EN[allDocs[i].item.id]?.kw ?? []);
+      if (h > best) { best = h; bestI = i; }
+    }
+    return bestI >= 0 && best >= 2 ? finish(allDocs[bestI], q, "lex", best, current) : null;
   }
 
   private byLex(q: string, current?: Route): AskResult | null {

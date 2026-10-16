@@ -620,7 +620,7 @@ async function fillQaCalib(root: HTMLElement): Promise<void> {
   const head = root.querySelector("[data-qa-h]") as HTMLElement | null;
   if (!body) return;
   try {
-    const res = await fetch("/qa-calib.json", { cache: "no-store" });
+    const res = await fetch("qa-calib.json", { cache: "no-store" });
     if (!res.ok) throw new Error(String(res.status));
     const d = (await res.json()) as QaCalib;
     if (head) head.textContent = `问展作答阈值 · qa-calib（n=${d.n}）`;
@@ -647,7 +647,7 @@ export async function fillThreshTable(root: HTMLElement): Promise<void> {
   if (!wrap || !body) return;
   if (biz) biz.textContent = THRESH_BIZ;
   try {
-    const res = await fetch("/thresh-bench.json", { cache: "no-store" });
+    const res = await fetch("thresh-bench.json", { cache: "no-store" });
     if (!res.ok) throw new Error(String(res.status));
     const data = (await res.json()) as BenchData;
     wrap.hidden = false;
