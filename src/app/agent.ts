@@ -1,4 +1,5 @@
 import type { QAItem, Route } from "../data/types";
+import { tr } from "../i18n/contentEn";
 import { QA_EN } from "../data/qaEn";
 import { allDocs, citationsOf, type Doc } from "./corpus";
 import { ask, type AskResult } from "./ask";
@@ -140,7 +141,7 @@ const LINE_SLOTS: Record<string, string[]> = {
 };
 
 function finish(doc: Doc, question: string, via: AskResult["via"], score: number, current?: Route): AskResult {
-  let answer = doc.item.answer;
+  let answer = getLang() === "en" ? tr(doc.item.answer) || doc.item.answer : doc.item.answer;
   if (current && doc.line !== "guide" && doc.line !== current) {
     answer = getLang()==="en" ? `This relates to the 「${routeName(doc.line)}」 route. ${answer}` : `这问落在「${routeName(doc.line)}」线上。${answer}`;
   }

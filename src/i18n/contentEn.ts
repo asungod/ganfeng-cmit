@@ -53,6 +53,7 @@ const RULES: Rule[] = [
   [/^(时代|釉色|器型|情境|意象|时辰|房间)·(.+)$/, (_, k, v) => `${g(k)} · ${g(v)}`],
   [/^\[(检索|算力|状态):(.+?)\]$/, (_, k, v) => `[${{ 检索: "retrieve", 算力: "compute", 状态: "state" }[k]}: ${tr(v) ?? g(v)}]`],
   [/^词面命中 (.+)$/, (_, a) => `Lexical hit ${gl(a)}`],
+  [/^「([^」]+)」([^「」]+)$/, (m, q, rest) => (SRC[q] || SRC["「" + q + "」"]) ? `「${q}」 [EN translation, ours] ${SRC[q] || SRC["「" + q + "」"]} ${splitTr(rest)}` : m],
   [/^钉自《(.+)》$/, (_, a) => `Pinned from "${g(a.replace(/^《|》$/g, "")) }"`],
   [/^帧 (.+?) · heap (.+)$/, (_, a, b) => `frame ${a} · heap ${b}`],
   [/^BGE-small ONNX q8 · 22\.9 MiB · 阈值 槽位 0\.40 · 作答 0\.55(.*)$/, (_, r) => `BGE-small ONNX q8 · 22.9 MiB · threshold slot 0.40 · answer 0.55${r}`],

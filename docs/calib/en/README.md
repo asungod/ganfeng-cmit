@@ -39,3 +39,5 @@ The threshold was picked by best F1 on dev: **EN_SCORE_THRESH = 0.82**.
 - English recall is clearly lower than Chinese.
 - The sample is small, and the developer wrote both the variants and the test questions.
 - If you need more reliable answers, ask in Chinese.
+
+**A known failure, reproduced 2026-10-16:** "What is the capital of Japan?" and "What is the capital of France?" both score 0.8475, with the variant "What is Pengli?" as the nearest match. That is above 0.82, so the exhibit wrongly answers with the Pengli entry. BGE-small-zh barely tells apart the English words that differ between these questions. "Who painted the Mona Lisa?" scores 0.747 and is refused.

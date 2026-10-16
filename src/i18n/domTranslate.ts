@@ -11,7 +11,12 @@ function srcKey(t: string): string | null {
   const k = t.replace(/\s+/g, " ").trim();
   if (SRC[k]) return k;
   const q = k.replace(/^「|」$/g, "");
-  return SRC[q] ? q : null;
+  if (SRC[q]) return q;
+  // Quoted *part* of a source excerpt (answer cards quote shortened excerpts with ……).
+  const segs = q.split(/……|…/).map((x) => x.trim()).filter((x) => x.length >= 6);
+  if (!segs.length || q.length < 12) return null;
+  for (const key of Object.keys(SRC)) if (segs.every((s) => key.includes(s))) return "~" + key;
+  return null;
 }
 
 function doText(n: Text): void {
@@ -27,7 +32,9 @@ function doText(n: Text): void {
     const span = document.createElement("span");
     span.className = "en-tr";
     span.lang = "en";
-    span.textContent = ` [EN translation, ours] ${SRC[sk]}`;
+    span.textContent = sk.startsWith("~")
+      ? ` [EN translation of the full excerpt this quote is taken from, ours] ${SRC[sk.slice(1)]}`
+      : ` [EN translation, ours] ${SRC[sk]}`;
     n.after(span);
     return;
   }
