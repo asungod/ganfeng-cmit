@@ -19,6 +19,7 @@ function names(): Record<DocLine, string> {
     ciyu: routeName("ciyu"),
     gexu: routeName("gexu"),
     kejia: routeName("kejia"),
+    wanshou: routeName("wanshou"),
     guide: routeName("guide"),
   };
 }

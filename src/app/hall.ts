@@ -60,6 +60,15 @@ export function mountHall(root: HTMLElement): () => void {
           <span class="door-rule" aria-hidden="true"></span>
           <span class="door-desc">以时辰与空间约束矩阵驱动围屋动线；对话可写入时辰或房间。</span>
         </button>
+        <button type="button" class="door door-demo" data-go="wanshou">
+          <span class="door-head">
+            <span class="door-index">04</span>
+            <span class="door-en">Wanshou</span>
+          </span>
+          <span class="door-v" aria-label="Wanshou Palace / 万寿宫"><span>万</span><span>寿</span></span>
+          <span class="door-rule" aria-hidden="true"></span>
+          <span class="door-desc">扩展演示线：西山万寿宫庙会的活动 × 时段约束，按扩展指南新增。</span>
+        </button>
       </nav>
       <div class="hall-ask" data-ask></div>
       <footer class="hall-foot">
@@ -88,7 +97,7 @@ export function mountHall(root: HTMLElement): () => void {
   const onClick = (e: Event) => {
     const t = e.target as HTMLElement;
     const goBtn = t.closest("[data-go]") as HTMLElement | null;
-    if (goBtn?.dataset.go === "ciyu" || goBtn?.dataset.go === "gexu" || goBtn?.dataset.go === "kejia") {
+    if (goBtn?.dataset.go === "ciyu" || goBtn?.dataset.go === "gexu" || goBtn?.dataset.go === "kejia" || goBtn?.dataset.go === "wanshou") {
       go(goBtn.dataset.go);
       return;
     }

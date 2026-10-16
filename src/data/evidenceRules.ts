@@ -2,6 +2,7 @@ import type { EvRule } from "../app/evidence";
 import type { EraId, GlazeId } from "./porcelain";
 import type { ImageId, MoodId } from "./tengwang";
 import type { HourId, MatrixRoomId } from "./hakka";
+import type { ActId, SlotId } from "./wanshou";
 
 /** 每条约束规则的依据与验证案例。出处 id 见 sources.ts；摘录只用已核出处。 */
 
@@ -138,5 +139,28 @@ export function hakkaRule(room: MatrixRoomId, _hour: HourId): EvRule {
       { a: "zutang", b: "noon", tag: "边界", label: "祖堂 × 午", note: "日光过白，判勉" },
       { a: "jiaolou", b: "night", tag: "例外", label: "角楼 × 夜", note: "规则不触发" },
     ],
+  };
+}
+
+const ACT_CLAIM: Record<ActId, string> = {
+  kaichao: "非遗项目页原文「八月（号净月）初一晨旦开朝」→ 开朝 × 晨旦判合；开朝放到夜晚判冲、改锁晨旦，白日判勉——后两者是本展设计约定。",
+  xiban: "非遗项目页原文「夜晚民间戏班演出」→ 戏班 × 夜晚判合；放到晨旦、白日判勉——这是本展设计约定，原文未说白天不演。",
+};
+
+export function wanshouRule(act: ActId, _slot: SlotId): EvRule {
+  return {
+    status: "design",
+    statusText: "设计约定 · 时间锚点（八月初一晨旦开朝、夜晚戏班演出、香期七月二十至九月初一）逐字出自官方非遗页；合/勉/冲的划分是本展约定，不是史料。",
+    claim: ACT_CLAIM[act],
+    sourceIds: ["ih-wanshou", "gov-ich3"],
+    cases: act === "kaichao"
+      ? [
+          { a: "kaichao", b: "yewan", tag: "命中", label: "开朝 × 夜晚", note: "原文为晨旦开朝，改锁晨旦" },
+          { a: "kaichao", b: "chendan", tag: "例外", label: "开朝 × 晨旦", note: "与原文一致，规则不触发" },
+        ]
+      : [
+          { a: "xiban", b: "chendan", tag: "边界", label: "戏班 × 晨旦", note: "原文只写夜晚演出，判勉" },
+          { a: "xiban", b: "yewan", tag: "例外", label: "戏班 × 夜晚", note: "与原文一致，规则不触发" },
+        ],
   };
 }

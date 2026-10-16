@@ -2328,3 +2328,9 @@ a { color: var(--gold); }
 .dialect-k { margin: 0 0 0.25rem; font-size: 0.68rem; letter-spacing: 0.12em; color: var(--celadon); }
 
 .en-tr { display: block; margin-top: .25em; font-size: .92em; opacity: .85; font-style: italic; }
+
+/* 万寿宫 扩展演示线 */
+.wanshou .ws-panel { max-width: 860px; margin: 24px auto; padding: 0 20px; display: grid; gap: 10px; }
+.wanshou .ws-verdict { font-size: 1.1rem; margin: 6px 0; }
+.wanshou .ws-matrix td.is-cur { outline: 2px solid currentColor; }
+.wanshou .chip i { font-style: normal; opacity: .7; margin-left: 4px; }

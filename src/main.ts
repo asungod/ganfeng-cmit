@@ -6,6 +6,7 @@ import { mountHall } from "./app/hall";
 import { mountPorcelain } from "./exhibits/porcelain";
 import { mountTengwang } from "./exhibits/tengwang";
 import { mountHakka } from "./exhibits/hakka";
+import { mountWanshou } from "./exhibits/wanshou";
 import { ambience } from "./render/ambience";
 import { setAskForceLex } from "./app/labels";
 import { guide } from "./app/guide";
@@ -34,6 +35,7 @@ function mount(route: Route): void {
     if (route === "hall") unmount = mountHall(app);
     else if (route === "ciyu") unmount = mountPorcelain(app);
     else if (route === "gexu") unmount = mountTengwang(app);
+    else if (route === "wanshou") unmount = mountWanshou(app);
     else unmount = mountHakka(app);
   } catch (err) {
     console.warn("mount failed", route, err);
@@ -127,6 +129,7 @@ window.addEventListener("keydown", (e) => {
   if (e.key === "1") location.hash = "#/ciyu";
   if (e.key === "2") location.hash = "#/gexu";
   if (e.key === "3") location.hash = "#/kejia";
+  if (e.key === "4") location.hash = "#/wanshou";
 });
 
 boot();

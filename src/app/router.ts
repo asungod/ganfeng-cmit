@@ -5,6 +5,7 @@ export function parseRoute(hash: string): Route {
   if (h === "ciyu" || h.startsWith("ciyu/")) return "ciyu";
   if (h === "gexu" || h.startsWith("gexu/")) return "gexu";
   if (h === "kejia" || h.startsWith("kejia/")) return "kejia";
+  if (h === "wanshou") return "wanshou";
   return "hall";
 }
 
@@ -14,6 +15,7 @@ export function go(route: Route): void {
     ciyu: "#/ciyu",
     gexu: "#/gexu",
     kejia: "#/kejia",
+    wanshou: "#/wanshou",
   };
   window.location.hash = map[route];
 }

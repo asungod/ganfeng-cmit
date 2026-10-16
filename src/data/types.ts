@@ -22,4 +22,4 @@ export type QAItem = {
 
 export type PipelineStage = "idle" | "queued" | "stylize" | "cite" | "ready";
 
-export type Route = "hall" | "ciyu" | "gexu" | "kejia";
+export type Route = "hall" | "ciyu" | "gexu" | "kejia" | "wanshou";

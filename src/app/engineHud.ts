@@ -7,7 +7,7 @@ const MAX_LINES = 5;
 const BGE_MIB = "22.9";
 const THRESH = "槽位 0.40 · 作答 0.55";
 
-export type LookupTag = "瓷" | "阁" | "客";
+export type LookupTag = "瓷" | "阁" | "客" | "万";
 
 const lines: string[] = [];
 let dock: HTMLElement | null = null;
@@ -45,7 +45,7 @@ export function formatLookupLine(opts: {
 }
 
 /** Demo lines used on route enter so switching 瓷↔阁↔客 proves the same logger. */
-export function demoLookupLine(route: "ciyu" | "gexu" | "kejia" | "hall"): string | null {
+export function demoLookupLine(route: "ciyu" | "gexu" | "kejia" | "wanshou" | "hall"): string | null {
   if (route === "ciyu") {
     return formatLookupLine({
       tag: "瓷",

@@ -1,5 +1,6 @@
 // 术语表：展内专名 → 英文（供模板与短串翻译）。EN translations are ours (project team), not official.
 export const GLOSS: Record<string, string> = {
+  开朝: "Opening court", 戏班: "Opera", "2011（第三批）": "2011 (3rd batch)",
   宋: "Song", 元: "Yuan", 明: "Ming", 清: "Qing",
   宋代: "Song dynasty", 元代: "Yuan dynasty", 明代: "Ming dynasty", 清代: "Qing dynasty",
   梅瓶: "meiping vase", 玉壶春瓶: "yuhuchun vase", 斗笠碗: "conical bowl", 折沿盘: "folded-rim dish", 花觚: "gu flower vase",
