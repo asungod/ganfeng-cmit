@@ -1,0 +1,586 @@
+{
+ "when": "2026-10-16T04:15:27.787Z",
+ "status": "fallback",
+ "rows": [
+  {
+   "split": "dev",
+   "q": "Are you just ChatGPT behind the scenes?",
+   "gold": [
+    "q-chatgpt"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Could you draw the pavilion for me?",
+   "gold": [
+    "q-photo"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Is that vase an actual piece from a museum collection?",
+   "gold": [
+    "q-real-vase"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Why didn't you use a bigger AI model?",
+   "gold": [
+    "q-why-small"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Why can't a Song vase get famille rose decoration?",
+   "gold": [
+    "q-song-fencai"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Where does the name yingqing come from?",
+   "gold": [
+    "q-yingqing-name"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "How do they get the blue colour on blue-and-white porcelain?",
+   "gold": [
+    "q-qinghua-cobalt"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Why was copper red glaze so difficult to fire?",
+   "gold": [
+    "q-jihong-hard"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "What did people use a meiping for?",
+   "gold": [
+    "q-meiping-use"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "At what time of day does the lone duck line take place?",
+   "gold": [
+    "q-luoxia"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Where exactly is Pengli located?",
+   "gold": [
+    "q-pengli"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Who was the Prince of Teng?",
+   "gold": [
+    "q-tengwang-who"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Why does the poem say the geese stop at Hengyang?",
+   "gold": [
+    "q-yanzhen"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Is a Hakka weiwu the same as a Fujian tulou?",
+   "gold": [
+    "q-tulou"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Why is the ancestral hall placed in the middle axis?",
+   "gold": [
+    "q-zutang"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "What were the corner towers used for?",
+   "gold": [
+    "q-jiaolou"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Why does the threshing yard conflict with night?",
+   "gold": [
+    "q-walk"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Is the guide powered by an online AI chatbot?",
+   "gold": [
+    "q-chatgpt"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Please create a picture of a porcelain vase",
+   "gold": [
+    "q-photo"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Is the porcelain on display authentic?",
+   "gold": [
+    "q-real-vase"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "What is the reason for choosing a tiny model?",
+   "gold": [
+    "q-why-small"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Is famille rose possible on Song dynasty porcelain?",
+   "gold": [
+    "q-song-fencai"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Why is qingbai also called yingqing?",
+   "gold": [
+    "q-yingqing-name"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Which mineral gives qinghua its blue?",
+   "gold": [
+    "q-qinghua-cobalt"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "What makes sacrificial red rare?",
+   "gold": [
+    "q-jihong-hard"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Was the meiping used for holding wine?",
+   "gold": [
+    "q-meiping-use"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Is the sunset clouds line set in the evening?",
+   "gold": [
+    "q-luoxia"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Does Pengli refer to Poyang Lake?",
+   "gold": [
+    "q-pengli"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Why was Tengwang Pavilion constructed?",
+   "gold": [
+    "q-tengwang-who"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "What is the meaning of the geese line about Hengyang?",
+   "gold": [
+    "q-yanzhen"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "How are southern Jiangxi walled houses different from tulou?",
+   "gold": [
+    "q-tulou"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "What role does the ancestral hall play in the walled house?",
+   "gold": [
+    "q-zutang"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Why are there towers at the corners of the walled house?",
+   "gold": [
+    "q-jiaolou"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "How are the hours matched to rooms?",
+   "gold": [
+    "q-walk"
+   ],
+   "kind": "in",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "What's the weather in Beijing today?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "How is the stock market doing?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Write me a poem about love",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Who won the World Cup?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "How do I cook rice?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "What is the capital of France?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Recommend a good movie",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "How do I learn Python?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Translate hello into Japanese",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "What time is it now?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Who is the president of the United States?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "How far is the Moon?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "Tell me a joke",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "What is the price of Bitcoin?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "dev",
+   "q": "How do I fix my laptop?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "How much is a ticket to Tengwang Pavilion?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "How much is a blue-and-white vase worth?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Do people still live in the walled houses?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "How big is Poyang Lake?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "What are the opening hours of the Palace Museum?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "How do I book a hotel in Nanchang?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "What is the best smartphone this year?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Explain quantum computing",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "How many calories are in an apple?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "What is the rule for offside in football?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "How do I make coffee?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Who painted the Mona Lisa?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "What is machine learning?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "Where can I buy porcelain online?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  },
+  {
+   "split": "holdout",
+   "q": "How tall is Mount Everest?",
+   "gold": [],
+   "kind": "ood",
+   "raw": 0,
+   "doc": ""
+  }
+ ]
+}

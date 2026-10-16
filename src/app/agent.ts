@@ -18,7 +18,7 @@ type Extractor = {
 const QUERY_PREFIX = "为这个句子生成表示以用于检索：";
 /** EN-mode answer threshold (cosine vs hand-written English variants + EN keyword bonus).
  *  Calibrated separately on docs/calib/en (dev picks, holdout checks). BGE-small-zh is a Chinese model. */
-export const EN_SCORE_THRESH = 0.8;
+export const EN_SCORE_THRESH = 0.82; // picked on EN dev (docs/calib/en/README.md)
 /** A query counts as English when it has Latin letters and no CJK characters. */
 export function isEnglishQuery(q: string): boolean {
   return /[A-Za-z]/.test(q) && !/[\u4e00-\u9fff]/.test(q);
@@ -220,7 +220,7 @@ class ExhibitAgent {
       env.allowLocalModels = true;
       env.allowRemoteModels = false;
       env.useBrowserCache = true;
-      env.localModelPath = new URL("models/", document.baseURI).href;
+      env.localModelPath = new URL("models/", document.baseURI).pathname;
       const wasm = env.backends.onnx?.wasm;
       if (wasm) {
         wasm.wasmPaths = new URL("ort/", document.baseURI).href;
