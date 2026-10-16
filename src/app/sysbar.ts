@@ -1,4 +1,5 @@
 import { agent, type AgentStatus } from "./agent";
+import { t } from "./i18n";
 
 export type SysBits = {
   line: string;
@@ -16,9 +17,9 @@ export type SysHandle = {
 
 function retrieveOf(s: AgentStatus): string {
   if (s === "ready") return "BGE q8";
-  if (s === "fallback") return "词面";
-  if (s === "loading") return "载入中";
-  return "未载入";
+  if (s === "fallback") return t("sys.retrieve.lex");
+  if (s === "loading") return t("sys.retrieve.loading");
+  return t("sys.retrieve.idle");
 }
 
 export function mountSys(parent: HTMLElement): SysHandle {
@@ -32,7 +33,7 @@ export function mountSys(parent: HTMLElement): SysHandle {
     <span data-sys-compute></span>
     <span data-sys-state></span>
     <span data-sys-slot hidden></span>
-    <span class="cpu-meter" data-cpu-meter title="帧 16–40ms">帧 —</span>
+    <span class="cpu-meter" data-cpu-meter title="16–40ms">—</span>
     <span class="sys-slot-cap" data-sys-slot-cap hidden></span>
   `;
   parent.appendChild(root);
@@ -46,17 +47,17 @@ export function mountSys(parent: HTMLElement): SysHandle {
     line: "",
     lock: "—",
     retrieve: retrieveOf(agent.status),
-    compute: "程序化复原示意（非文物三维扫描）· CPU/WASM · 无GPU",
-    state: "合规",
+    compute: t("sys.compute"),
+    state: t("sys.stateOk"),
   };
 
   function paint(): void {
     lineEl.textContent = bits.line ? `[${bits.line}]` : "";
     lockEl.textContent = `[${bits.lock}]`;
-    retrieveEl.textContent = `[检索:${bits.retrieve}]`;
-    computeEl.textContent = `[算力:${bits.compute}]`;
-    stateEl.textContent = `[状态:${bits.state}]`;
-    stateEl.classList.toggle("is-rewrite", bits.state === "已改锁");
+    retrieveEl.textContent = `[${t("sys.retrievePrefix")}:${bits.retrieve}]`;
+    computeEl.textContent = `[${t("sys.computePrefix")}:${bits.compute}]`;
+    stateEl.textContent = `[${t("sys.statePrefix")}:${bits.state}]`;
+    stateEl.classList.toggle("is-rewrite", bits.state === t("sys.stateRewrite") || bits.state === "已改锁");
   }
 
   function set(next: Partial<SysBits>): void {
@@ -67,7 +68,7 @@ export function mountSys(parent: HTMLElement): SysHandle {
   const bgeEl = root.querySelector("[data-sys-bge]") as HTMLElement;
   const unsub = agent.onStatus((s) => {
     set({ retrieve: retrieveOf(s) });
-    const load = agent.loadMs > 0 ? ` · 载入 ${agent.loadMs}ms` : "";
+    const load = agent.loadMs > 0 ? ` · ${agent.loadMs}ms` : "";
     bgeEl.textContent = `BGE · ${s === "idle" ? "idle" : s}${s === "ready" || s === "fallback" ? load : ""}`;
     bgeEl.dataset.state = s;
   });
@@ -83,7 +84,7 @@ export function mountSys(parent: HTMLElement): SysHandle {
       lastPaint = now;
       const mem = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
       const heap = mem ? ` · heap ${Math.round(mem.usedJSHeapSize / 1048576)}MB` : "";
-      meter.textContent = `帧 ${Math.round(frameMs)}ms${heap}`;
+      meter.textContent = `${t("sys.frame")} ${Math.round(frameMs)}ms${heap}`;
     }
     raf = requestAnimationFrame(tick);
   };

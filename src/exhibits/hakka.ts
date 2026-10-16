@@ -28,6 +28,7 @@ import { guide, lines } from "../app/guide";
 import { RoomView } from "../render/roomview";
 import { markTry, renderEvidence } from "../app/evidence";
 import { hakkaRule } from "../data/evidenceRules";
+import { routeName, t } from "../app/i18n";
 
 export function mountHakka(root: HTMLElement): () => void {
   let room: RoomId = "menlou";
@@ -45,9 +46,9 @@ export function mountHakka(root: HTMLElement): () => void {
     <div class="exhibit kejia">
       <div class="grain" aria-hidden="true"></div>
       <header class="ex-bar">
-        <button type="button" class="text-btn" data-hall>← 门厅</button>
+        <button type="button" class="text-btn" data-hall>← ${routeName("hall")}</button>
         <div class="ex-crumb">
-          <b>客家</b>
+          <b>${routeName("kejia")}</b>
           <span>赣南围屋 · 可走的宗族与防御</span>
         </div>
         <span class="stamp">示意平面 · 非某一文保测绘</span>
@@ -117,7 +118,7 @@ export function mountHakka(root: HTMLElement): () => void {
   const hoursEl = root.querySelector("[data-hours]") as HTMLElement;
   const roomEl = root.querySelector("[data-room]") as HTMLElement;
   const citesEl = root.querySelector("[data-cites]") as HTMLElement;
-  const pipe = mountPipeline(root.querySelector("[data-pipe]") as HTMLElement, "客家");
+  const pipe = mountPipeline(root.querySelector("[data-pipe]") as HTMLElement, routeName("kejia"));
   mountAsk(
     root.querySelector("[data-ask]") as HTMLElement,
     hakkaQA,
@@ -379,7 +380,7 @@ export function mountHakka(root: HTMLElement): () => void {
     }
     pipe.sys.set({
       lock: `${h.name}·${r.name}`,
-      state: lockNote ? "已改锁" : "合规",
+      state: lockNote ? t("sys.stateRewrite") : t("sys.stateOk"),
     });
     const toast = root.querySelector("[data-toast]") as HTMLElement | null;
     if (toast) {

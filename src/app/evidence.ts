@@ -1,5 +1,6 @@
 import type { Compat } from "./table";
 import { sourceById } from "../data/sources";
+import { compatWord, t, tagLabel } from "./i18n";
 
 /** 审计面板「展示 → 验证」：依据摘录（仅已核出处）+ 命中/边界/例外案例 + 试一下。 */
 
@@ -23,8 +24,6 @@ export type EvRule = {
   sourceIds: string[];
   cases: EvCase[];
 };
-
-const WORD: Record<Compat, string> = { ok: "合", stretch: "勉", conflict: "冲" };
 
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -58,8 +57,8 @@ export function renderEvidence(
       (s) => `<li class="ev-src-i">
         <q>${esc(s.excerpt)}</q>
         <span class="ev-src-by">—— ${esc(s.publisher)}《${esc(s.title)}》${s.date !== "—" ? ` · ${esc(s.date)}` : ""}
-        · <a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.url)}</a> · 访问 ${esc(s.accessed)}
-        ${s.status === "partial" ? '<em class="ev-partial">（仅经搜索摘要核对，页面未直接打开）</em>' : ""}</span>
+        · <a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.url)}</a> · ${t("ev.access")} ${esc(s.accessed)}
+        ${s.status === "partial" ? `<em class="ev-partial">${t("ev.partial")}</em>` : ""}</span>
       </li>`,
     )
     .join("");
@@ -67,16 +66,16 @@ export function renderEvidence(
     .map((c) => {
       const exp = expectFn(c.a, c.b);
       const act = actualFn(c.a, c.b);
-      const drift = exp !== act ? `<em class="ev-drift">当前表已被改成「${WORD[act]}」</em>` : "";
+      const drift = exp !== act ? `<em class="ev-drift">${t("ev.drift")}「${compatWord(act)}」</em>` : "";
       const tried = lastTry && lastTry.line === line && lastTry.a === c.a && lastTry.b === c.b;
       const verdict = tried
-        ? `<span class="ev-verdict ${exp === act ? "is-pass" : "is-fail"}">实测 ${WORD[act]} ${exp === act ? "✓ 与依据一致" : "✗ 与依据不一致"}</span>`
+        ? `<span class="ev-verdict ${exp === act ? "is-pass" : "is-fail"}">${t("ev.measured")} ${compatWord(act)} ${exp === act ? t("ev.match") : t("ev.mismatch")}</span>`
         : "";
       const tagCls = c.tag === "命中" ? "tag-hit" : c.tag === "边界" ? "tag-edge" : "tag-exc";
       return `<li class="ev-case">
-        <span class="ev-tag ${tagCls}">${c.tag}</span>
-        <b>${esc(nameOf(c.a, c.b))}</b> → 依据预期「${WORD[exp]}」${drift}
-        <button type="button" class="chip ev-try" data-try-a="${esc(c.a)}" data-try-b="${esc(c.b)}">试一下</button>
+        <span class="ev-tag ${tagCls}">${tagLabel(c.tag)}</span>
+        <b>${esc(nameOf(c.a, c.b))}</b> → ${t("ev.expect")}「${compatWord(exp)}」${drift}
+        <button type="button" class="chip ev-try" data-try-a="${esc(c.a)}" data-try-b="${esc(c.b)}">${t("ev.try")}</button>
         ${verdict}
         <small class="ev-note">${esc(c.label)}${c.note ? `：${esc(c.note)}` : ""}</small>
       </li>`;
@@ -84,10 +83,10 @@ export function renderEvidence(
     .join("");
   const stCls = rule.status === "verified" ? "is-verified" : rule.status === "design" ? "is-design" : "is-pending";
   return `<section class="ev" data-evidence>
-    <p class="ev-status ${stCls}"><b>依据状态</b> ${esc(rule.statusText)}</p>
-    <p class="ev-claim"><b>规则依据</b> ${esc(rule.claim)}</p>
-    ${srcs ? `<ul class="ev-src">${srcs}</ul>` : '<p class="ev-none">本条没有可公开查证的出处摘录（设计约定或待核）。</p>'}
-    <p class="ev-k"><b>验证 · 同类案例</b> 点「试一下」用默认约束表现场复现，并对照依据。</p>
+    <p class="ev-status ${stCls}"><b>${t("ev.status")}</b> ${esc(rule.statusText)}</p>
+    <p class="ev-claim"><b>${t("ev.claim")}</b> ${esc(rule.claim)}</p>
+    ${srcs ? `<ul class="ev-src">${srcs}</ul>` : `<p class="ev-none">${t("ev.none")}</p>`}
+    <p class="ev-k"><b>${t("ev.verify")}</b> ${t("ev.verifyHint")}</p>
     <ol class="ev-cases">${cases}</ol>
   </section>`;
 }

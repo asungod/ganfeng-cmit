@@ -1,4 +1,5 @@
 import type { Citation, QAItem } from "../data/types";
+import { t } from "./i18n";
 
 export type AskVia = "slip" | "bge" | "lex" | "none";
 
@@ -23,7 +24,7 @@ export function ask(
     return {
       ok: false,
       question: q,
-      answer: "请先点一条问展纸条，或写入与当前展线有关的词。",
+      answer: t("ask.empty"),
       citations: [],
       via: "none",
     };

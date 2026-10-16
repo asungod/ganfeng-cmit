@@ -24,6 +24,7 @@ import { ambience } from "../render/ambience";
 import { guide, lines } from "../app/guide";
 import { markTry, renderEvidence } from "../app/evidence";
 import { tengwangRule } from "../data/evidenceRules";
+import { routeName, t } from "../app/i18n";
 
 export function mountTengwang(root: HTMLElement): () => void {
   let mood: MoodId = "luoxia";
@@ -42,9 +43,9 @@ export function mountTengwang(root: HTMLElement): () => void {
     <div class="exhibit gexu">
       <div class="grain" aria-hidden="true"></div>
       <header class="ex-bar">
-        <button type="button" class="text-btn" data-hall>← 门厅</button>
+        <button type="button" class="text-btn" data-hall>← ${routeName("hall")}</button>
         <div class="ex-crumb">
-          <b>阁序</b>
+          <b>${routeName("gexu")}</b>
           <span>滕王阁 · 诗文意象钉在画面上</span>
         </div>
         <span class="stamp">原文公有领域 · 导览为示例</span>
@@ -105,7 +106,7 @@ export function mountTengwang(root: HTMLElement): () => void {
   const verseEl = root.querySelector("[data-verse]") as HTMLElement;
   const citesEl = root.querySelector("[data-cites]") as HTMLElement;
   const canvas = root.querySelector("canvas.dusk") as HTMLCanvasElement;
-  const pipe = mountPipeline(root.querySelector("[data-pipe]") as HTMLElement, "阁序");
+  const pipe = mountPipeline(root.querySelector("[data-pipe]") as HTMLElement, routeName("gexu"));
   mountAsk(
     root.querySelector("[data-ask]") as HTMLElement,
     tengwangQA,
@@ -379,7 +380,7 @@ export function mountTengwang(root: HTMLElement): () => void {
     }
     pipe.sys.set({
       lock: `${m.name}·${motif.name}`,
-      state: lockNote ? "已改锁" : "合规",
+      state: lockNote ? t("sys.stateRewrite") : t("sys.stateOk"),
     });
     if (fromTalk) {
       showTalkToast(root, `对话写入展陈：${m.name} · ${motif.name}`);

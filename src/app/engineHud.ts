@@ -1,6 +1,7 @@
 /** Persistent Engine HUD + live table.ts lookup strip (main-screen proof, not #/?arch). */
 
 import type { Compat } from "./table";
+import { compatWord } from "./i18n";
 
 const MAX_LINES = 5;
 const BGE_MIB = "22.9";
@@ -25,7 +26,7 @@ let frameMs = 0;
 let lastHudPaint = 0;
 
 function compatMark(c: Compat): string {
-  return c === "ok" ? "合" : c === "stretch" ? "勉" : "冲";
+  return compatWord(c);
 }
 
 export function formatLookupLine(opts: {

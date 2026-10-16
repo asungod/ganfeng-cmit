@@ -3,6 +3,7 @@ import { porcelainCitations, porcelainQA } from "../data/porcelain";
 import { tengwangCitations, tengwangQA } from "../data/tengwang";
 import { hakkaCitations, hakkaQA } from "../data/hakka";
 import { guideCitations, guideQA } from "../data/guideQA";
+import { routeName } from "./i18n";
 
 export type DocLine = Route | "guide";
 
@@ -12,13 +13,15 @@ export type Doc = {
   item: QAItem;
 };
 
-const NAMES: Record<DocLine, string> = {
-  hall: "门厅",
-  ciyu: "瓷语",
-  gexu: "阁序",
-  kejia: "客家",
-  guide: "开源边界",
-};
+function names(): Record<DocLine, string> {
+  return {
+    hall: routeName("hall"),
+    ciyu: routeName("ciyu"),
+    gexu: routeName("gexu"),
+    kejia: routeName("kejia"),
+    guide: routeName("guide"),
+  };
+}
 
 export const allCitations: Citation[] = [
   ...guideCitations,
@@ -27,12 +30,18 @@ export const allCitations: Citation[] = [
   ...hakkaCitations,
 ];
 
-export const allDocs: Doc[] = [
-  ...guideQA.map((item) => ({ line: "guide" as const, lineName: NAMES.guide, item })),
-  ...porcelainQA.map((item) => ({ line: "ciyu" as const, lineName: NAMES.ciyu, item })),
-  ...tengwangQA.map((item) => ({ line: "gexu" as const, lineName: NAMES.gexu, item })),
-  ...hakkaQA.map((item) => ({ line: "kejia" as const, lineName: NAMES.kejia, item })),
-];
+export function allDocsNow(): Doc[] {
+  const N = names();
+  return [
+    ...guideQA.map((item) => ({ line: "guide" as const, lineName: N.guide, item })),
+    ...porcelainQA.map((item) => ({ line: "ciyu" as const, lineName: N.ciyu, item })),
+    ...tengwangQA.map((item) => ({ line: "gexu" as const, lineName: N.gexu, item })),
+    ...hakkaQA.map((item) => ({ line: "kejia" as const, lineName: N.kejia, item })),
+  ];
+}
+
+/** Snapshot at load; prefer allDocsNow() when language may have changed. */
+export const allDocs: Doc[] = allDocsNow();
 
 export function citationsOf(ids: string[]): Citation[] {
   const map = new Map(allCitations.map((c) => [c.id, c]));
@@ -40,5 +49,5 @@ export function citationsOf(ids: string[]): Citation[] {
 }
 
 export function lineName(id: DocLine): string {
-  return NAMES[id];
+  return names()[id];
 }

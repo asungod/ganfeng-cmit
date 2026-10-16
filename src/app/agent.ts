@@ -1,6 +1,7 @@
 import type { QAItem, Route } from "../data/types";
 import { allDocs, citationsOf, type Doc } from "./corpus";
 import { ask, type AskResult } from "./ask";
+import { getLang, routeName, t } from "./i18n";
 import {
   parseGexuIntent,
   parseHakkaIntent,
@@ -129,7 +130,7 @@ const LINE_SLOTS: Record<string, string[]> = {
 function finish(doc: Doc, question: string, via: AskResult["via"], score: number, current?: Route): AskResult {
   let answer = doc.item.answer;
   if (current && doc.line !== "guide" && doc.line !== current) {
-    answer = `这问落在「${doc.lineName}」线上。${answer}`;
+    answer = getLang()==="en" ? `This relates to the 「${routeName(doc.line)}」 route. ${answer}` : `这问落在「${routeName(doc.line)}」线上。${answer}`;
   }
   return {
     ok: true,
@@ -254,7 +255,7 @@ class ExhibitAgent {
       return {
         ok: false,
         question: q0,
-        answer: "请先点一条问展纸条，或写入与展线有关的词。",
+        answer: t("ask.empty"),
         citations: [],
         via: "none",
       };
@@ -292,8 +293,7 @@ class ExhibitAgent {
     return {
       ok: false,
       question: q0,
-      answer:
-        "题库未收录这一问。讲解员只在本展内容包里检索，不把句子送去外部大模型，以免无出处的话混进展柜。",
+      answer: t("ask.refuse"),
       citations: [],
       via: "none",
     };

@@ -4,18 +4,19 @@ import { ask, type AskResult } from "./ask";
 import { agent, statusLabel, type SlotFillResult, PROTO_SCORE_THRESH } from "./agent";
 import { reportSlotMs } from "./engineHud";
 import { intentJson, slotLabel, slotValueLabel } from "./intent";
+import { t } from "./i18n";
 
 function citeStamp(c: Citation): string {
-  if (c.status === "verified") return '<span class="cite-stamp is-verified">已核</span>';
-  if (c.status === "design") return '<span class="cite-stamp is-design">本展说明</span>';
-  if (c.status === "pending") return '<span class="cite-stamp is-pending">待核</span>';
-  return '<span class="cite-stamp">示例</span>';
+  if (c.status === "verified") return `<span class="cite-stamp is-verified">${t("cite.verified")}</span>`;
+  if (c.status === "design") return `<span class="cite-stamp is-design">${t("cite.design")}</span>`;
+  if (c.status === "pending") return `<span class="cite-stamp is-pending">${t("cite.pending")}</span>`;
+  return `<span class="cite-stamp">${t("cite.sample")}</span>`;
 }
 
 export function citationCard(c: Citation, open = false): string {
   const urlLine = c.url
-    ? `<p class="cite-page">出处网址：<a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.url)}</a> · 访问 2026-10-08</p>`
-    : '<p class="cite-page">无可公开查证网址</p>';
+    ? `<p class="cite-page">${t("cite.url")}：<a href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.url)}</a> · ${t("cite.accessed")} 2026-10-08</p>`
+    : `<p class="cite-page">${t("cite.noUrl")}</p>`;
   return `
     <article class="cite ${open ? "is-open" : ""}" data-cite="${c.id}">
       <button type="button" class="cite-chip" data-toggle-cite="${c.id}">
@@ -24,12 +25,12 @@ export function citationCard(c: Citation, open = false): string {
         <span class="cite-src">${esc(c.source)}</span>
       </button>
       <div class="cite-body">
-        <p class="cite-detail-k">出处详情</p>
+        <p class="cite-detail-k">${t("cite.detail")}</p>
         <p class="cite-excerpt">${esc(c.excerpt)}</p>
         <p class="cite-src-line">${esc(c.source)}</p>
         <p class="cite-note">${esc(c.note)}</p>
         ${urlLine}
-        ${c.publicDomain ? '<p class="cite-pd">原文公有领域</p>' : ""}
+        ${c.publicDomain ? `<p class="cite-pd">${t("cite.pd")}</p>` : ""}
       </div>
     </article>
   `;
@@ -55,10 +56,10 @@ export function bindCiteToggles(root: HTMLElement): void {
 }
 
 function viaLabel(res: AskResult): string {
-  if (res.via === "bge") return "本答走：本地轻量检索";
-  if (res.via === "lex") return "本答走：词面检索";
-  if (res.via === "slip") return "本答走：题库原问";
-  return "本答走：未收录";
+  if (res.via === "bge") return t("ask.via.bge");
+  if (res.via === "lex") return t("ask.via.lex");
+  if (res.via === "slip") return t("ask.via.slip");
+  return t("ask.via.none");
 }
 
 const COMPARE_Q = "前朝器皿为什么不能上后世软彩？";
@@ -83,16 +84,16 @@ function hitLine(res: AskResult | null, empty: string): string {
 }
 
 function diffLine(bge: AskResult | null, lex: AskResult | null): string {
-  if (bge && lex && (bge.hitTitle ?? bge.question) === (lex.hitTitle ?? lex.question)) return "差异：同一题";
-  if (bge && lex) return "差异：不同命中";
-  return "差异：一侧拒绝";
+  if (bge && lex && (bge.hitTitle ?? bge.question) === (lex.hitTitle ?? lex.question)) return t("ask.diff.same");
+  if (bge && lex) return t("ask.diff.diff");
+  return t("ask.diff.one");
 }
 
 function hintFor(line?: Route): string {
-  if (line === "gexu") return "可以写成问句，例如：彭蠡是哪里？";
-  if (line === "kejia") return "可以写成问句，例如：围屋和土楼是一回事吗？";
-  if (line === "hall") return "可以写成问句，例如：这是 ChatGPT 套壳吗？";
-  return "可以写成问句，例如：宋代为什么不能锁粉彩？";
+  if (line === "gexu") return t("ask.hint.gexu");
+  if (line === "kejia") return t("ask.hint.kejia");
+  if (line === "hall") return t("ask.hint.hall");
+  return t("ask.hint.ciyu");
 }
 
 export function showTalkToast(root: HTMLElement, text: string): void {
@@ -113,18 +114,18 @@ export function mountAsk(
   box.className = "ask";
   box.innerHTML = `
     <header class="ask-h">
-      <span class="kicker">问展 · 本地讲解员</span>
-      <h3>就当前展柜提问</h3>
-      <p>本地 BGE-small 嵌入 + 约束表路由：槽位余弦相似度 ≥0.40 写入约束；题库检索最高分 ≥0.55 才作答并钉出处，否则拒答。</p>
-      <p class="ask-status" data-agent-status>提问后加载本地检索模型 · 先可用词面检索</p>
+      <span class="kicker">${t("ask.kicker")}</span>
+      <h3>${t("ask.title")}</h3>
+      <p>${t("ask.blurb")}</p>
+      <p class="ask-status" data-agent-status>${t("ask.statusIdle")}</p>
       <div class="engine-status" data-engine-status>
         <span class="bge-chip" data-bge-chip>BGE · idle</span>
-        <span class="fallback-chip" data-fallback-chip hidden>[Fallback: lex-slot 激活]</span>
+        <span class="fallback-chip" data-fallback-chip hidden>[Fallback: lex-slot]</span>
       </div>
       <p class="ask-trace" data-ask-trace hidden></p>
       <div class="ask-tools">
-        <button type="button" class="text-btn" data-force-lex>模拟加载失败</button>
-        <button type="button" class="text-btn" data-compare>对比两条路径</button>
+        <button type="button" class="text-btn" data-force-lex>${t("ask.forceLex")}</button>
+        <button type="button" class="text-btn" data-compare>${t("ask.compare")}</button>
       </div>
     </header>
     <div class="ask-slips"></div>

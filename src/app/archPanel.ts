@@ -18,6 +18,7 @@ import { lookup } from "../app/table";
 import { lookup } from "../app/table";
 // src/exhibits/porcelain.ts & hakka.ts
 import { fallbackRow } from "../app/table";`;
+import { compatWord } from "./i18n";
 
 const LOOKUP_SNIP = `export function lookup<R extends string, C extends string>(
   grid: Record<C, Record<R, Compat>>,
@@ -44,7 +45,7 @@ function esc(s: string): string {
 }
 
 function compatMark(c: Compat): string {
-  return c === "ok" ? "合" : c === "stretch" ? "勉" : "冲";
+  return compatWord(c);
 }
 
 function firstKey(obj: Record<string, unknown>): string {

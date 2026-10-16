@@ -29,6 +29,7 @@ import { ambience } from "../render/ambience";
 import { guide, lines } from "../app/guide";
 import { markTry, renderEvidence } from "../app/evidence";
 import { porcelainRule } from "../data/evidenceRules";
+import { routeName, t } from "../app/i18n";
 
 export function mountPorcelain(root: HTMLElement): () => void {
   resetMatrix();
@@ -66,9 +67,9 @@ export function mountPorcelain(root: HTMLElement): () => void {
     <div class="exhibit ciyu">
       <div class="grain" aria-hidden="true"></div>
       <header class="ex-bar">
-        <button type="button" class="text-btn" data-hall>← 门厅</button>
+        <button type="button" class="text-btn" data-hall>← ${routeName("hall")}</button>
         <div class="ex-crumb">
-          <b>瓷语</b>
+          <b>${routeName("ciyu")}</b>
           <span>景德镇 · 器型与釉色的约束展</span>
         </div>
       </header>
@@ -195,7 +196,7 @@ export function mountPorcelain(root: HTMLElement): () => void {
   const citesEl = root.querySelector("[data-cites]") as HTMLElement;
   const canvas = root.querySelector("canvas.vitrine") as HTMLCanvasElement;
   const labelEl = root.querySelector("[data-label]") as HTMLElement;
-  const pipe = mountPipeline(root.querySelector("[data-pipe]") as HTMLElement, "瓷语");
+  const pipe = mountPipeline(root.querySelector("[data-pipe]") as HTMLElement, routeName("ciyu"));
   const ask = mountAsk(
     root.querySelector("[data-ask]") as HTMLElement,
     porcelainQA,
@@ -622,7 +623,7 @@ export function mountPorcelain(root: HTMLElement): () => void {
     const gName = glazes.find((x) => x.id === glaze)!.name;
     pipe.sys.set({
       lock: `${eName}·${sName}·${gName}`,
-      state: lockNote ? "已改锁" : "合规",
+      state: lockNote ? t("sys.stateRewrite") : t("sys.stateOk"),
     });
     if (fromTalk) {
       const main = `对话写入展陈：${eName} · ${sName} · ${gName}`;

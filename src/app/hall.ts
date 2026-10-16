@@ -4,6 +4,7 @@ import { mountAsk } from "./labels";
 import { mountSys } from "./sysbar";
 import { guideQA, guideCitations } from "../data/guideQA";
 import { archPanelHtml, bindArchProbe, fillThreshTable } from "./archPanel";
+import { routeName, t } from "./i18n";
 
 /** Real ONNX quantized size under public/models (du -b). */
 const BGE_ONNX_BYTES = 24010842;
@@ -37,7 +38,7 @@ export function mountHall(root: HTMLElement): () => void {
             <span class="door-index">01</span>
             <span class="door-en">Jingdezhen</span>
           </span>
-          <span class="door-v" aria-label="瓷语"><span>瓷</span><span>语</span></span>
+          <span class="door-v" aria-label="${routeName("ciyu")}"><span>瓷</span><span>语</span></span>
           <span class="door-rule" aria-hidden="true"></span>
           <span class="door-desc">先锁时代约束，再选器型与釉色。冲突改锁并写理由。展柜是程序梅瓶，引用钉在旁边。</span>
         </button>
@@ -46,7 +47,7 @@ export function mountHall(root: HTMLElement): () => void {
             <span class="door-index">02</span>
             <span class="door-en">Tengwang</span>
           </span>
-          <span class="door-v" aria-label="阁序"><span>阁</span><span>序</span></span>
+          <span class="door-v" aria-label="Tengwang Preface / 阁序" title="Tengwang Pavilion Preface"><span>阁</span><span>序</span></span>
           <span class="door-rule" aria-hidden="true"></span>
           <span class="door-desc">点落霞、孤鹜、秋水。画面与王勃原句绑在一起，不是另写提示词出图。</span>
         </button>
@@ -55,7 +56,7 @@ export function mountHall(root: HTMLElement): () => void {
             <span class="door-index">03</span>
             <span class="door-en">Gannan</span>
           </span>
-          <span class="door-v" aria-label="客家"><span>客</span><span>家</span></span>
+          <span class="door-v" aria-label="Hakka Weiwu / 客家" title="Hakka Walled Residences"><span>客</span><span>家</span></span>
           <span class="door-rule" aria-hidden="true"></span>
           <span class="door-desc">以时辰与空间约束矩阵驱动围屋动线；对话可写入时辰或房间。</span>
         </button>
@@ -104,7 +105,7 @@ export function mountHall(root: HTMLElement): () => void {
   };
   mountAsk(root.querySelector("[data-ask]") as HTMLElement, guideQA, guideCitations, "hall");
   const sys = mountSys(root.querySelector("[data-ask]") as HTMLElement);
-  sys.set({ line: "门厅", lock: "未入展柜", state: "合规" });
+  sys.set({ line: routeName("hall"), lock: t("sys.lockNone"), state: t("sys.stateOk") });
   root.addEventListener("click", onClick);
   guide.speak(lines.hall);
   if (showArch) {

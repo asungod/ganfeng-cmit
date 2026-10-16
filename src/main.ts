@@ -11,6 +11,7 @@ import { setAskForceLex } from "./app/labels";
 import { guide } from "./app/guide";
 import type { Route } from "./data/types";
 import { demoLookupLine, mountEngineHud, pushLookupLog } from "./app/engineHud";
+import { getLang, onLang, t, toggleLang } from "./app/i18n";
 
 let app = document.getElementById("app") as HTMLDivElement;
 
@@ -42,9 +43,9 @@ function boot(): void {
   const overlay = document.createElement("div");
   overlay.className = "boot";
   overlay.innerHTML = `
-    <p class="boot-k">夜展开启</p>
+    <p class="boot-k">${t("boot.k")}</p>
     <p class="boot-t">赣风</p>
-    <p class="boot-s">可对话的数字展</p>
+    <p class="boot-s">${t("boot.s")}</p>
   `;
   document.body.appendChild(overlay);
   window.setTimeout(() => overlay.classList.add("is-out"), 900);
@@ -52,21 +53,37 @@ function boot(): void {
 }
 
 function paintGuideBtn(btn: HTMLButtonElement): void {
-  btn.textContent = guide.enabled ? "讲解开启" : "讲解关闭";
+  btn.textContent = guide.enabled ? t("chrome.guideOn") : t("chrome.guideOff");
   btn.classList.toggle("is-on", guide.enabled);
+}
+
+function paintChrome(bar: HTMLElement): void {
+  const mute = bar.querySelector("[data-mute]") as HTMLButtonElement | null;
+  const langBtn = bar.querySelector("[data-lang]") as HTMLButtonElement | null;
+  if (mute && !mute.classList.contains("is-on")) mute.textContent = t("chrome.muteOff");
+  if (mute?.classList.contains("is-on")) mute.textContent = t("chrome.muteOn");
+  const guideBtn = bar.querySelector("[data-guide]") as HTMLButtonElement | null;
+  if (guideBtn) paintGuideBtn(guideBtn);
+  if (langBtn) {
+    langBtn.textContent = t("chrome.lang");
+    langBtn.title = t("chrome.langTitle");
+  }
 }
 
 function ensureChrome(): void {
   if (document.querySelector(".global-chrome")) return;
+  document.documentElement.lang = getLang() === "en" ? "en" : "zh-CN";
   const bar = document.createElement("div");
   bar.className = "global-chrome";
   bar.innerHTML = `
     <div class="chrome-btns">
-      <button type="button" class="mute" data-mute>声景关闭</button>
-      <button type="button" class="mute" data-guide>讲解关闭</button>
+      <button type="button" class="mute" data-lang title="">EN</button>
+      <button type="button" class="mute" data-mute>${t("chrome.muteOff")}</button>
+      <button type="button" class="mute" data-guide>${t("chrome.guideOff")}</button>
     </div>
   `;
   document.body.appendChild(bar);
+  paintChrome(bar);
   const line = document.createElement("p");
   line.className = "guide-line";
   line.setAttribute("data-guide-line", "");
@@ -74,19 +91,27 @@ function ensureChrome(): void {
   guide.attachLine(line);
 
   bar.addEventListener("click", async (e) => {
-    const t = e.target as HTMLElement;
-    if (t.closest("[data-mute]")) {
+    const el = e.target as HTMLElement;
+    if (el.closest("[data-lang]")) {
+      toggleLang();
+      paintChrome(bar);
+      // Remount current route so Ask / audit / sys chrome pick up strings.
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+      return;
+    }
+    if (el.closest("[data-mute]")) {
       const muted = await ambience.toggleMute();
       const btn = bar.querySelector("[data-mute]") as HTMLButtonElement;
-      btn.textContent = muted ? "声景关闭" : "声景开启";
+      btn.textContent = muted ? t("chrome.muteOff") : t("chrome.muteOn");
       btn.classList.toggle("is-on", !muted);
       return;
     }
-    if (t.closest("[data-guide]")) {
+    if (el.closest("[data-guide]")) {
       guide.toggle();
       paintGuideBtn(bar.querySelector("[data-guide]") as HTMLButtonElement);
     }
   });
+  onLang(() => paintChrome(bar));
 }
 
 window.addEventListener("hashchange", () => mount(parseRoute(location.hash)));
