@@ -1,6 +1,6 @@
 {
- "when": "2026-10-16T04:15:27.787Z",
- "status": "fallback",
+ "when": "2026-10-16T06:34:25.930Z",
+ "status": "ready",
  "rows": [
   {
    "split": "dev",
@@ -9,8 +9,8 @@
     "q-chatgpt"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.04,
+   "doc": "q-chatgpt"
   },
   {
    "split": "dev",
@@ -19,8 +19,8 @@
     "q-photo"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.04,
+   "doc": "q-photo"
   },
   {
    "split": "dev",
@@ -29,8 +29,8 @@
     "q-real-vase"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1,
+   "doc": "q-real-vase"
   },
   {
    "split": "dev",
@@ -39,8 +39,8 @@
     "q-why-small"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.04,
+   "doc": "q-why-small"
   },
   {
    "split": "dev",
@@ -49,8 +49,8 @@
     "q-song-fencai"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.9669,
+   "doc": "q-song-fencai"
   },
   {
    "split": "dev",
@@ -59,8 +59,8 @@
     "q-yingqing-name"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.837,
+   "doc": "q-yingqing-name"
   },
   {
    "split": "dev",
@@ -69,8 +69,8 @@
     "q-qinghua-cobalt"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.8991,
+   "doc": "q-qinghua-cobalt"
   },
   {
    "split": "dev",
@@ -79,8 +79,8 @@
     "q-jihong-hard"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.0096,
+   "doc": "q-jihong-hard"
   },
   {
    "split": "dev",
@@ -89,8 +89,8 @@
     "q-meiping-use"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.9159,
+   "doc": "q-meiping-use"
   },
   {
    "split": "dev",
@@ -99,8 +99,8 @@
     "q-luoxia"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.8432,
+   "doc": "q-luoxia"
   },
   {
    "split": "dev",
@@ -109,8 +109,8 @@
     "q-pengli"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.7356,
+   "doc": "q-tengwang-who"
   },
   {
    "split": "dev",
@@ -119,8 +119,8 @@
     "q-tengwang-who"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.8399,
+   "doc": "q-pengli"
   },
   {
    "split": "dev",
@@ -129,8 +129,8 @@
     "q-yanzhen"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.9402,
+   "doc": "q-yanzhen"
   },
   {
    "split": "dev",
@@ -139,8 +139,8 @@
     "q-tulou"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.9837,
+   "doc": "q-tulou"
   },
   {
    "split": "dev",
@@ -149,8 +149,8 @@
     "q-zutang"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.9129,
+   "doc": "q-zutang"
   },
   {
    "split": "dev",
@@ -159,8 +159,8 @@
     "q-jiaolou"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.9715,
+   "doc": "q-jiaolou"
   },
   {
    "split": "dev",
@@ -169,8 +169,8 @@
     "q-walk"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.8975,
+   "doc": "q-walk"
   },
   {
    "split": "holdout",
@@ -179,8 +179,8 @@
     "q-chatgpt"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-chatgpt"
   },
   {
    "split": "holdout",
@@ -189,8 +189,8 @@
     "q-photo"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-photo"
   },
   {
    "split": "holdout",
@@ -199,8 +199,8 @@
     "q-real-vase"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-real-vase"
   },
   {
    "split": "holdout",
@@ -209,8 +209,8 @@
     "q-why-small"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.04,
+   "doc": "q-why-small"
   },
   {
    "split": "holdout",
@@ -219,8 +219,8 @@
     "q-song-fencai"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-song-fencai"
   },
   {
    "split": "holdout",
@@ -229,8 +229,8 @@
     "q-yingqing-name"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-yingqing-name"
   },
   {
    "split": "holdout",
@@ -239,8 +239,8 @@
     "q-qinghua-cobalt"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-qinghua-cobalt"
   },
   {
    "split": "holdout",
@@ -249,8 +249,8 @@
     "q-jihong-hard"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-jihong-hard"
   },
   {
    "split": "holdout",
@@ -259,8 +259,8 @@
     "q-meiping-use"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-meiping-use"
   },
   {
    "split": "holdout",
@@ -269,8 +269,8 @@
     "q-luoxia"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-luoxia"
   },
   {
    "split": "holdout",
@@ -279,8 +279,8 @@
     "q-pengli"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-pengli"
   },
   {
    "split": "holdout",
@@ -289,8 +289,8 @@
     "q-tengwang-who"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-tengwang-who"
   },
   {
    "split": "holdout",
@@ -299,8 +299,8 @@
     "q-yanzhen"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-yanzhen"
   },
   {
    "split": "holdout",
@@ -309,8 +309,8 @@
     "q-tulou"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-tulou"
   },
   {
    "split": "holdout",
@@ -319,8 +319,8 @@
     "q-zutang"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.04,
+   "doc": "q-zutang"
   },
   {
    "split": "holdout",
@@ -329,8 +329,8 @@
     "q-jiaolou"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.04,
+   "doc": "q-jiaolou"
   },
   {
    "split": "holdout",
@@ -339,248 +339,248 @@
     "q-walk"
    ],
    "kind": "in",
-   "raw": 0,
-   "doc": ""
+   "raw": 1.08,
+   "doc": "q-walk"
   },
   {
    "split": "dev",
    "q": "What's the weather in Beijing today?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.7514,
+   "doc": "q-pengli"
   },
   {
    "split": "dev",
    "q": "How is the stock market doing?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.7434,
+   "doc": "q-pengli"
   },
   {
    "split": "dev",
    "q": "Write me a poem about love",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.6863,
+   "doc": "q-song-fencai"
   },
   {
    "split": "dev",
    "q": "Who won the World Cup?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.7611,
+   "doc": "q-chatgpt"
   },
   {
    "split": "dev",
    "q": "How do I cook rice?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.6703,
+   "doc": "q-pengli"
   },
   {
    "split": "dev",
    "q": "What is the capital of France?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.8475,
+   "doc": "q-pengli"
   },
   {
    "split": "dev",
    "q": "Recommend a good movie",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.6541,
+   "doc": "q-chatgpt"
   },
   {
    "split": "dev",
    "q": "How do I learn Python?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.7293,
+   "doc": "q-yanzhen"
   },
   {
    "split": "dev",
    "q": "Translate hello into Japanese",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.6817,
+   "doc": "q-pengli"
   },
   {
    "split": "dev",
    "q": "What time is it now?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.7464,
+   "doc": "q-pengli"
   },
   {
    "split": "dev",
    "q": "Who is the president of the United States?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.7972,
+   "doc": "q-pengli"
   },
   {
    "split": "dev",
    "q": "How far is the Moon?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.8185,
+   "doc": "q-pengli"
   },
   {
    "split": "dev",
    "q": "Tell me a joke",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.6651,
+   "doc": "q-song-fencai"
   },
   {
    "split": "dev",
    "q": "What is the price of Bitcoin?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.8144,
+   "doc": "q-pengli"
   },
   {
    "split": "dev",
    "q": "How do I fix my laptop?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.6608,
+   "doc": "q-song-fencai"
   },
   {
    "split": "holdout",
    "q": "How much is a ticket to Tengwang Pavilion?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.75,
+   "doc": "q-tengwang-who"
   },
   {
    "split": "holdout",
    "q": "How much is a blue-and-white vase worth?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.8352,
+   "doc": "q-qinghua-cobalt"
   },
   {
    "split": "holdout",
    "q": "Do people still live in the walled houses?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.8282,
+   "doc": "q-tulou"
   },
   {
    "split": "holdout",
    "q": "How big is Poyang Lake?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.8583,
+   "doc": "q-pengli"
   },
   {
    "split": "holdout",
    "q": "What are the opening hours of the Palace Museum?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.8581,
+   "doc": "q-walk"
   },
   {
    "split": "holdout",
    "q": "How do I book a hotel in Nanchang?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.714,
+   "doc": "q-yanzhen"
   },
   {
    "split": "holdout",
    "q": "What is the best smartphone this year?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.7144,
+   "doc": "q-luoxia"
   },
   {
    "split": "holdout",
    "q": "Explain quantum computing",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.6091,
+   "doc": "q-qinghua-cobalt"
   },
   {
    "split": "holdout",
    "q": "How many calories are in an apple?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.6705,
+   "doc": "q-chatgpt"
   },
   {
    "split": "holdout",
    "q": "What is the rule for offside in football?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.6723,
+   "doc": "q-jiaolou"
   },
   {
    "split": "holdout",
    "q": "How do I make coffee?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.6674,
+   "doc": "q-yanzhen"
   },
   {
    "split": "holdout",
    "q": "Who painted the Mona Lisa?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.7506,
+   "doc": "q-photo"
   },
   {
    "split": "holdout",
    "q": "What is machine learning?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.7033,
+   "doc": "q-pengli"
   },
   {
    "split": "holdout",
    "q": "Where can I buy porcelain online?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.7646,
+   "doc": "q-yingqing-name"
   },
   {
    "split": "holdout",
    "q": "How tall is Mount Everest?",
    "gold": [],
    "kind": "ood",
-   "raw": 0,
-   "doc": ""
+   "raw": 0.7925,
+   "doc": "q-pengli"
   }
  ]
 }

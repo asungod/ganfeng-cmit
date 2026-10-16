@@ -24,6 +24,22 @@ export const EN_SCORE_THRESH = 0.82; // picked on EN dev (docs/calib/en/README.m
 export function isEnglishQuery(q: string): boolean {
   return /[A-Za-z]/.test(q) && !/[\u4e00-\u9fff]/.test(q);
 }
+
+/** Question types this exhibit never answers (tickets, prices, current population, place area, travel booking).
+ *  Checked before retrieval so same-topic hard negatives refuse without lowering in-bank recall.
+ *  None of the 17 bank questions match these patterns (verified 2026-10-16). */
+const OOD_SCOPE_ZH =
+  /门票|票价|多少钱|值多少钱|值多少|什么价|售价|报价|费用|收费|多大面积|面积多大|占地面积|平方公里|还有人住|有人住吗|还住人|现在.*住[人吗]|怎么坐高铁|高铁怎么去|订(?:个)?酒店|订票|火车票|开放时间|几点开门|首都是哪/;
+const OOD_SCOPE_EN =
+  /\b(?:ticket|tickets|admission|how much (?:does|is|are)|(?:what(?:'s| is) the )?(?:price|cost|worth)|worth\b|how big\b|how large\b|area of\b|square (?:kilo)?met(?:er|re)s?|anyone (?:still )?live|still (?:people )?liv(?:e|ing)|people still live|book (?:a )?hotel|train (?:ticket|to)\b|opening hours|what time (?:does|do|is).*(?:open|close)|capital of)\b/i;
+
+export function isOutOfScopeQuery(q: string): boolean {
+  const t = q.trim();
+  if (!t) return false;
+  if (/[\u4e00-\u9fff]/.test(t)) return OOD_SCOPE_ZH.test(t);
+  return OOD_SCOPE_EN.test(t);
+}
+
 function enKwHits(q: string, kw: string[]): number {
   const s = ` ${q.toLowerCase().replace(/[^a-z0-9\- ]+/g, " ")} `;
   return kw.filter((k) => s.includes(` ${k} `) || s.includes(` ${k}s `)).length;
@@ -285,6 +301,11 @@ class ExhibitAgent {
         citations: [],
         via: "none",
       };
+    }
+
+    if (isOutOfScopeQuery(q0)) {
+      this.lastQ = q0;
+      return { ok: false, question: q0, answer: t("ask.refuse"), citations: [], via: "none" };
     }
 
     const exact = ask(pack, citationsOf(pack.flatMap((p) => p.citationIds)), q0);
