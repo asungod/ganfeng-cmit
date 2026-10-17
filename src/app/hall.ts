@@ -1,5 +1,5 @@
 import { go } from "./router";
-import { guide, lines } from "./guide";
+import { guide } from "./guide";
 import { mountAsk } from "./labels";
 import { mountSys } from "./sysbar";
 import { guideQA, guideCitations } from "../data/guideQA";
@@ -120,7 +120,8 @@ export function mountHall(root: HTMLElement): () => void {
   const sys = mountSys(root.querySelector("[data-ask]") as HTMLElement);
   sys.set({ line: routeName("hall"), lock: t("sys.lockNone"), state: t("sys.stateOk") });
   root.addEventListener("click", onClick);
-  guide.speak(lines.hall);
+  // Lobby: no floating guide bubble over .hall-ask (welcome lives in tagline / innov).
+  guide.stop();
   if (showArch) {
     bindArchProbe(root);
     void fillThreshTable(root);

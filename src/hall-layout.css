@@ -392,11 +392,9 @@
 .engine-hud-dock .engine-tech {
   min-width: 6.5rem;
 }
+/* Hall ask panel owns the bottom; never float guide text over slips/input. */
 body[data-route="hall"] .guide-line {
-  bottom: 4.6rem;
-  max-width: min(36rem, 70vw);
-  font-size: 0.74rem;
-  padding: 0.32rem 0.7rem;
+  display: none !important;
 }
 /* On exhibits, nudge dock up a bit so it clears chrome */
 body:not([data-route="hall"]) .engine-hud-dock {
