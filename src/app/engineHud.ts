@@ -175,21 +175,25 @@ export function mountEngineHud(): void {
   dock.className = "engine-hud-dock";
   dock.setAttribute("data-engine-hud-dock", "");
   dock.innerHTML = `
-    <div class="engine-hud" data-engine-hud title="本地确定性路由 · table.ts">
-      Engine: local · table.ts
-    </div>
-    <div class="engine-metrics" data-engine-metrics hidden></div>
     <details class="engine-tech" data-engine-tech>
       <summary>技术明细</summary>
+      <div class="engine-hud" data-engine-hud title="本地确定性路由 · table.ts">
+        Engine: local · table.ts
+      </div>
+      <div class="engine-metrics" data-engine-metrics hidden></div>
       <p class="engine-tech-body" data-engine-tech-body>BGE-small ONNX q8 · ${BGE_MIB} MiB · 阈值 ${THRESH}</p>
+      <div class="lookup-log" data-lookup-log aria-label="table.ts lookup 日志"></div>
     </details>
-    <div class="lookup-log" data-lookup-log aria-label="table.ts lookup 日志"></div>
   `;
   document.body.appendChild(dock);
   hudEl = dock.querySelector("[data-engine-hud]") as HTMLElement;
   metricsEl = dock.querySelector("[data-engine-metrics]") as HTMLElement;
   techEl = dock.querySelector("[data-engine-tech-body]") as HTMLElement;
   logEl = dock.querySelector("[data-lookup-log]") as HTMLElement;
+  const tech = dock.querySelector("[data-engine-tech]") as HTMLDetailsElement | null;
+  const syncTech = () => dock?.classList.toggle("is-open", Boolean(tech?.open));
+  tech?.addEventListener("toggle", syncTech);
+  syncTech();
   paintLog();
   paintHud();
   if (!rafId) {

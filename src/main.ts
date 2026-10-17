@@ -20,6 +20,7 @@ let app = document.getElementById("app") as HTMLDivElement;
 let unmount: (() => void) | null = null;
 function mount(route: Route): void {
   // Always remount: query flags (?arch/?bge/?build/…) live in the hash and must re-apply.
+  document.body.dataset.route = route;
   if (!/fallback/.test(location.hash)) setAskForceLex(false);
   guide.stop();
   unmount?.();

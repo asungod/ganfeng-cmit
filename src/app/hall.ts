@@ -24,12 +24,16 @@ export function mountHall(root: HTMLElement): () => void {
       <div class="hall-title">
         <h1 class="hall-brand" aria-label="赣风"><span>赣</span><span>风</span></h1>
         <p class="hall-sub">可对话的数字展</p>
-        <p class="hall-lede">
-          智能交互创新在于：冲突组合触发约束表规则，规则本身可展开审计，改锁过程在矩阵上可追溯回放（冲格×→规则条目→改锁格）。
-        </p>
-        <p class="hall-lede-sub">
-          本地 BGE-small 语义匹配 + table.ts 确定性路由为工程支撑（非卖点）；三线共用同一查找接口是实现。
-        </p>
+        <p class="hall-tagline">点门进入展线 · 约束可审计 · 本地检索</p>
+        <details class="hall-innov">
+          <summary>创新要点</summary>
+          <p class="hall-lede">
+            冲突组合触发约束表规则，规则可展开审计，改锁过程在矩阵上可追溯回放（冲格×→规则条目→改锁格）。
+          </p>
+          <p class="hall-lede-sub">
+            工程支撑：本地 BGE-small + table.ts 确定性路由；三线共用同一查找接口是实现，不是卖点。
+          </p>
+        </details>
       </div>
       ${showArch ? archPanelHtml() : ""}
       <nav class="doors" aria-label="三条参观线" ${showArch ? 'hidden' : ''}>
@@ -40,7 +44,7 @@ export function mountHall(root: HTMLElement): () => void {
           </span>
           <span class="door-v" aria-label="${routeName("ciyu")}"><span>瓷</span><span>语</span></span>
           <span class="door-rule" aria-hidden="true"></span>
-          <span class="door-desc">先锁时代约束，再选器型与釉色。冲突改锁并写理由。展柜是程序梅瓶，引用钉在旁边。</span>
+          <span class="door-desc">先锁时代，再选器型与釉色；冲突改锁并写理由。</span>
         </button>
         <button type="button" class="door" data-go="gexu">
           <span class="door-head">
@@ -49,7 +53,7 @@ export function mountHall(root: HTMLElement): () => void {
           </span>
           <span class="door-v" aria-label="Tengwang Preface / 阁序" title="Tengwang Pavilion Preface"><span>阁</span><span>序</span></span>
           <span class="door-rule" aria-hidden="true"></span>
-          <span class="door-desc">点落霞、孤鹜、秋水。画面与王勃原句绑在一起，不是另写提示词出图。</span>
+          <span class="door-desc">点落霞、孤鹜、秋水；画面钉回王勃原句。</span>
         </button>
         <button type="button" class="door" data-go="kejia">
           <span class="door-head">
@@ -58,7 +62,7 @@ export function mountHall(root: HTMLElement): () => void {
           </span>
           <span class="door-v" aria-label="Hakka Weiwu / 客家" title="Hakka Walled Residences"><span>客</span><span>家</span></span>
           <span class="door-rule" aria-hidden="true"></span>
-          <span class="door-desc">以时辰与空间约束矩阵驱动围屋动线；对话可写入时辰或房间。</span>
+          <span class="door-desc">时辰 × 空间矩阵驱动围屋动线。</span>
         </button>
         <button type="button" class="door door-demo" data-go="wanshou">
           <span class="door-head">
@@ -67,15 +71,15 @@ export function mountHall(root: HTMLElement): () => void {
           </span>
           <span class="door-v" aria-label="Wanshou Palace / 万寿宫"><span>万</span><span>寿</span></span>
           <span class="door-rule" aria-hidden="true"></span>
-          <span class="door-desc">扩展演示线：西山万寿宫庙会的活动 × 时段约束，按扩展指南新增。</span>
+          <span class="door-desc">扩展线：庙会活动 × 时段约束。</span>
         </button>
       </nav>
       <div class="hall-ask" data-ask></div>
       <footer class="hall-foot">
-        <p>工程支撑：本地 BGE-small 语义匹配 + table.ts 确定性路由；槽位余弦相似度 ≥0.40 写入约束，题库检索 ≥0.55 才作答。卖点是约束表可审计、可验证 + 改锁可追溯回放，不是统一接口本身。</p>
+        <p class="hall-foot-hint">本地检索 · 无付费 API · 无 GPU</p>
         <div class="hall-foot-btns">
-          <button type="button" class="chip is-on" data-calib>阈值标定曲线</button>
-          <button type="button" class="text-btn" data-about>开源边界与诚实声明</button>
+          <button type="button" class="chip" data-calib>阈值标定</button>
+          <button type="button" class="text-btn" data-about>开源边界</button>
         </div>
       </footer>
       <dialog class="about" data-dialog>

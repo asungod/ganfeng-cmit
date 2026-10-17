@@ -112,12 +112,23 @@ export function mountAsk(
 ): { setCitations: (c: Citation[]) => void } {
   const box = document.createElement("section");
   box.className = "ask";
-  box.innerHTML = `
-    <header class="ask-h">
-      <span class="kicker">${t("ask.kicker")}</span>
-      <h3>${t("ask.title")}</h3>
-      <p>${t("ask.blurb")}</p>
-      <p class="ask-status" data-agent-status>${t("ask.statusIdle")}</p>
+  const headerExtras = line === "hall"
+    ? `<details class="ask-judge" data-ask-judge>
+        <summary>评测工具</summary>
+        <p class="ask-status" data-agent-status>${t("ask.statusIdle")}</p>
+        <div class="engine-status" data-engine-status>
+          <span class="bge-chip" data-bge-chip>BGE · idle</span>
+          <span class="fallback-chip" data-fallback-chip hidden>[Fallback: lex-slot]</span>
+        </div>
+        <p class="ask-trace" data-ask-trace hidden></p>
+        <div class="ask-tools">
+          <button type="button" class="text-btn" data-force-lex>${t("ask.forceLex")}</button>
+          <button type="button" class="text-btn" data-compare>${t("ask.compare")}</button>
+        </div>
+        <p class="intent-cap">余弦相似度 · 阈值 0.40 · 本地 BGE</p>
+        <pre class="intent-json" data-intent-json>未解析到展陈参数</pre>
+      </details>`
+    : `<p class="ask-status" data-agent-status>${t("ask.statusIdle")}</p>
       <div class="engine-status" data-engine-status>
         <span class="bge-chip" data-bge-chip>BGE · idle</span>
         <span class="fallback-chip" data-fallback-chip hidden>[Fallback: lex-slot]</span>
@@ -126,7 +137,17 @@ export function mountAsk(
       <div class="ask-tools">
         <button type="button" class="text-btn" data-force-lex>${t("ask.forceLex")}</button>
         <button type="button" class="text-btn" data-compare>${t("ask.compare")}</button>
-      </div>
+      </div>`;
+  const intentBlock = line === "hall"
+    ? ""
+    : `<p class="intent-cap">余弦相似度 · 阈值 0.40 · 本地 BGE</p>
+    <pre class="intent-json" data-intent-json>未解析到展陈参数</pre>`;
+  box.innerHTML = `
+    <header class="ask-h">
+      <span class="kicker">${t("ask.kicker")}</span>
+      <h3>${t("ask.title")}</h3>
+      <p>${t("ask.blurb")}</p>
+      ${headerExtras}
     </header>
     <div class="ask-slips"></div>
     <form class="ask-form">
@@ -134,12 +155,17 @@ export function mountAsk(
       <input type="text" name="q" maxlength="80" placeholder="${esc(hintFor(line))}" />
       <button type="submit">问讲解员</button>
     </form>
-    <p class="intent-cap">余弦相似度 · 阈值 0.40 · 本地 BGE</p>
-    <pre class="intent-json" data-intent-json>未解析到展陈参数</pre>
+    ${intentBlock}
     <div class="ask-out" hidden></div>
     <div class="ask-compare" data-compare-out hidden></div>
   `;
   parent.appendChild(box);
+  if (line === "hall") {
+    const judge = box.querySelector("[data-ask-judge]") as HTMLDetailsElement | null;
+    const syncJudge = () => parent.classList.toggle("is-judge-open", Boolean(judge?.open));
+    judge?.addEventListener("toggle", syncJudge);
+    syncJudge();
+  }
   const slips = box.querySelector(".ask-slips") as HTMLElement;
   const out = box.querySelector(".ask-out") as HTMLElement;
   const form = box.querySelector("form") as HTMLFormElement;

@@ -2189,6 +2189,23 @@ a { color: var(--gold); }
   color: var(--celadon);
   white-space: normal;
 }
+.engine-tech .engine-hud,
+.engine-tech .engine-metrics,
+.engine-tech .lookup-log {
+  margin: 0.3rem 0.45rem;
+  max-width: calc(100% - 0.9rem);
+  align-self: stretch;
+}
+.engine-tech .lookup-log {
+  margin-bottom: 0.45rem;
+  pointer-events: none;
+}
+.engine-tech:not([open]) .engine-hud,
+.engine-tech:not([open]) .engine-metrics,
+.engine-tech:not([open]) .lookup-log,
+.engine-tech:not([open]) .engine-tech-body {
+  /* hidden by details; keep for clarity */
+}
 
 .audit-panel {
   margin-top: 0.55rem;
