@@ -41,6 +41,7 @@ function mount(route: Route): void {
   } catch (err) {
     console.warn("mount failed", route, err);
   }
+  if (getLang() === "en") startEnContent();
 }
 
 function boot(): void {

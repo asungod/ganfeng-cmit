@@ -288,7 +288,7 @@ export class PorcelainVitrine {
     this.rampSteps = segs.length;
     this.buildDone = false;
     this.piece = new THREE.Group();
-    this.piece.position.y = 0.002;
+    this.piece.position.y = 0.014; // sit above plinth; avoid foot z-fight / sink
     this.scene.add(this.piece);
     this.controls.target.set(0, height * 0.62, 0);
     this.well.position.set(0, height * 0.92, 0);
@@ -446,9 +446,34 @@ function disposeMat(m: THREE.Material): void {
   m.dispose();
 }
 
+/** Inner half-width of glass case (see addGlassCase W/D=1.34) minus margin. */
+const CASE_MAX_R = 0.55;
+const CASE_MAX_H = 1.95;
+
 function makeProfile(shape: ShapeId, samples = PROFILE_SAMPLES): THREE.Vector2[] {
   const dense = catmullRom(keypoints(shape).map(([x, y]) => new THREE.Vector2(x, y)), 10);
-  return resampleArc(dense, samples);
+  const pts = resampleArc(dense, samples);
+  // Catmull-Rom can overshoot below the foot — clamp so the ring sits on the plinth.
+  for (const p of pts) {
+    if (p.y < 0) p.y = 0;
+    if (p.x < 0.001) p.x = 0.001;
+  }
+  return fitProfileInCase(pts);
+}
+
+/** Uniformly scale a lathe profile so the vessel sits fully inside the glass case. */
+function fitProfileInCase(pts: THREE.Vector2[]): THREE.Vector2[] {
+  let maxR = 0;
+  let maxH = 0;
+  for (const p of pts) {
+    if (p.x > maxR) maxR = p.x;
+    if (p.y > maxH) maxH = p.y;
+  }
+  const sR = maxR > 0 ? CASE_MAX_R / maxR : 1;
+  const sH = maxH > 0 ? CASE_MAX_H / maxH : 1;
+  const s = Math.min(1, sR, sH);
+  if (s >= 0.999) return pts;
+  return pts.map((p) => new THREE.Vector2(p.x * s, p.y * s));
 }
 
 function makeInner(shape: ShapeId, outer: THREE.Vector2[]): THREE.Vector2[] {
@@ -1915,9 +1940,9 @@ function addGlassCase(scene: THREE.Scene): void {
     depthWrite: false,
     side: THREE.DoubleSide,
   });
-  const W = 1.34;
-  const D = 1.34;
-  const H = 2.12;
+  const W = 1.42;
+  const D = 1.42;
+  const H = 2.18;
   const T = 0.01;
   const y0 = 0.01;
   const panes: { geo: THREE.BufferGeometry; pos: [number, number, number] }[] = [

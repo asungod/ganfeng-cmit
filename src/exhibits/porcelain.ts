@@ -73,7 +73,7 @@ export function mountPorcelain(root: HTMLElement): () => void {
           <b>${routeName("ciyu")}</b>
           <span>景德镇 · 器型与釉色的约束展</span>
         </div>
-        <button type="button" class="chip demo-detail-btn" data-demo-detail aria-pressed="false">演示细节</button>
+        <button type="button" class="chip demo-detail-btn" data-demo-detail aria-pressed="false">${t("demo.off")}</button>
       </header>
       <div class="ex-grid">
         <aside class="wall wall-left">
@@ -81,8 +81,10 @@ export function mountPorcelain(root: HTMLElement): () => void {
           <div class="lock-dock">
             <h2>风格锁定</h2>
           </div>
-          <p class="wall-lead">先选定时代约束，再选器型与釉色。冲突不生成「好看的错」，而是改锁并写明理由。</p>
-          <p class="engine-chip demo-only">约束表引擎 · table.ts lookup</p>
+          <details class="wall-hint" data-wall-hint>
+            <summary>怎么选</summary>
+            <p class="wall-lead">先选定时代约束，再选器型与釉色。冲突不生成「好看的错」，而是改锁并写明理由。</p>
+          </details>
           <div class="field">
             <span class="field-l">器型</span>
             <div class="chips" data-kind="shape"></div>
@@ -96,25 +98,28 @@ export function mountPorcelain(root: HTMLElement): () => void {
             <div class="chips" data-kind="era"></div>
           </div>
           <section class="matrix" data-matrix>
-            <p class="kicker">约束表 · 查找</p>
-            <table class="matrix-table">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th data-era-col="song">宋</th>
-                  <th data-era-col="yuan">元</th>
-                  <th data-era-col="ming">明</th>
-                  <th data-era-col="qing">清</th>
-                </tr>
-              </thead>
-              <tbody data-matrix-body></tbody>
-            </table>
-            <div class="matrix-rule" data-matrix-rule></div>
-            <details class="audit-panel" data-audit>
-              <summary class="audit-sum">约束表审计 · 规则条目（可展开）</summary>
-              <div class="audit-body" data-audit-body>
-                <p class="audit-empty">点冲突格或问「宋代有没有粉彩」以触发规则审计。</p>
-              </div>
+            <details class="matrix-fold" data-matrix-fold>
+              <summary class="matrix-sum">约束表</summary>
+              <p class="engine-chip demo-only">约束表引擎 · table.ts lookup</p>
+              <table class="matrix-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th data-era-col="song">宋</th>
+                    <th data-era-col="yuan">元</th>
+                    <th data-era-col="ming">明</th>
+                    <th data-era-col="qing">清</th>
+                  </tr>
+                </thead>
+                <tbody data-matrix-body></tbody>
+              </table>
+              <div class="matrix-rule" data-matrix-rule></div>
+              <details class="audit-panel" data-audit>
+                <summary class="audit-sum">约束表审计 · 规则条目（可展开）</summary>
+                <div class="audit-body" data-audit-body>
+                  <p class="audit-empty">点冲突格或问「宋代有没有粉彩」以触发规则审计。</p>
+                </div>
+              </details>
             </details>
           </section>
           <div class="lock-card" data-lock></div>
@@ -433,7 +438,7 @@ export function mountPorcelain(root: HTMLElement): () => void {
       .map((g) => {
         const c = compatOf(era, g.id);
         const rej = rejected === g.id ? " is-rejected" : "";
-        return `<button type="button" class="chip ${g.id === glaze ? "is-on" : ""}${rej} compat-${c}" data-glaze="${g.id}">${g.name}<i>${c === "ok" ? "合" : c === "stretch" ? "勉强" : "冲突"}</i></button>`;
+        return `<button type="button" class="chip ${g.id === glaze ? "is-on" : ""}${rej} compat-${c}" data-glaze="${g.id}" title="${c === "ok" ? "合" : c === "stretch" ? "勉强" : "冲突"}">${g.name}</button>`;
       })
       .join("");
     chipsEra.innerHTML = eras

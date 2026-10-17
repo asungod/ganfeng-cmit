@@ -68,9 +68,9 @@ export function translateTree(root: Node): void {
 }
 
 export function startEnContent(): void {
-  if (obs) return;
   document.documentElement.lang = "en";
   translateTree(document.body);
+  if (obs) return;
   obs = new MutationObserver((muts) => {
     if (busy) return;
     busy = true;

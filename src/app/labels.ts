@@ -112,9 +112,9 @@ export function mountAsk(
 ): { setCitations: (c: Citation[]) => void } {
   const box = document.createElement("section");
   box.className = "ask";
-  const headerExtras = line === "hall"
-    ? `<details class="ask-judge" data-ask-judge>
-        <summary>评测工具</summary>
+  const headerExtras = `<details class="ask-judge" data-ask-judge>
+        <summary>${t("ask.judge")}</summary>
+        <p class="ask-blurb-tech">${t("ask.blurbTech")}</p>
         <p class="ask-status" data-agent-status>${t("ask.statusIdle")}</p>
         <div class="engine-status" data-engine-status>
           <span class="bge-chip" data-bge-chip>BGE · idle</span>
@@ -127,26 +127,12 @@ export function mountAsk(
         </div>
         <p class="intent-cap">余弦相似度 · 阈值 0.40 · 本地 BGE</p>
         <pre class="intent-json" data-intent-json>未解析到展陈参数</pre>
-      </details>`
-    : `<p class="ask-status" data-agent-status>${t("ask.statusIdle")}</p>
-      <div class="engine-status" data-engine-status>
-        <span class="bge-chip" data-bge-chip>BGE · idle</span>
-        <span class="fallback-chip" data-fallback-chip hidden>[Fallback: lex-slot]</span>
-      </div>
-      <p class="ask-trace" data-ask-trace hidden></p>
-      <div class="ask-tools">
-        <button type="button" class="text-btn" data-force-lex>${t("ask.forceLex")}</button>
-        <button type="button" class="text-btn" data-compare>${t("ask.compare")}</button>
-      </div>`;
-  const intentBlock = line === "hall"
-    ? ""
-    : `<p class="intent-cap">余弦相似度 · 阈值 0.40 · 本地 BGE</p>
-    <pre class="intent-json" data-intent-json>未解析到展陈参数</pre>`;
+      </details>`;
   box.innerHTML = `
     <header class="ask-h">
       <span class="kicker">${t("ask.kicker")}</span>
       <h3>${t("ask.title")}</h3>
-      <p>${t("ask.blurb")}</p>
+      <p class="ask-blurb">${t("ask.blurb")}</p>
       ${headerExtras}
     </header>
     <div class="ask-slips"></div>
@@ -155,15 +141,19 @@ export function mountAsk(
       <input type="text" name="q" maxlength="80" placeholder="${esc(hintFor(line))}" />
       <button type="submit">问讲解员</button>
     </form>
-    ${intentBlock}
     <div class="ask-out" hidden></div>
     <div class="ask-compare" data-compare-out hidden></div>
   `;
   parent.appendChild(box);
-  if (line === "hall") {
+  {
     const judge = box.querySelector("[data-ask-judge]") as HTMLDetailsElement | null;
-    const syncJudge = () => parent.classList.toggle("is-judge-open", Boolean(judge?.open));
+    const syncJudge = () => {
+      parent.classList.toggle("is-judge-open", Boolean(judge?.open));
+      box.classList.toggle("is-judge-open", Boolean(judge?.open));
+    };
     judge?.addEventListener("toggle", syncJudge);
+    // Demo detail mode opens judge tools by default
+    if (document.body.classList.contains("is-demo-detail") && judge) judge.open = true;
     syncJudge();
   }
   const slips = box.querySelector(".ask-slips") as HTMLElement;

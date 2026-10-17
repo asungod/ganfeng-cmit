@@ -34,8 +34,10 @@ const ZH: Dict = {
   "sys.frame": "帧",
   "ask.kicker": "问展 · 本地讲解员",
   "ask.title": "就当前展柜提问",
-  "ask.blurb":
+  "ask.blurb": "点下方问句，或自己输入；讲解员只在本展内容包里回答，并钉出处。",
+  "ask.blurbTech":
     "本地 BGE-small 嵌入 + 约束表路由：槽位余弦相似度 ≥0.40 写入约束；题库检索最高分 ≥0.55 才作答并钉出处，否则拒答。",
+  "ask.judge": "评测工具",
   "ask.statusIdle": "提问后加载本地检索模型 · 先可用词面检索",
   "ask.forceLex": "模拟加载失败",
   "ask.compare": "对比两条路径",
@@ -78,6 +80,10 @@ const ZH: Dict = {
   "ev.tag.exc": "例外",
   "ev.partial": "（仅经搜索摘要核对，页面未直接打开）",
   "ev.access": "访问",
+  "demo.off": "演示细节",
+  "demo.on": "演示细节 · 开",
+  "ui.matrix": "约束表",
+  "ui.howto": "怎么选",
 };
 
 const EN: Dict = {
@@ -111,8 +117,10 @@ const EN: Dict = {
   "sys.frame": "frame",
   "ask.kicker": "Ask the Exhibit · local guide",
   "ask.title": "Ask about this cabinet",
-  "ask.blurb":
+  "ask.blurb": "Pick a slip or type a question; answers stay in this exhibit pack with sources.",
+  "ask.blurbTech":
     "Local BGE-small embeddings + constraint routing: slot cosine ≥0.40 writes a constraint; bank score ≥0.55 answers with a source; otherwise refuse.",
+  "ask.judge": "Judge tools",
   "ask.statusIdle": "Local retriever loads on first ask · lexical search works first",
   "ask.forceLex": "Simulate load failure",
   "ask.compare": "Compare two paths",
@@ -155,6 +163,10 @@ const EN: Dict = {
   "ev.tag.exc": "Exception",
   "ev.partial": "(checked via search snippet only; page not opened)",
   "ev.access": "accessed",
+  "demo.off": "Demo details",
+  "demo.on": "Demo details · on",
+  "ui.matrix": "Constraint table",
+  "ui.howto": "How to choose",
 };
 
 let lang: Lang = (localStorage.getItem("gf-lang") as Lang) || "zh";

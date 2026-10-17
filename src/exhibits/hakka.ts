@@ -53,7 +53,7 @@ export function mountHakka(root: HTMLElement): () => void {
           <span>赣南围屋 · 可走的宗族与防御</span>
         </div>
         <span class="stamp">示意平面 · 非某一文保测绘</span>
-              <button type="button" class="chip demo-detail-btn" data-demo-detail aria-pressed="false">演示细节</button>
+              <button type="button" class="chip demo-detail-btn" data-demo-detail aria-pressed="false">${t("demo.off")}</button>
       </header>
       <div class="kejia-grid">
         <section class="plan-wrap">
@@ -84,26 +84,28 @@ export function mountHakka(root: HTMLElement): () => void {
             <div class="chips" data-hours></div>
           </div>
           <section class="matrix" data-matrix>
-            <p class="kicker">约束表 · 查找</p>
-            <p class="engine-chip demo-only">约束表引擎 · table.ts lookup</p>
-            <table class="matrix-table">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th data-hour-col="dawn">晨</th>
-                  <th data-hour-col="noon">午</th>
-                  <th data-hour-col="dusk">暮</th>
-                  <th data-hour-col="night">夜</th>
-                </tr>
-              </thead>
-              <tbody data-matrix-body></tbody>
-            </table>
-            <div class="matrix-rule" data-matrix-rule></div>
-            <details class="audit-panel" data-audit>
-              <summary class="audit-sum">约束表审计 · 规则条目（可展开）</summary>
-              <div class="audit-body" data-audit-body>
-                <p class="audit-empty">冲突格触发后展开规则原文。</p>
-              </div>
+            <details class="matrix-fold" data-matrix-fold>
+              <summary class="matrix-sum">约束表</summary>
+              <p class="engine-chip demo-only">约束表引擎 · table.ts lookup</p>
+              <table class="matrix-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th data-hour-col="dawn">晨</th>
+                    <th data-hour-col="noon">午</th>
+                    <th data-hour-col="dusk">暮</th>
+                    <th data-hour-col="night">夜</th>
+                  </tr>
+                </thead>
+                <tbody data-matrix-body></tbody>
+              </table>
+              <div class="matrix-rule" data-matrix-rule></div>
+              <details class="audit-panel" data-audit>
+                <summary class="audit-sum">约束表审计 · 规则条目（可展开）</summary>
+                <div class="audit-body" data-audit-body>
+                  <p class="audit-empty">冲突格触发后展开规则原文。</p>
+                </div>
+              </details>
             </details>
           </section>
           <article class="room-card" data-room></article>
@@ -232,8 +234,12 @@ export function mountHakka(root: HTMLElement): () => void {
         )}
       `;
       if (rejected || c === "conflict") {
-        panel.open = true;
         panel.classList.add("is-live");
+        if (document.body.classList.contains("is-demo-detail")) {
+          panel.open = true;
+          const fold = root.querySelector("[data-matrix-fold]") as HTMLDetailsElement | null;
+          if (fold) fold.open = true;
+        }
       } else {
         panel.classList.remove("is-live");
       }
@@ -364,15 +370,20 @@ export function mountHakka(root: HTMLElement): () => void {
       <p class="lock-main">${h.name} · ${r.name}</p>
       <h3>${r.name}</h3>
       <p class="lock-b">${r.role}</p>
-      <p class="walk-line">${r.walk}</p>
-      <p class="sound-line">声景：${hourSounds[hour]} ${r.sound}</p>
+      <details class="lock-more" data-lock-more>
+        <summary>怎么选</summary>
+        <p class="walk-line">${r.walk}</p>
+        <p class="sound-line">声景：${hourSounds[hour]} ${r.sound}</p>
+      </details>
       ${lockNote ? `<p class="lock-warn">${lockNote}</p>` : ""}
-      <div class="dialect">
-        <p class="dialect-k">本地称谓 · 建筑术语（出处已核）</p>
-        <span class="dialect-term">${r.dialect.term}</span>
-        <span class="dialect-gloss">${r.dialect.gloss}</span>
-        <p>${r.dialect.hint}</p>
-      </div>
+      <details class="dialect-fold" data-dialect-fold>
+        <summary class="dialect-k">本地称谓 · 建筑术语（出处已核）</summary>
+        <div class="dialect">
+          <span class="dialect-term">${r.dialect.term}</span>
+          <span class="dialect-gloss">${r.dialect.gloss}</span>
+          <p>${r.dialect.hint}</p>
+        </div>
+      </details>
     `;
     root.querySelector(".exhibit")?.setAttribute("data-hour", hour);
     renderCitations(citesEl, citationsForRoom(id), citationsForRoom(id)[0]?.id);

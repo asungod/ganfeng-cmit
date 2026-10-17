@@ -2415,13 +2415,8 @@ a { color: var(--gold); }
 }
 
 /* Quieter side walls when not in demo detail */
-.exhibit:not(.is-demo-detail) .wall-lead {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  font-size: 0.8rem;
-  opacity: 0.85;
+.exhibit:not(.is-demo-detail) .wall-hint:not([open]) > .wall-lead {
+  /* native details hides body when closed */
 }
 .exhibit:not(.is-demo-detail) .audit-panel:not([open]) {
   opacity: 0.7;
@@ -2431,7 +2426,7 @@ a { color: var(--gold); }
   overflow: auto;
 }
 .exhibit:not(.is-demo-detail) .ex-pipe {
-  padding: 0.35rem 1.2rem 0.45rem;
+  display: none !important;
 }
 .exhibit:not(.is-demo-detail) .pipeline .sysbar {
   display: none;
@@ -2475,3 +2470,188 @@ body:not([data-route="hall"]) .guide-line {
 body.is-demo-detail .pipeline-fold:not([data-user-fold]) {
   /* hint only — open attribute managed in setDemoDetail */
 }
+
+
+/* —— visitor quiet: ask judge tools + matrix fold —— */
+.ask-judge {
+  margin: 0.35rem 0 0.15rem;
+  border: 1px solid rgba(198, 161, 91, 0.18);
+  background: rgba(8, 6, 4, 0.28);
+}
+.ask-judge > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--gold-dim);
+  user-select: none;
+}
+.ask-judge > summary::-webkit-details-marker { display: none; }
+.ask-judge[open] > summary {
+  color: var(--gold);
+  border-bottom: 1px solid rgba(198, 161, 91, 0.16);
+}
+.ask-judge .ask-blurb-tech {
+  margin: 0.35rem 0.55rem;
+  color: var(--mist);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+.ask-judge .ask-status,
+.ask-judge .engine-status,
+.ask-judge .ask-tools,
+.ask-judge .ask-trace,
+.ask-judge .intent-cap,
+.ask-judge .intent-json {
+  margin: 0.35rem 0.55rem;
+}
+.ask-judge .intent-json {
+  max-height: 6rem;
+  overflow: auto;
+  font-size: 0.68rem;
+}
+.ask-judge[open] .engine-status,
+.ask-judge[open] .ask-tools {
+  display: flex;
+}
+.ask-h > .ask-blurb {
+  margin: 0 0 0.45rem;
+  color: var(--mist);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+/* Path / compare panels: quiet for visitors unless judge tools or demo detail open */
+.exhibit:not(.is-demo-detail) .ask:not(.is-judge-open) .ask-via,
+.exhibit:not(.is-demo-detail) .ask:not(.is-judge-open) .ask-compare {
+  display: none;
+}
+
+.wall-hint {
+  margin: 0 0 0.55rem;
+  border: 1px solid rgba(198, 161, 91, 0.14);
+  background: rgba(8, 6, 4, 0.2);
+}
+.wall-hint > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.22rem 0.5rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  color: var(--gold-dim);
+  user-select: none;
+}
+.wall-hint > summary::-webkit-details-marker { display: none; }
+.wall-hint[open] > summary {
+  color: var(--gold);
+  border-bottom: 1px solid rgba(198, 161, 91, 0.12);
+}
+.wall-hint .wall-lead {
+  margin: 0.35rem 0.5rem 0.45rem;
+  display: block !important;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+.matrix-fold {
+  margin: 0;
+  border: 1px solid rgba(198, 161, 91, 0.16);
+  background: rgba(8, 6, 4, 0.18);
+}
+.matrix-fold > .matrix-sum {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.32rem 0.55rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: var(--gold-dim);
+  user-select: none;
+}
+.matrix-fold > .matrix-sum::-webkit-details-marker { display: none; }
+.matrix-fold[open] > .matrix-sum {
+  color: var(--gold);
+  border-bottom: 1px solid rgba(198, 161, 91, 0.14);
+  margin-bottom: 0.35rem;
+}
+.matrix-fold .matrix-table,
+.matrix-fold .matrix-rule,
+.matrix-fold .audit-panel,
+.matrix-fold .engine-chip {
+  margin-left: 0.35rem;
+  margin-right: 0.35rem;
+}
+.matrix-fold .audit-panel { margin-bottom: 0.4rem; }
+.exhibit:not(.is-demo-detail) .matrix-fold:not([open]) {
+  opacity: 0.92;
+}
+
+
+/* —— visitor quiet v14: pipeline gone; soft picks; folded prose —— */
+.wanshou .ws-pick {
+  margin: 0.15rem 0 0.35rem;
+  color: var(--paper-dim);
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+}
+.wanshou .ws-verdict {
+  font-size: 0.92rem;
+  margin: 0.25rem 0 0.55rem;
+  color: var(--mist);
+}
+.wanshou .chip.compat-ok,
+.wanshou .chip.compat-stretch,
+.wanshou .chip.compat-conflict {
+  /* border hint only — no 合/勉/冲 glyph on visitor chips */
+}
+.exhibit:not(.is-demo-detail) .vitrine-cap,
+.exhibit:not(.is-demo-detail) .walk-path,
+.exhibit:not(.is-demo-detail) .restore-mark {
+  display: none !important;
+}
+.lock-more,
+.dialect-fold {
+  margin: 0.35rem 0 0.45rem;
+  border: 1px solid rgba(198, 161, 91, 0.14);
+  background: rgba(8, 6, 4, 0.18);
+}
+.lock-more > summary,
+.dialect-fold > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.22rem 0.5rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  color: var(--gold-dim);
+  user-select: none;
+}
+.lock-more > summary::-webkit-details-marker,
+.dialect-fold > summary::-webkit-details-marker { display: none; }
+.lock-more[open] > summary,
+.dialect-fold[open] > summary {
+  color: var(--gold);
+  border-bottom: 1px solid rgba(198, 161, 91, 0.12);
+}
+.lock-more .lock-b,
+.lock-more .walk-line,
+.lock-more .sound-line,
+.dialect-fold .dialect {
+  margin: 0.35rem 0.5rem 0.45rem;
+}
+.exhibit:not(.is-demo-detail) .poem-rail .poem {
+  max-height: 7.5rem;
+  overflow: auto;
+}
+.exhibit:not(.is-demo-detail) .cite-layer .cites,
+.exhibit:not(.is-demo-detail) .room-panel .cites {
+  max-height: min(28vh, 12rem);
+  overflow: auto;
+}
+.exhibit:not(.is-demo-detail) .gexu-ask {
+  position: relative;
+  z-index: 4;
+  background: rgba(10, 8, 6, 0.92);
+  border-top: 1px solid rgba(198, 161, 91, 0.12);
+}
+.exhibit.is-demo-detail .ex-pipe { display: block; }

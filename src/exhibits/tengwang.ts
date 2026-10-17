@@ -50,7 +50,7 @@ export function mountTengwang(root: HTMLElement): () => void {
           <span>滕王阁 · 诗文意象钉在画面上</span>
         </div>
         <span class="stamp">原文公有领域 · 导览为示例</span>
-              <button type="button" class="chip demo-detail-btn" data-demo-detail aria-pressed="false">演示细节</button>
+              <button type="button" class="chip demo-detail-btn" data-demo-detail aria-pressed="false">${t("demo.off")}</button>
       </header>
       <div class="gexu-stage">
         <div class="painting-wrap">
@@ -68,26 +68,28 @@ export function mountTengwang(root: HTMLElement): () => void {
             <div class="chips" data-moods></div>
           </div>
           <section class="matrix" data-matrix>
-            <p class="kicker">约束表 · 查找</p>
-            <p class="engine-chip demo-only">约束表引擎 · table.ts lookup</p>
-            <table class="matrix-table">
-              <thead>
-                <tr>
-                  <th></th>
-                  <th data-mood-col="sanyan">九月三秋</th>
-                  <th data-mood-col="luoxia">落霞孤鹜</th>
-                  <th data-mood-col="yuzhou">渔舟唱晚</th>
-                  <th data-mood-col="yanzhen">雁阵惊寒</th>
-                </tr>
-              </thead>
-              <tbody data-matrix-body></tbody>
-            </table>
-            <div class="matrix-rule" data-matrix-rule></div>
-            <details class="audit-panel" data-audit>
-              <summary class="audit-sum">约束表审计 · 规则条目（可展开）</summary>
-              <div class="audit-body" data-audit-body>
-                <p class="audit-empty">冲突格触发后展开规则原文。</p>
-              </div>
+            <details class="matrix-fold" data-matrix-fold>
+              <summary class="matrix-sum">约束表</summary>
+              <p class="engine-chip demo-only">约束表引擎 · table.ts lookup</p>
+              <table class="matrix-table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th data-mood-col="sanyan">九月三秋</th>
+                    <th data-mood-col="luoxia">落霞孤鹜</th>
+                    <th data-mood-col="yuzhou">渔舟唱晚</th>
+                    <th data-mood-col="yanzhen">雁阵惊寒</th>
+                  </tr>
+                </thead>
+                <tbody data-matrix-body></tbody>
+              </table>
+              <div class="matrix-rule" data-matrix-rule></div>
+              <details class="audit-panel" data-audit>
+                <summary class="audit-sum">约束表审计 · 规则条目（可展开）</summary>
+                <div class="audit-body" data-audit-body>
+                  <p class="audit-empty">冲突格触发后展开规则原文。</p>
+                </div>
+              </details>
             </details>
           </section>
           <div class="verse-card" data-verse></div>
@@ -211,8 +213,12 @@ export function mountTengwang(root: HTMLElement): () => void {
           )}
         `;
         if (rejected || c === "conflict") {
-          panel.open = true;
           panel.classList.add("is-live");
+          if (document.body.classList.contains("is-demo-detail")) {
+            panel.open = true;
+            const fold = root.querySelector("[data-matrix-fold]") as HTMLDetailsElement | null;
+            if (fold) fold.open = true;
+          }
         } else {
           panel.classList.remove("is-live");
         }
@@ -366,8 +372,11 @@ export function mountTengwang(root: HTMLElement): () => void {
       <p class="lock-k">${lockNote ? "冲突改锁" : "当前锁定"}</p>
       <p class="verse">${motif.couplet}</p>
       <p class="lock-main">${m.name} · ${motif.name}</p>
-      <p class="lock-b">${motif.scene}</p>
-      <p class="lock-b">${m.blurb}</p>
+      <details class="lock-more" data-lock-more>
+        <summary>怎么选</summary>
+        <p class="lock-b">${motif.scene}</p>
+        <p class="lock-b">${m.blurb}</p>
+      </details>
       ${lockNote ? `<p class="lock-warn">${lockNote}</p>` : ""}
     `;
     const toast = root.querySelector("[data-toast]") as HTMLElement | null;

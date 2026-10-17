@@ -558,5 +558,13 @@
 "非遗项目页原文「八月（号净月）初一晨旦开朝」→ 开朝 × 晨旦判合；开朝放到夜晚判冲、改锁晨旦，白日判勉——后两者是本展设计约定。": "The ICH page says \"on the morning of the 1st of the 8th month (the Pure Month) the court opens\" → opening court × dawn is Compatible; opening court at night is Conflict and re-locked to dawn, daytime is Borderline — the latter two are this exhibit's design convention.",
 "非遗项目页原文「夜晚民间戏班演出」→ 戏班 × 夜晚判合；放到晨旦、白日判勉——这是本展设计约定，原文未说白天不演。": "The ICH page says \"at night, folk opera troupes perform\" → opera × night is Compatible; dawn and daytime are Borderline — this is this exhibit's design convention; the source does not say there were no daytime performances.",
 "2026 指定命题 · 科技+创意，讲好中国故事": "2026 designated theme · Technology + Creativity, telling China's stories well",
-"瞬时档 · segs 160 · elapsed —（本帧 WebGL 不可用，未测 lathe ms）": "Instant profile · segs 160 · elapsed — (WebGL unavailable this frame; lathe ms not measured)"
+"瞬时档 · segs 160 · elapsed —（本帧 WebGL 不可用，未测 lathe ms）": "Instant profile · segs 160 · elapsed — (WebGL unavailable this frame; lathe ms not measured)",
+"约束表": "Constraint table",
+"怎么选": "How to choose",
+"演示细节": "Demo details",
+"演示细节 · 开": "Demo details · on",
+"本机演示时序 · 点开查看": "Local demo timing · expand to view",
+"当前：": "Now: ",
+"点选活动与时段即可；约束表与规则审计收在下方。": "Pick an activity and time slot; the constraint table and rule audit stay folded below.",
+"活动 × 时段": "Activity × time slot"
 }
