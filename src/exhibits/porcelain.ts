@@ -27,6 +27,7 @@ import {
 import { PorcelainVitrine } from "../render/vase";
 import { ambience } from "../render/ambience";
 import { guide, lines } from "../app/guide";
+import { bindDemoDetailToggle } from "../app/demoDetail";
 import { markTry, renderEvidence } from "../app/evidence";
 import { porcelainRule } from "../data/evidenceRules";
 import { routeName, t } from "../app/i18n";
@@ -72,6 +73,7 @@ export function mountPorcelain(root: HTMLElement): () => void {
           <b>${routeName("ciyu")}</b>
           <span>景德镇 · 器型与釉色的约束展</span>
         </div>
+        <button type="button" class="chip demo-detail-btn" data-demo-detail aria-pressed="false">演示细节</button>
       </header>
       <div class="ex-grid">
         <aside class="wall wall-left">
@@ -80,7 +82,7 @@ export function mountPorcelain(root: HTMLElement): () => void {
             <h2>风格锁定</h2>
           </div>
           <p class="wall-lead">先选定时代约束，再选器型与釉色。冲突不生成「好看的错」，而是改锁并写明理由。</p>
-          <p class="engine-chip">约束表引擎 · table.ts lookup</p>
+          <p class="engine-chip demo-only">约束表引擎 · table.ts lookup</p>
           <div class="field">
             <span class="field-l">器型</span>
             <div class="chips" data-kind="shape"></div>
@@ -116,7 +118,7 @@ export function mountPorcelain(root: HTMLElement): () => void {
             </details>
           </section>
           <div class="lock-card" data-lock></div>
-          <div class="craft" data-craft>
+          <div class="craft demo-only" data-craft>
             <p class="field-l">程序参数 · 证明不是贴图</p>
             <label class="craft-row">青花浓度 <b data-cobalt-n>0.70</b>
               <input type="range" min="0.35" max="1" step="0.05" value="0.70" data-cobalt />
@@ -137,11 +139,11 @@ export function mountPorcelain(root: HTMLElement): () => void {
           <canvas class="vitrine" aria-label="旋转体几何展柜"></canvas>
           <p class="restore-mark">⚠️ 示意模型 · 程序复原非三维扫描</p>
           <button type="button" class="chip is-wire" data-wire>线框</button>
-          <div class="speed-toggle" data-speed-toggle role="group" aria-label="升采样速度">
+          <div class="speed-toggle demo-only" data-speed-toggle role="group" aria-label="升采样速度">
             <button type="button" class="chip is-speed is-on" data-speed="instant">瞬时</button>
             <button type="button" class="chip is-speed" data-speed="demo">慢放演示(评委)</button>
           </div>
-          <pre class="shader-chip" aria-hidden="true"><b>几何现场</b>new THREE.LatheGeometry(outerPts, 160)
+          <pre class="shader-chip demo-only" aria-hidden="true"><b>几何现场</b>new THREE.LatheGeometry(outerPts, 160)
 // craquelure: canvas 2D branching lines
 // density/length follow craft.crack
 // roughness (white) + albedo (multiply)
@@ -156,11 +158,11 @@ export function mountPorcelain(root: HTMLElement): () => void {
             <p class="parse-via" data-parse-via></p>
             <pre class="parse-json" data-parse-json></pre>
           </div>
-          <figure class="build-loop-fig" aria-hidden="true">
+          <figure class="build-loop-fig demo-only" aria-hidden="true">
             <canvas class="build-loop" width="140" height="180" aria-label="剖面示意"></canvas>
             <figcaption>剖面示意</figcaption>
           </figure>
-          <div class="geo-hud-stack">
+          <div class="geo-hud-stack demo-only">
             <p class="geo-hud" data-geo-hud>瞬时完成 · segs 160</p>
             <details class="build-log" data-build-log>
               <summary>生成溯源</summary>
@@ -197,6 +199,7 @@ export function mountPorcelain(root: HTMLElement): () => void {
   const canvas = root.querySelector("canvas.vitrine") as HTMLCanvasElement;
   const labelEl = root.querySelector("[data-label]") as HTMLElement;
   const pipe = mountPipeline(root.querySelector("[data-pipe]") as HTMLElement, routeName("ciyu"));
+  bindDemoDetailToggle(root);
   const ask = mountAsk(
     root.querySelector("[data-ask]") as HTMLElement,
     porcelainQA,

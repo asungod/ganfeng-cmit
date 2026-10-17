@@ -25,6 +25,7 @@ import {
 } from "../data/hakka";
 import { ambience } from "../render/ambience";
 import { guide, lines } from "../app/guide";
+import { bindDemoDetailToggle } from "../app/demoDetail";
 import { RoomView } from "../render/roomview";
 import { markTry, renderEvidence } from "../app/evidence";
 import { hakkaRule } from "../data/evidenceRules";
@@ -52,6 +53,7 @@ export function mountHakka(root: HTMLElement): () => void {
           <span>赣南围屋 · 可走的宗族与防御</span>
         </div>
         <span class="stamp">示意平面 · 非某一文保测绘</span>
+              <button type="button" class="chip demo-detail-btn" data-demo-detail aria-pressed="false">演示细节</button>
       </header>
       <div class="kejia-grid">
         <section class="plan-wrap">
@@ -83,7 +85,7 @@ export function mountHakka(root: HTMLElement): () => void {
           </div>
           <section class="matrix" data-matrix>
             <p class="kicker">约束表 · 查找</p>
-            <p class="engine-chip">约束表引擎 · table.ts lookup</p>
+            <p class="engine-chip demo-only">约束表引擎 · table.ts lookup</p>
             <table class="matrix-table">
               <thead>
                 <tr>
@@ -119,6 +121,7 @@ export function mountHakka(root: HTMLElement): () => void {
   const roomEl = root.querySelector("[data-room]") as HTMLElement;
   const citesEl = root.querySelector("[data-cites]") as HTMLElement;
   const pipe = mountPipeline(root.querySelector("[data-pipe]") as HTMLElement, routeName("kejia"));
+  bindDemoDetailToggle(root);
   mountAsk(
     root.querySelector("[data-ask]") as HTMLElement,
     hakkaQA,

@@ -29,8 +29,12 @@ export class Guide {
   speak(text: string): void {
     const clean = text.replace(/\s+/g, " ").trim();
     if (!clean) return;
+    // Visitor default: no floating bubble over the 3D stage unless 讲解 is on.
+    if (!this.enabled) {
+      if (this.lineEl) this.lineEl.textContent = "";
+      return;
+    }
     if (this.lineEl) this.lineEl.textContent = clean;
-    if (!this.enabled) return;
     const synth = window.speechSynthesis;
     if (!synth) return;
     synth.cancel();

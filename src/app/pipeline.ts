@@ -27,13 +27,19 @@ const hints: Record<PipelineStage, string> = {
 export function mountPipeline(parent: HTMLElement, line = ""): PipelineHandle {
   const root = document.createElement("div");
   root.className = "pipeline";
+  // Collapsed by default for visitors; open when body has is-demo-detail or hash demo flags.
+  const openPipe = typeof document !== "undefined" && document.body.classList.contains("is-demo-detail");
   root.innerHTML = `
-    <div class="pipeline-meta">
-      <span class="pipeline-kicker">可见生成管线</span>
-      <span class="pipeline-honest">本机演示时序，不是云端 GPU</span>
-    </div>
-    <ol class="pipeline-steps"></ol>
-    <p class="pipeline-note">交互输入：点选或把问句写入约束，不发送到外部模型。</p>
+    <details class="pipeline-fold" data-pipeline-fold ${openPipe ? "open" : ""}>
+      <summary class="pipeline-sum">
+        <span class="pipeline-kicker">可见生成管线</span>
+        <span class="pipeline-honest">本机演示时序 · 点开查看</span>
+      </summary>
+      <div class="pipeline-body">
+        <ol class="pipeline-steps"></ol>
+        <p class="pipeline-note">交互输入：点选或把问句写入约束，不发送到外部模型。</p>
+      </div>
+    </details>
   `;
   parent.appendChild(root);
   const ol = root.querySelector(".pipeline-steps") as HTMLOListElement;
@@ -46,7 +52,9 @@ export function mountPipeline(parent: HTMLElement, line = ""): PipelineHandle {
     ol.appendChild(li);
   }
   const sys = mountSys(root);
-  root.querySelector(".pipeline-meta")?.after(sys.root);
+  const body = root.querySelector(".pipeline-body");
+  if (body) body.prepend(sys.root);
+  else root.prepend(sys.root);
   if (line) sys.set({ line });
 
   let token = 0;

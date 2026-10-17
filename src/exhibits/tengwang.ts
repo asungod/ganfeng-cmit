@@ -22,6 +22,7 @@ import {
 import { PavilionScene } from "../render/pavilion";
 import { ambience } from "../render/ambience";
 import { guide, lines } from "../app/guide";
+import { bindDemoDetailToggle } from "../app/demoDetail";
 import { markTry, renderEvidence } from "../app/evidence";
 import { tengwangRule } from "../data/evidenceRules";
 import { routeName, t } from "../app/i18n";
@@ -49,6 +50,7 @@ export function mountTengwang(root: HTMLElement): () => void {
           <span>滕王阁 · 诗文意象钉在画面上</span>
         </div>
         <span class="stamp">原文公有领域 · 导览为示例</span>
+              <button type="button" class="chip demo-detail-btn" data-demo-detail aria-pressed="false">演示细节</button>
       </header>
       <div class="gexu-stage">
         <div class="painting-wrap">
@@ -67,7 +69,7 @@ export function mountTengwang(root: HTMLElement): () => void {
           </div>
           <section class="matrix" data-matrix>
             <p class="kicker">约束表 · 查找</p>
-            <p class="engine-chip">约束表引擎 · table.ts lookup</p>
+            <p class="engine-chip demo-only">约束表引擎 · table.ts lookup</p>
             <table class="matrix-table">
               <thead>
                 <tr>
@@ -107,6 +109,7 @@ export function mountTengwang(root: HTMLElement): () => void {
   const citesEl = root.querySelector("[data-cites]") as HTMLElement;
   const canvas = root.querySelector("canvas.dusk") as HTMLCanvasElement;
   const pipe = mountPipeline(root.querySelector("[data-pipe]") as HTMLElement, routeName("gexu"));
+  bindDemoDetailToggle(root);
   mountAsk(
     root.querySelector("[data-ask]") as HTMLElement,
     tengwangQA,
