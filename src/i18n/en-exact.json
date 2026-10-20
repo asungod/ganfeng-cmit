@@ -1,7 +1,7 @@
 {
 "全国大学生数字媒体科技作品及创意竞赛": "China Collegiate Computing Competition — Digital Media Track (CMIT)",
 "可对话的数字展": "A Conversational Digital Exhibition",
-"智能交互创新在于：冲突组合触发约束表规则，规则本身可展开审计，改锁过程在矩阵上可追溯回放（冲格×→规则条目→改锁格）。": "The interaction idea: a conflicting combination fires a constraint-table rule; the rule itself can be opened and audited; and the conflict-resolution (改锁) is replayed on the matrix (conflict cell × → rule entry → resolved cell).",
+"智能交互创新在于：冲突组合触发约束表规则，规则本身可展开审计，改锁过程在矩阵上可追溯回放（冲格×→规则条目→改锁格）。": "The interaction idea: a conflicting combination fires a constraint-table rule; the rule itself can be opened and audited; and the conflict resolution is replayed on the matrix (conflict cell × → rule entry → resolved cell).",
 "本地 BGE-small 语义匹配 + table.ts 确定性路由为工程支撑（非卖点）；三线共用同一查找接口是实现。": "Engineering support (not the selling point): local BGE-small semantic matching + deterministic routing in table.ts; all three routes share one lookup interface.",
 "先锁时代约束，再选器型与釉色。冲突改锁并写理由。展柜是程序梅瓶，引用钉在旁边。": "Lock the era first, then pick shape and glaze. Conflicts are resolved with a stated reason. The vase is procedural; citations are pinned beside it.",
 "点落霞、孤鹜、秋水。画面与王勃原句绑在一起，不是另写提示词出图。": "Tap sunset clouds, lone duck, autumn water. The scene is bound to Wang Bo's original lines — not a newly prompted image.",
@@ -507,7 +507,7 @@
 "模拟加载失败": "Simulate load failure",
 "对比两条路径": "Compare two paths",
 "规则依据": "Rule basis",
-"冲突改锁": "Conflict-resolution (改锁)",
+"冲突改锁": "Conflict resolved",
 "厅 · 堂": "ting · tang",
 "火角 · 敌楼": "huojiao · dilou",
 "约束表引擎 · 多态调度": "Constraint engine · polymorphic dispatch",
