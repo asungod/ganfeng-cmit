@@ -41,7 +41,7 @@ export function mountTengwang(root: HTMLElement): () => void {
   let solveGen = 0;
 
   root.innerHTML = `
-    <div class="exhibit gexu">
+    <div class="exhibit gexu is-immersive">
       <div class="grain" aria-hidden="true"></div>
       <header class="ex-bar">
         <button type="button" class="text-btn" data-hall>← ${routeName("hall")}</button>
@@ -52,7 +52,7 @@ export function mountTengwang(root: HTMLElement): () => void {
         <span class="stamp">原文公有领域 · 导览为示例</span>
               <button type="button" class="chip demo-detail-btn" data-demo-detail aria-pressed="false">${t("demo.off")}</button>
       </header>
-      <div class="gexu-stage">
+      <div class="gexu-stage immersive">
         <div class="painting-wrap">
           <canvas class="dusk" aria-label="滕王阁程序夜景"></canvas>
           <div class="rewrite-toast" data-toast hidden></div>

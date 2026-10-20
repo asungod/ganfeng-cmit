@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { Flight, loadHdri, makePost, particles, phMat, softDot, type Post } from "./kit";
 import type { ImageId, MoodId } from "../data/tengwang";
 
 const MARK: Record<ImageId, THREE.Vector3> = {
@@ -34,33 +35,38 @@ export class PavilionScene {
   private waterMesh: THREE.Mesh;
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
-  private glow: THREE.Mesh;
+  private glow: THREE.Sprite;
   private markers = new Map<ImageId, THREE.Object3D>();
-  private look = new THREE.Vector3(3.4, 2.4, -12.5);
+  private look = new THREE.Vector3(2.6, 3.2, -12.5);
+  private post!: Post;
+  private flight!: Flight;
+  private mist!: ReturnType<typeof particles>;
+  private started = false;
+  private lastKey = "";
+  private lastT = performance.now();
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.22;
+    this.renderer.toneMappingExposure = 0.78;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.scene = new THREE.Scene();
-    this.fog = new THREE.FogExp2(0x1a1d38, 0.016);
+    this.fog = new THREE.FogExp2(0x8a6a68, 0.009);
     this.scene.fog = this.fog;
     this.scene.background = new THREE.Color(0x1a1d38);
 
     this.camera = new THREE.PerspectiveCamera(38, 1, 0.1, 120);
-    this.camera.position.set(1.6, 3.15, 7.2);
+    this.camera.position.set(-4.2, 3.0, 1.5);
 
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.enablePan = false;
-    this.controls.autoRotate = true;
-    this.controls.autoRotateSpeed = 0.18;
+    this.controls.autoRotate = false;
     this.controls.minDistance = 5;
     this.controls.maxDistance = 30;
     this.controls.minPolarAngle = Math.PI * 0.32;
@@ -94,8 +100,16 @@ export class PavilionScene {
     const pavilion = makePavilion();
     pavilion.position.set(3.4, 0, -12.5);
     pavilion.rotation.y = -0.42;
-    pavilion.scale.setScalar(0.85);
+    pavilion.scale.setScalar(1.1);
     this.scene.add(pavilion);
+    // riverbank embankment the pavilion stands on
+    const bankTop = phMat("brown_mud_dry", [8, 4], { color: 0x8a7a68 });
+    const bankWall = phMat("stone_tiles", [10, 1], { color: 0x8a847a });
+    const bank = new THREE.Mesh(new THREE.BoxGeometry(18, 0.7, 9), [bankWall, bankWall, bankTop, bankTop, bankWall, bankWall]);
+    bank.position.set(4.2, 0.15, -14.2);
+    bank.rotation.y = -0.42;
+    bank.receiveShadow = true;
+    this.scene.add(bank);
     this.markers.set("feige", pavilion);
 
     this.scene.add(makeBoats());
@@ -107,15 +121,13 @@ export class PavilionScene {
     this.scene.add(this.markers.get("yanzhen")!);
 
     this.sun = new THREE.Mesh(
-      new THREE.SphereGeometry(0.85, 24, 24),
-      new THREE.MeshBasicMaterial({ color: 0xffe6b8 }),
+      new THREE.SphereGeometry(0.7, 24, 24),
+      new THREE.MeshBasicMaterial({ color: 0xfff0d0, fog: false }),
     );
     this.sun.position.copy(MARK.luoxia);
     this.scene.add(this.sun);
-    this.glow = new THREE.Mesh(
-      new THREE.SphereGeometry(3.4, 24, 24),
-      new THREE.MeshBasicMaterial({ color: 0xff7a3a, transparent: true, opacity: 0.16, depthWrite: false }),
-    );
+    this.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softDot(), color: 0xff8a4a, transparent: true, opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+    this.glow.scale.setScalar(16);
     this.glow.position.copy(MARK.luoxia);
     this.scene.add(this.glow);
 
@@ -132,9 +144,18 @@ export class PavilionScene {
     this.markers.set("qiushui", this.water);
     this.markers.set("changtian", this.glow);
 
+    this.mist = particles(220, new THREE.Box3(new THREE.Vector3(-34, 0.2, -30), new THREE.Vector3(30, 1.6, -9)), 0xf0d8c8, 2.6, 0.07, "mist");
+    this.scene.add(this.mist.points);
+    loadHdri(this.renderer, this.scene, "qwantani_dusk_2_puresky", true);
+    this.scene.environmentIntensity = 0.55;
+    this.post = makePost(this.renderer, this.scene, this.camera, 0.4, 0.95);
+    this.flight = new Flight(this.camera, this.controls.target);
     this.resize();
     this.applyMood();
-    this.controls.target.copy(this.look);
+    // hero composition: pavilion right, setting sun left over the river
+    this.camera.position.set(-9.5, 2.4, 3.5);
+    this.controls.target.set(1.0, 3.6, -12.5);
+    this.started = true;
     this.loop();
   }
 
@@ -142,6 +163,7 @@ export class PavilionScene {
     const w = this.canvas.clientWidth || 960;
     const h = this.canvas.clientHeight || 540;
     this.renderer.setSize(w, h, false);
+    this.post?.setSize(w, h);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
   }
@@ -177,9 +199,12 @@ export class PavilionScene {
     }
     pos.needsUpdate = true;
     this.waterMesh.geometry.computeVertexNormals();
-    this.controls.target.lerp(this.look, 0.04);
+    const now = performance.now();
+    this.flight.step(Math.min(0.3, (now - this.lastT) / 1000));
+    this.lastT = now;
+    this.mist.update(t);
     this.controls.update();
-    this.renderer.render(this.scene, this.camera);
+    this.post.render();
     this.emitProject();
   };
 
@@ -199,26 +224,35 @@ export class PavilionScene {
 
   applyMood(): void {
     const pal = palette(this.mood, this.focus);
-    this.scene.background = new THREE.Color(pal.zenith);
-    this.fog.color.set(pal.zenith);
+    this.fog.color.set(pal.haze);
+    this.scene.backgroundIntensity = pal.sky;
     this.hemi.color.set(pal.sun);
     this.hemi.groundColor.set(pal.hill);
     this.sunLight.color.set(pal.sun);
     this.sunLight.intensity = pal.key;
-    ((this.water.children[0] as THREE.Mesh).material as THREE.MeshPhongMaterial).color.set(pal.water);
-    (this.glow.material as THREE.MeshBasicMaterial).color.set(pal.glow);
+    ((this.water.children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial).color.set(pal.water);
+    this.glow.material.color.set(pal.glow);
     this.look.copy(MARK[this.focus]);
     if (this.focus === "qiushui" || this.focus === "hantan") this.look.y = 0.4;
     if (this.focus === "changtian") this.look.set(2, 5.5, -8);
-    if (this.focus === "feige") this.look.set(3.4, 3.0, -12.5);
+    if (this.focus === "feige") this.look.set(2.6, 3.2, -12.5);
+    const key = this.focus + "|" + this.mood;
+    if (this.started && this.lastKey && key !== this.lastKey) {
+      const d = { luoxia: 20, guwu: 9, qiushui: 10, changtian: 15, yuzhou: 8, yanzhen: 12, feige: 15, hantan: 8 }[this.focus] ?? 10;
+      const dir = new THREE.Vector3(-0.42, 0.18, 1).normalize();
+      const eye = this.look.clone().addScaledVector(dir, d);
+      eye.y = Math.max(1.4, eye.y);
+      this.flight.go(eye, this.look.clone(), 2.0);
+    }
+    if (this.started) this.lastKey = key;
   }
 }
 
 function palette(mood: MoodId, focus: ImageId) {
-  const dusk = { zenith: 0x1a1d38, sun: 0xffd4a0, glow: 0xff7a3a, hill: 0x2a1a22, water: 0x3a6a88, key: 2.8 };
-  if (mood === "sanyan") return { zenith: 0x2a3348, sun: 0xc9a07a, glow: 0x88aacc, hill: 0x3d4450, water: 0x3a6888, key: 1.8 };
-  if (mood === "yuzhou") return { zenith: 0x1c2438, sun: 0xd4895a, glow: 0xc06030, hill: 0x241818, water: 0x2a5878, key: 2.0 };
-  if (mood === "yanzhen") return { zenith: 0x14182a, sun: 0xb86a55, glow: 0x884030, hill: 0x1a1216, water: 0x2a4868, key: 1.7 };
+  const dusk = { zenith: 0x1a1d38, haze: 0x9a6a5c, sky: 0.75, sun: 0xffc488, glow: 0xff7a3a, hill: 0x2a1a22, water: 0x6a7a88, key: 3.2 };
+  if (mood === "sanyan") return { zenith: 0x2a3348, haze: 0x8a8a94, sky: 0.8, sun: 0xd8c0a0, glow: 0x88aacc, hill: 0x3d4450, water: 0x5a7080, key: 2.2 };
+  if (mood === "yuzhou") return { zenith: 0x1c2438, haze: 0x8a5a52, sky: 0.65, sun: 0xe0905a, glow: 0xc06030, hill: 0x241818, water: 0x4a5a70, key: 2.4 };
+  if (mood === "yanzhen") return { zenith: 0x14182a, haze: 0x4a4458, sky: 0.4, sun: 0xb86a55, glow: 0x884030, hill: 0x1a1216, water: 0x34405a, key: 1.6 };
   if (focus === "changtian") return { ...dusk, zenith: 0x2a3a58, water: 0x4a78a0 };
   return dusk;
 }
@@ -231,12 +265,7 @@ function makeWater(): THREE.Group {
   const g = new THREE.Group();
   const m = new THREE.Mesh(
     new THREE.PlaneGeometry(90, 90, 56, 56),
-    new THREE.MeshPhongMaterial({
-      color: 0x3a6a88,
-      specular: 0xffe2c0,
-      shininess: 90,
-      flatShading: false,
-    }),
+    new THREE.MeshStandardMaterial({ color: 0x6a7a88, roughness: 0.06, metalness: 0.92, envMapIntensity: 1.5 }),
   );
   m.rotation.x = -Math.PI / 2;
   m.receiveShadow = true;
@@ -296,10 +325,10 @@ function makeHills(): THREE.Group {
   // 层叠山脊（远淡近浓），替代早期的压扁球体，避免“积木感”
   const g = new THREE.Group();
   const layers: { z: number; base: number; amp: number; color: number; seed: number; gap?: [number, number] }[] = [
-    { z: -34, base: 2.6, amp: 3.4, color: 0x4a3040, seed: 1.7 },
-    { z: -27, base: 1.8, amp: 2.8, color: 0x382430, seed: 4.1 },
-    { z: -20, base: 0.9, amp: 2.0, color: 0x28181f, seed: 7.3, gap: [-13, 2] },
-    { z: -14, base: 0.4, amp: 1.5, color: 0x1c1116, seed: 9.9, gap: [-16, 11] },
+    { z: -34, base: 2.6, amp: 3.4, color: 0x5a4a5c, seed: 1.7 },
+    { z: -27, base: 1.8, amp: 2.8, color: 0x463a4c, seed: 4.1 },
+    { z: -20, base: 0.9, amp: 2.0, color: 0x30283a, seed: 7.3, gap: [-13, 2] },
+    { z: -14, base: 0.4, amp: 1.5, color: 0x1e1a26, seed: 9.9, gap: [-16, 11] },
   ];
   for (const L of layers) {
     const shape = new THREE.Shape();
@@ -334,10 +363,10 @@ function makeHills(): THREE.Group {
 
 function makePavilion(): THREE.Group {
   const g = new THREE.Group();
-  const stone = mat(0x4a433a, 0.9, 0.04);
-  const stoneDark = mat(0x302a24, 0.92, 0.02);
-  const wood = mat(0x3a1c14, 0.7, 0.04);
-  const dan = mat(0x9a2e22, 0.5, 0.06);
+  const stone = phMat("stone_tiles", [2, 2], { color: 0x9a948a });
+  const stoneDark = phMat("stone_tiles", [3, 3], { color: 0x6a645c });
+  const wood = phMat("dark_wooden_planks", [1, 1], { color: 0x8a5a44 });
+  const dan = phMat("lacquered_cherry_wood", [1, 2], { color: 0xc04030 });
   const gold = mat(0xc6a15b, 0.42, 0.35);
   const tile = new THREE.MeshStandardMaterial({ color: 0x2c3632, roughness: 0.48, metalness: 0.18, side: THREE.DoubleSide });
 
@@ -367,7 +396,7 @@ function makePavilion(): THREE.Group {
     g.add(pole, lamp);
   }
 
-  const paper = new THREE.MeshStandardMaterial({ color: 0xffe2b0, emissive: 0xc07030, emissiveIntensity: 0.6, roughness: 0.6 });
+  const paper = new THREE.MeshStandardMaterial({ color: 0xffe2b0, emissive: 0xc07030, emissiveIntensity: 0.32, roughness: 0.6 });
   const stories = [
     { y0: 1.1, w: 4.8, d: 4.3, h: 1.45, roofW: 7.0, roofD: 6.3, rise: 1.0 },
     { y0: 3.0, w: 3.9, d: 3.5, h: 1.2, roofW: 5.8, roofD: 5.2, rise: 0.95 },
@@ -481,7 +510,7 @@ function brackets(g: THREE.Group, w: number, d: number, y: number, m: THREE.Mate
 }
 
 // 曲面屋顶：举折（上陡下缓）+ 翼角起翘，取代平直四坡面
-function curvedRoof(w: number, d: number, rise: number, tile: THREE.Material, gold: THREE.Material, top: boolean): THREE.Group {
+export function curvedRoof(w: number, d: number, rise: number, tile: THREE.Material, gold: THREE.Material, top: boolean): THREE.Group {
   const g = new THREE.Group();
   const hw = w / 2;
   const hd = d / 2;

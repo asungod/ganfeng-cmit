@@ -26,7 +26,7 @@ import {
 import { ambience } from "../render/ambience";
 import { guide, lines } from "../app/guide";
 import { bindDemoDetailToggle } from "../app/demoDetail";
-import { RoomView } from "../render/roomview";
+import { WeiwuScene } from "../render/weiwu";
 import { markTry, renderEvidence } from "../app/evidence";
 import { hakkaRule } from "../data/evidenceRules";
 import { routeName, t } from "../app/i18n";
@@ -36,7 +36,8 @@ export function mountHakka(root: HTMLElement): () => void {
   let hour: HourId = "dusk";
   let walking = false;
   let firstVisit = true;
-  let view: RoomView | null = null;
+  let view: WeiwuScene | null = null;
+  let firstView = !/#\/?kejia\/./.test(location.hash);
   let lockNote = "";
   let rejected: HourId | null = null;
   let pickRoom: RoomId = room;
@@ -44,7 +45,7 @@ export function mountHakka(root: HTMLElement): () => void {
   let fromTalk = false;
 
   root.innerHTML = `
-    <div class="exhibit kejia">
+    <div class="exhibit kejia is-immersive">
       <div class="grain" aria-hidden="true"></div>
       <header class="ex-bar">
         <button type="button" class="text-btn" data-hall>← ${routeName("hall")}</button>
@@ -55,7 +56,7 @@ export function mountHakka(root: HTMLElement): () => void {
         <span class="stamp">示意平面 · 非某一文保测绘</span>
               <button type="button" class="chip demo-detail-btn" data-demo-detail aria-pressed="false">${t("demo.off")}</button>
       </header>
-      <div class="kejia-grid">
+      <div class="kejia-grid immersive">
         <section class="plan-wrap">
           <p class="kicker">围屋平面 · 点房间即走入</p>
           <svg class="plan" viewBox="0 0 100 100" role="img" aria-label="赣南围屋示意平面">
@@ -65,6 +66,7 @@ export function mountHakka(root: HTMLElement): () => void {
             <circle class="walker" data-walker cx="50" cy="90" r="2.2" />
           </svg>
           <div class="walk-btns">
+            <button type="button" class="chip" data-overview>俯瞰全貌</button>
             <button type="button" class="chip" data-prev>上一段</button>
             <button type="button" class="chip is-on" data-next>沿动线走下一步</button>
           </div>
@@ -389,8 +391,9 @@ export function mountHakka(root: HTMLElement): () => void {
     renderCitations(citesEl, citationsForRoom(id), citationsForRoom(id)[0]?.id);
     if (view) {
       pathEl();
-      view.room = id;
-      view.hour = hour;
+      view.setHour(hour);
+      if (firstView) firstView = false;
+      else view.setRoom(id);
     }
     pipe.sys.set({
       lock: `${h.name}·${r.name}`,
@@ -445,6 +448,10 @@ export function mountHakka(root: HTMLElement): () => void {
       step(1);
       return;
     }
+    if (t.closest("[data-overview]")) {
+      view?.setRoom("overview");
+      return;
+    }
     if (t.closest("[data-prev]")) {
       step(-1);
       return;
@@ -492,7 +499,12 @@ export function mountHakka(root: HTMLElement): () => void {
     }
   });
 
-  view = new RoomView(root.querySelector("canvas.room-view") as HTMLCanvasElement);
+  try {
+    view = new WeiwuScene(root.querySelector("canvas.room-view") as HTMLCanvasElement);
+  } catch (err) {
+    console.warn("kejia weiwu: WebGL unavailable", err);
+    view = null;
+  }
   const onResize = () => view?.resize();
   window.addEventListener("resize", onResize);
   void ambience.set("earth");

@@ -6,6 +6,7 @@ import { formatLookupLine, pushLookupLog } from "../app/engineHud";
 import { compatWord, routeName, t } from "../app/i18n";
 import { bindDemoDetailToggle } from "../app/demoDetail";
 import { wanshouRule } from "../data/evidenceRules";
+import { TempleScene } from "../render/temple";
 import { acts, actCompat, preferredSlot, slotByAct, slots, type ActId, type SlotId } from "../data/wanshou";
 
 export function mountWanshou(root: HTMLElement): () => void {
@@ -16,14 +17,15 @@ export function mountWanshou(root: HTMLElement): () => void {
   const nameS = (s: string) => slots.find((x) => x.id === s)?.name ?? s;
 
   root.innerHTML = `
-    <div class="exhibit wanshou">
+    <div class="exhibit wanshou is-immersive">
       <header class="ex-bar">
         <button type="button" class="text-btn" data-hall>← ${routeName("hall")}</button>
         <div class="ex-crumb"><b>${routeName("wanshou")}</b><span>西山万寿宫庙会 · 活动与时段的约束（扩展演示线）</span></div>
-        <span class="stamp">模板演示 · 无三维场景</span>
+        <span class="stamp">程序复原示意 · 非测绘</span>
         <button type="button" class="chip demo-detail-btn" data-demo-detail aria-pressed="false">${t("demo.off")}</button>
       </header>
-      <section class="ws-panel">
+      <div class="immersive ws-stage"><div class="painting-wrap"><canvas class="temple" aria-label="万寿宫庙会三维场景"></canvas></div></div>
+      <section class="ws-panel ws-card">
         <details class="wall-hint" data-wall-hint>
           <summary>怎么选</summary>
           <p class="wall-lead">点选活动与时段即可；约束表与规则审计收在下方。</p>
@@ -48,6 +50,14 @@ export function mountWanshou(root: HTMLElement): () => void {
       </section>
     </div>`;
   const $ = (s: string) => root.querySelector(s) as HTMLElement;
+  let scene: TempleScene | null = null;
+  try {
+    scene = new TempleScene(root.querySelector("canvas.temple") as HTMLCanvasElement);
+  } catch (err) {
+    console.warn("wanshou temple: WebGL unavailable", err);
+  }
+  const onResize = () => scene?.resize();
+  window.addEventListener("resize", onResize);
   bindDemoDetailToggle(root);
 
   function render(): void {
@@ -83,6 +93,7 @@ export function mountWanshou(root: HTMLElement): () => void {
       (a, b) => actCompat(a as ActId, b as SlotId),
       (a, b) => `${nameA(a)} × ${nameS(b)}`,
     );
+    scene?.set(act, slot);
     const audit = root.querySelector("[data-audit]") as HTMLDetailsElement | null;
     const fold = root.querySelector("[data-matrix-fold]") as HTMLDetailsElement | null;
     const c = actCompat(act, slot);
@@ -143,5 +154,9 @@ export function mountWanshou(root: HTMLElement): () => void {
   };
   root.addEventListener("click", onClick);
   render();
-  return () => root.removeEventListener("click", onClick);
+  return () => {
+    root.removeEventListener("click", onClick);
+    window.removeEventListener("resize", onResize);
+    scene?.dispose();
+  };
 }

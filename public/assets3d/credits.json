@@ -1,0 +1,168 @@
+[
+ {
+  "id": "qwantani_dusk_2_puresky",
+  "name": "Qwantani Dusk 2 (Pure Sky)",
+  "type": "HDRI",
+  "authors": [
+   "Greg Zaal",
+   "Jarod Guest"
+  ],
+  "url": "https://polyhaven.com/a/qwantani_dusk_2_puresky",
+  "files": [
+   "qwantani_dusk_2_puresky_1k.hdr"
+  ]
+ },
+ {
+  "id": "qwantani_sunset_puresky",
+  "name": "Qwantani Sunset (Pure Sky)",
+  "type": "HDRI",
+  "authors": [
+   "Greg Zaal",
+   "Jarod Guest"
+  ],
+  "url": "https://polyhaven.com/a/qwantani_sunset_puresky",
+  "files": [
+   "qwantani_sunset_puresky_1k.hdr"
+  ]
+ },
+ {
+  "id": "qwantani_night_puresky",
+  "name": "Qwantani Night (Pure Sky)",
+  "type": "HDRI",
+  "authors": [
+   "Greg Zaal",
+   "Jarod Guest"
+  ],
+  "url": "https://polyhaven.com/a/qwantani_night_puresky",
+  "files": [
+   "qwantani_night_puresky_1k.hdr"
+  ]
+ },
+ {
+  "id": "qwantani_puresky",
+  "name": "Qwantani (Pure Sky)",
+  "type": "HDRI",
+  "authors": [
+   "Greg Zaal",
+   "Jarod Guest"
+  ],
+  "url": "https://polyhaven.com/a/qwantani_puresky",
+  "files": [
+   "qwantani_puresky_1k.hdr"
+  ]
+ },
+ {
+  "id": "clay_plaster",
+  "name": "Clay Plaster",
+  "type": "PBR texture",
+  "authors": [
+   "Amal Kumar"
+  ],
+  "url": "https://polyhaven.com/a/clay_plaster",
+  "files": [
+   "clay_plaster_diff_1k.jpg",
+   "clay_plaster_nor_1k.jpg",
+   "clay_plaster_rough_1k.jpg"
+  ]
+ },
+ {
+  "id": "grey_roof_tiles",
+  "name": "Grey Roof Tiles",
+  "type": "PBR texture",
+  "authors": [
+   "Rob Tuytel"
+  ],
+  "url": "https://polyhaven.com/a/grey_roof_tiles",
+  "files": [
+   "grey_roof_tiles_diff_1k.jpg",
+   "grey_roof_tiles_nor_1k.jpg",
+   "grey_roof_tiles_rough_1k.jpg"
+  ]
+ },
+ {
+  "id": "dark_wooden_planks",
+  "name": "Dark Wooden Planks",
+  "type": "PBR texture",
+  "authors": [
+   "Amal Kumar"
+  ],
+  "url": "https://polyhaven.com/a/dark_wooden_planks",
+  "files": [
+   "dark_wooden_planks_diff_1k.jpg",
+   "dark_wooden_planks_nor_1k.jpg",
+   "dark_wooden_planks_rough_1k.jpg"
+  ]
+ },
+ {
+  "id": "stone_tiles",
+  "name": "Stone Tiles",
+  "type": "PBR texture",
+  "authors": [
+   "Christopher Melani"
+  ],
+  "url": "https://polyhaven.com/a/stone_tiles",
+  "files": [
+   "stone_tiles_diff_1k.jpg",
+   "stone_tiles_nor_1k.jpg",
+   "stone_tiles_rough_1k.jpg"
+  ]
+ },
+ {
+  "id": "brown_mud_dry",
+  "name": "Brown Mud Dry",
+  "type": "PBR texture",
+  "authors": [
+   "Rob Tuytel"
+  ],
+  "url": "https://polyhaven.com/a/brown_mud_dry",
+  "files": [
+   "brown_mud_dry_diff_1k.jpg",
+   "brown_mud_dry_nor_1k.jpg",
+   "brown_mud_dry_rough_1k.jpg"
+  ]
+ },
+ {
+  "id": "red_plaster_weathered",
+  "name": "Red Plaster Weathered",
+  "type": "PBR texture",
+  "authors": [
+   "Amal Kumar"
+  ],
+  "url": "https://polyhaven.com/a/red_plaster_weathered",
+  "files": [
+   "red_plaster_weathered_diff_1k.jpg",
+   "red_plaster_weathered_nor_1k.jpg",
+   "red_plaster_weathered_rough_1k.jpg"
+  ]
+ },
+ {
+  "id": "lacquered_cherry_wood",
+  "name": "Lacquered Cherry Wood",
+  "type": "PBR texture",
+  "authors": [
+   "Jenelle van Heerden",
+   "Rico Cilliers"
+  ],
+  "url": "https://polyhaven.com/a/lacquered_cherry_wood",
+  "files": [
+   "lacquered_cherry_wood_diff_1k.jpg",
+   "lacquered_cherry_wood_nor_1k.jpg",
+   "lacquered_cherry_wood_rough_1k.jpg"
+  ]
+ },
+ {
+  "id": "weathered_planks",
+  "name": "Weathered Planks",
+  "type": "PBR texture",
+  "authors": [
+   "Dario Barresi",
+   "Dimitrios Savva"
+  ],
+  "url": "https://polyhaven.com/a/weathered_planks",
+  "files": [
+   "weathered_planks_diff_1k.jpg",
+   "weathered_planks_nor_1k.jpg",
+   "weathered_planks_rough_1k.jpg"
+  ]
+ }
+]

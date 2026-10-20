@@ -87,6 +87,8 @@ export function mountHall(root: HTMLElement): () => void {
             <li>瓷语矩阵点格子可改规则；阁序意象矩阵钉回原句；客家时辰×空间矩阵约束动线。LatheGeometry 实时生成（segs 160），支持瞬时/慢放。</li>
             <li>独立出处卡片，含引用标记。三条线内容、约束矩阵、引用条与动线为原创。</li>
           </ul>
+          <h3 class="about-credits-h">${L("素材致谢（CC0）", "Asset credits (CC0)")}</h3>
+          <ul class="about-credits" data-credits></ul>
           <p class="about-lic">资料为示例，非馆方官方。代码许可见仓库说明。</p>
           <button type="button" class="text-btn" data-close>关闭</button>
         </div>
@@ -107,6 +109,16 @@ export function mountHall(root: HTMLElement): () => void {
     }
     if (t.closest("[data-about]")) {
       root.querySelector<HTMLDialogElement>("[data-dialog]")?.showModal();
+      const ul = root.querySelector<HTMLElement>("[data-credits]");
+      if (ul && !ul.childElementCount)
+        void fetch("./assets3d/credits.json")
+          .then((r) => r.json())
+          .then((list: { name: string; type: string; authors: string[]; url: string }[]) => {
+            ul.innerHTML = list
+              .map((c) => `<li>${c.name} · ${c.type} · ${c.authors.join(", ")} · <a href="${c.url}" target="_blank" rel="noopener">Poly Haven</a> · CC0</li>`)
+              .join("");
+          })
+          .catch(() => undefined);
     }
     if (t.closest("[data-close]")) {
       root.querySelector<HTMLDialogElement>("[data-dialog]")?.close();

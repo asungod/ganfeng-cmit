@@ -2700,3 +2700,79 @@ html[lang="en"] .kicker { letter-spacing: 0.1em; }
 .wanshou { align-content: start; }
 .wanshou .ws-panel { align-self: start; height: auto; max-height: none; }
 .exhibit.wanshou { grid-template-rows: auto auto 1fr; overflow: auto; }
+
+/* ====== r21 immersive halls: full-bleed 3D hero + glass overlays ====== */
+:root { --glass: rgba(14, 11, 9, 0.52); --glass-line: rgba(232, 200, 140, 0.2); }
+.glass, .immersive .plan-wrap, .immersive .room-panel, .immersive .poem-rail,
+.exhibit.is-immersive > .gexu-ask, .immersive .ws-card {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  backdrop-filter: blur(16px) saturate(1.25);
+  border: 1px solid var(--glass-line);
+  border-radius: 12px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 240, 210, 0.06);
+}
+.exhibit.is-immersive { grid-template-rows: auto 1fr; position: relative; overflow: hidden; }
+.exhibit.is-immersive > .ex-bar {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 6; border-bottom: none;
+  background: linear-gradient(180deg, rgba(8, 6, 4, 0.72), rgba(8, 6, 4, 0));
+}
+.exhibit.is-immersive > .ex-pipe { display: none; }
+.exhibit.is-immersive.is-demo-detail > .ex-pipe { display: block; position: absolute; left: 1rem; bottom: 0.4rem; z-index: 7; }
+.immersive { position: relative !important; display: block !important; grid-row: 1 / -1; min-height: 0; height: 100%; }
+.immersive .room-view-wrap, .immersive .painting-wrap { position: absolute !important; inset: 0; background: #000; box-shadow: none; }
+.immersive canvas { width: 100% !important; height: 100% !important; display: block; }
+.immersive .vitrine-cap, .immersive .walk-path { display: none; }
+.immersive .restore-mark { position: absolute; left: 50%; transform: translateX(-50%); top: 4.2rem; margin: 0; font-size: 0.62rem; opacity: 0.6; letter-spacing: 0.08em; white-space: nowrap; z-index: 3; }
+.immersive .plan-wrap .restore-mark { display: none; }
+
+/* Kejia: minimap top-left, room card right, ask bottom */
+.immersive .plan-wrap { position: absolute; left: 1rem; top: 4.4rem; width: 13.5rem; padding: 0.7rem 0.75rem; z-index: 4; display: block; }
+.immersive .plan { min-height: 0; height: auto; aspect-ratio: 1; background: transparent; }
+.immersive .plan-wrap .kicker { margin: 0 0 0.35rem; font-size: 0.62rem; }
+.immersive .walk-btns { flex-wrap: wrap; gap: 0.35rem; padding: 0.45rem 0 0; }
+.immersive .walk-btns .chip { font-size: 0.7rem; padding: 0.3rem 0.5rem; }
+.immersive .room-panel { position: absolute; right: 1rem; top: 4.4rem; bottom: 1rem; width: 21rem; padding: 0.9rem 1rem; z-index: 4; border-left: 1px solid var(--glass-line); }
+.immersive .room-card h3 { font-size: 1.9rem; letter-spacing: 0.04em; }
+
+/* ask as a floating bar along the bottom between the side cards */
+.exhibit.is-immersive > .gexu-ask {
+  position: absolute; z-index: 5; left: 15.5rem; right: 23rem; bottom: 1rem; max-height: 34vh;
+  padding: 0.6rem 0.9rem; border-top: 1px solid var(--glass-line);
+}
+.exhibit.is-immersive > .gexu-ask .ask { grid-template-columns: 1fr; gap: 0.45rem; }
+.exhibit.is-immersive > .gexu-ask .ask-h .ask-blurb { display: none; }
+.exhibit.is-immersive > .gexu-ask .ask-h { display: flex; align-items: baseline; gap: 0.7rem; flex-wrap: wrap; }
+.exhibit.is-immersive > .gexu-ask .ask-h h3 { font-size: 0.95rem; margin: 0; }
+.exhibit.is-immersive > .gexu-ask .ask-slips { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.exhibit.is-immersive > .gexu-ask .slip { font-size: 0.7rem; padding: 0.3rem 0.45rem; background: rgba(255, 240, 210, 0.04); border-radius: 6px; }
+.exhibit.is-immersive > .gexu-ask .ask-form { display: flex; gap: 0.4rem; }
+.exhibit.is-immersive > .gexu-ask .ask-form input { flex: 1; min-height: 2.1rem; border-radius: 6px; background: rgba(0, 0, 0, 0.3); }
+.exhibit.is-immersive > .gexu-ask .ask-form button { min-height: 2.1rem; border-radius: 6px; padding: 0 0.9rem; }
+@media (max-width: 1350px) {
+  .exhibit.is-immersive > .gexu-ask .ask-slips { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .exhibit.is-immersive > .gexu-ask .slip:nth-child(n+3) { display: none; }
+}
+.is-immersive .chip, .is-immersive .chips button { border-radius: 6px; }
+.is-immersive .chip.is-on { box-shadow: 0 0 0 1px rgba(255, 220, 160, 0.5), 0 0 18px rgba(255, 190, 110, 0.25); }
+/* Gexu immersive: poem card right, hotspots over the scene */
+.immersive .poem-rail { position: absolute; right: 1rem; top: 4.4rem; bottom: 1rem; width: 21rem; padding: 0.9rem 1rem; z-index: 4; overflow: auto; border-left: 1px solid var(--glass-line); }
+.gexu.is-immersive > .gexu-ask { left: 1rem; }
+.immersive .hotspots { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.immersive .hotspots .hot { pointer-events: auto; }
+.immersive .hot span {
+  background: rgba(14, 10, 8, 0.45); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 225, 170, 0.35); border-radius: 999px; padding: 0.22rem 0.7rem; font-family: var(--serif);
+}
+.immersive .hot.is-on span { background: rgba(255, 214, 150, 0.9); color: #2a1a10; box-shadow: 0 0 22px rgba(255, 190, 110, 0.6); }
+.immersive .poem li { line-height: 1.8; }
+.immersive .hotspots .hot { background: none !important; border: none !important; box-shadow: none !important; }
+/* Wanshou immersive */
+.exhibit.wanshou.is-immersive { grid-template-rows: auto 1fr; overflow: hidden; }
+.wanshou .ws-stage { position: absolute !important; inset: 0; }
+.wanshou.is-immersive .ws-panel.ws-card {
+  position: absolute; left: 1rem; top: 4.4rem; width: 20rem; max-height: calc(100% - 5.4rem); overflow: auto;
+  margin: 0; z-index: 4; padding: 1rem 1.1rem;
+}
+.wanshou.is-immersive .ws-panel .chip { font-size: 0.8rem; }
+.about-credits { font-size: 0.74rem; line-height: 1.6; color: var(--paper-dim); max-height: 12rem; overflow: auto; padding-left: 1rem; } .about-credits-h { font-size: 0.9rem; margin: 0.8rem 0 0.3rem; color: var(--gold); }
