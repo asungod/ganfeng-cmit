@@ -65,7 +65,7 @@ export function mountPorcelain(root: HTMLElement): () => void {
 
 
   root.innerHTML = `
-    <div class="exhibit ciyu">
+    <div class="exhibit ciyu is-immersive">
       <div class="grain" aria-hidden="true"></div>
       <header class="ex-bar">
         <button type="button" class="text-btn" data-hall>← ${routeName("hall")}</button>
@@ -75,7 +75,7 @@ export function mountPorcelain(root: HTMLElement): () => void {
         </div>
         <button type="button" class="chip demo-detail-btn" data-demo-detail aria-pressed="false">${t("demo.off")}</button>
       </header>
-      <div class="ex-grid">
+      <div class="ex-grid immersive">
         <aside class="wall wall-left">
           <p class="kicker">约束面板</p>
           <div class="lock-dock">

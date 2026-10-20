@@ -2788,3 +2788,16 @@ html[lang="en"] .kicker { letter-spacing: 0.1em; }
 .immersive .matrix, .immersive .lock-dock { border: none !important; background: none !important; padding: 0 !important; }
 .immersive .cites .cite, .immersive .cites > * { background: rgba(255, 240, 210, 0.03); border-radius: 8px; }
 .immersive .field-l, .immersive .kicker { font-size: 0.62rem; letter-spacing: 0.14em; }
+/* Ciyu immersive */
+.immersive .vitrine-wrap { position: absolute !important; inset: 0; }
+.immersive .wall.wall-left, .immersive .wall.wall-right {
+  position: absolute; top: 4.4rem; bottom: 1rem; z-index: 4; overflow: auto; padding: 0.9rem 1rem;
+  background: var(--glass); -webkit-backdrop-filter: blur(16px) saturate(1.25); backdrop-filter: blur(16px) saturate(1.25);
+  border: 1px solid var(--glass-line) !important; border-radius: 12px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  display: flex; flex-direction: column; gap: 0.6rem; scrollbar-width: thin;
+}
+.immersive .wall.wall-left { left: 1rem; width: 17.5rem; }
+.immersive .wall.wall-right { right: 1rem; width: 21rem; }
+.immersive .wall > * { margin: 0 !important; }
+.ciyu.is-immersive .museum-label { left: 19.5rem; bottom: 1.2rem; border-radius: 8px; }
+.ciyu.is-immersive .restore-mark { top: 4.6rem; }
