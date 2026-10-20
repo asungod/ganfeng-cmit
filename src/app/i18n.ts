@@ -94,7 +94,7 @@ const EN: Dict = {
   "chrome.guideOff": "Guide off",
   "chrome.guideOn": "Guide on",
   "chrome.lang": "中文",
-  "chrome.langTitle": "切换为中文界面壳层",
+  "chrome.langTitle": "切换为中文 / Switch to Chinese",
   "route.hall": "Lobby",
   "route.ciyu": "Porcelain Whispers",
   "route.gexu": "Tengwang Preface",
@@ -116,7 +116,7 @@ const EN: Dict = {
   "sys.statePrefix": "state",
   "sys.frame": "frame",
   "ask.kicker": "Ask the Exhibit · local guide",
-  "ask.title": "Ask about this cabinet",
+  "ask.title": "Ask this exhibit",
   "ask.blurb": "Pick a slip or type a question; answers stay in this exhibit pack with sources.",
   "ask.blurbTech":
     "Local BGE-small embeddings + constraint routing: slot cosine ≥0.40 writes a constraint; bank score ≥0.55 answers with a source; otherwise refuse.",
@@ -169,7 +169,9 @@ const EN: Dict = {
   "ui.howto": "How to choose",
 };
 
-let lang: Lang = (localStorage.getItem("gf-lang") as Lang) || "zh";
+const urlLang = /[?&#]lang=(en|zh)\b/.exec(location.search + location.hash)?.[1] as Lang | undefined;
+if (urlLang) localStorage.setItem("gf-lang", urlLang);
+let lang: Lang = urlLang || (localStorage.getItem("gf-lang") as Lang) || "zh";
 const listeners = new Set<() => void>();
 
 export function getLang(): Lang {
@@ -213,3 +215,5 @@ export function tagLabel(tag: string): string {
   if (tag === "例外" || tag === "Exception") return t("ev.tag.exc");
   return tag;
 }
+
+if (lang === "en") document.title = "Ganfeng · A Conversational Digital Exhibition";

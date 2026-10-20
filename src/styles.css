@@ -2655,3 +2655,48 @@ body.is-demo-detail .pipeline-fold:not([data-user-fold]) {
   border-top: 1px solid rgba(198, 161, 91, 0.12);
 }
 .exhibit.is-demo-detail .ex-pipe { display: block; }
+
+/* —— r20 polish: header never collides with fixed chrome; quieter stamp; HUD only for judges —— */
+.ex-bar { padding-right: 17.5rem; min-height: 3.4rem; }
+.ex-bar .stamp {
+  margin-left: auto; border-color: rgba(178, 74, 54, 0.45); color: rgba(214, 120, 96, 0.85);
+  font-size: 0.62rem; letter-spacing: 0.06em; padding: 0.15rem 0.4rem; white-space: nowrap;
+  max-width: 22rem; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0;
+}
+.ex-bar .stamp + .demo-detail-btn { margin-left: 0; }
+.ex-crumb { min-width: 0; }
+.ex-crumb span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 34rem; vertical-align: bottom; }
+.engine-hud-dock { display: none !important; }
+body:has(.exhibit.is-demo-detail) .engine-hud-dock,
+body:has(.ask-judge[open]) .engine-hud-dock,
+body:has(.hall-arch) .engine-hud-dock { display: flex !important; }
+@media (max-width: 1180px) { .ex-crumb span { display: none; } }
+/* EN translations: always a plain readable face, never the calligraphy display font */
+.en-tr { font-family: var(--sans, "Inter", system-ui, sans-serif) !important; font-style: normal; font-size: 0.82rem !important; line-height: 1.55; letter-spacing: 0.01em; color: var(--paper-dim); opacity: 1; }
+.ex-bar .demo-detail-btn { white-space: nowrap; }
+html[lang="en"] .plan-room text { font-size: 2.5px; }
+html[lang="en"] .kicker { letter-spacing: 0.1em; }
+.en-tr-tag { display: block; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 0.1rem; }
+/* museum label: corner plaque, no wide letter-spacing, clear of the piece */
+.museum-label { left: 0.75rem; bottom: 0.75rem; }
+.exhibit:not(.is-demo-detail) .museum-label { max-width: 12.5rem; }
+.ml-title { letter-spacing: 0.04em; font-size: 0.88rem; }
+.ml-meta { letter-spacing: 0.04em; flex-wrap: wrap; gap: 0.2rem 0.6rem; }
+.exhibit:not(.is-demo-detail) .ml-note { display: none; }
+/* Wanshou: compact card, rows never stretch */
+.wanshou .ws-panel {
+  align-content: start; grid-auto-rows: max-content; max-width: 760px; margin: 2.2rem auto;
+  padding: 1.4rem 1.6rem 1.6rem; border: 1px solid var(--line); background: rgba(20, 16, 12, 0.55); gap: 0.55rem;
+}
+.wanshou .ws-panel .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: flex-start; }
+.wanshou .ws-panel .chip { height: auto; padding: 0.45rem 0.85rem; }
+.wanshou .ws-panel .kicker { margin: 0.6rem 0 0; }
+.wanshou .wall-hint { min-height: 0; }
+.wanshou .ws-pick { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--line); font-family: var(--serif); font-size: 1.05rem; }
+.wanshou .matrix { min-height: 0; }
+/* Large screens: scale the whole UI so 1920×1080 isn't a sea of tiny text */
+@media (min-width: 1600px) { html { font-size: 19px; } }
+@media (min-width: 2200px) { html { font-size: 22px; } }
+.wanshou { align-content: start; }
+.wanshou .ws-panel { align-self: start; height: auto; max-height: none; }
+.exhibit.wanshou { grid-template-rows: auto auto 1fr; overflow: auto; }

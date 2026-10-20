@@ -143,7 +143,7 @@ export function mountPorcelain(root: HTMLElement): () => void {
         <section class="vitrine-wrap">
           <canvas class="vitrine" aria-label="旋转体几何展柜"></canvas>
           <p class="restore-mark">⚠️ 示意模型 · 程序复原非三维扫描</p>
-          <button type="button" class="chip is-wire" data-wire>线框</button>
+          <button type="button" class="chip is-wire demo-only" data-wire>线框</button>
           <div class="speed-toggle demo-only" data-speed-toggle role="group" aria-label="升采样速度">
             <button type="button" class="chip is-speed is-on" data-speed="instant">瞬时</button>
             <button type="button" class="chip is-speed" data-speed="demo">慢放演示(评委)</button>

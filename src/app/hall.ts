@@ -4,7 +4,8 @@ import { mountAsk } from "./labels";
 import { mountSys } from "./sysbar";
 import { guideQA, guideCitations } from "../data/guideQA";
 import { archPanelHtml, bindArchProbe, fillThreshTable } from "./archPanel";
-import { routeName, t } from "./i18n";
+import { getLang, routeName, t } from "./i18n";
+const L = (zh: string, en: string): string => (getLang() === "en" ? en : zh);
 
 /** Real ONNX quantized size under public/models (du -b). */
 const BGE_ONNX_BYTES = 24010842;
@@ -23,63 +24,58 @@ export function mountHall(root: HTMLElement): () => void {
       </header>
       <div class="hall-title">
         <h1 class="hall-brand" aria-label="赣风"><span>赣</span><span>风</span></h1>
-        <p class="hall-sub">可对话的数字展</p>
-        <p class="hall-tagline">点门进入展线 · 约束可审计 · 本地检索</p>
-        <details class="hall-innov">
-          <summary>创新要点</summary>
-          <p class="hall-lede">
-            冲突组合触发约束表规则，规则可展开审计，改锁过程在矩阵上可追溯回放（冲格×→规则条目→改锁格）。
-          </p>
-          <p class="hall-lede-sub">
-            工程支撑：本地 BGE-small + table.ts 确定性路由；三线共用同一查找接口是实现，不是卖点。
-          </p>
-        </details>
+        <p class="hall-sub">${L("可对话的数字展", "A conversational digital exhibition")}</p>
+        <ol class="hall-steps" data-no-tr>
+          <li><b>${L("是什么", "What it is")}</b><span>${L("江西三处文化遗产的夜间数字展：景德镇瓷、滕王阁序、赣南围屋。", "A night-time digital exhibition of three Jiangxi heritages: Jingdezhen porcelain, the Tengwang Pavilion Preface, Hakka walled houses.")}</span></li>
+          <li><b>${L("新在哪", "What's new")}</b><span>${L("你自由组合，展品按史实规则回应：不合史实会被改正，并给出出处。", "You combine freely; the exhibit answers with historical rules. Impossible combinations are corrected, with sources.")}</span></li>
+          <li><b>${L("怎么试", "Try it in 5 min")}</b><span>${L("进「瓷语」，选宋代 + 粉彩，看它如何改正并说明理由。", "Open Porcelain, pick Song dynasty + famille-rose, and watch it correct itself and explain why.")}</span></li>
+        </ol>
       </div>
       ${showArch ? archPanelHtml() : ""}
       <nav class="doors" aria-label="三条参观线" ${showArch ? 'hidden' : ''}>
         <button type="button" class="door" data-go="ciyu">
           <span class="door-head">
             <span class="door-index">01</span>
-            <span class="door-en">Jingdezhen</span>
+            <span class="door-en">${L("Jingdezhen", "Porcelain · Jingdezhen")}</span>
           </span>
-          <span class="door-v" aria-label="${routeName("ciyu")}"><span>瓷</span><span>语</span></span>
+          <span data-no-tr class="door-v" aria-label="${routeName("ciyu")}"><span>瓷</span><span>语</span></span>
           <span class="door-rule" aria-hidden="true"></span>
-          <span class="door-desc">先锁时代，再选器型与釉色；冲突改锁并写理由。</span>
+          <span class="door-desc">${L("选时代、器型与釉色，亲手“烧”一只瓶。", "Pick era, shape and glaze, then fire your own vase.")}</span>
         </button>
         <button type="button" class="door" data-go="gexu">
           <span class="door-head">
             <span class="door-index">02</span>
-            <span class="door-en">Tengwang</span>
+            <span class="door-en">${L("Tengwang", "Tengwang Preface")}</span>
           </span>
-          <span class="door-v" aria-label="Tengwang Preface / 阁序" title="Tengwang Pavilion Preface"><span>阁</span><span>序</span></span>
+          <span data-no-tr class="door-v" aria-label="Tengwang Preface / 阁序" title="Tengwang Pavilion Preface"><span>阁</span><span>序</span></span>
           <span class="door-rule" aria-hidden="true"></span>
-          <span class="door-desc">点落霞、孤鹜、秋水；画面钉回王勃原句。</span>
+          <span class="door-desc">${L("点落霞、孤鹜、秋水，画面回到王勃原句。", "Tap clouds, duck and water; each scene ties back to the original poem.")}</span>
         </button>
         <button type="button" class="door" data-go="kejia">
           <span class="door-head">
             <span class="door-index">03</span>
-            <span class="door-en">Gannan</span>
+            <span class="door-en">${L("Gannan", "Hakka Walled House")}</span>
           </span>
-          <span class="door-v" aria-label="Hakka Weiwu / 客家" title="Hakka Walled Residences"><span>客</span><span>家</span></span>
+          <span data-no-tr class="door-v" aria-label="Hakka Weiwu / 客家" title="Hakka Walled Residences"><span>客</span><span>家</span></span>
           <span class="door-rule" aria-hidden="true"></span>
-          <span class="door-desc">时辰 × 空间矩阵驱动围屋动线。</span>
+          <span class="door-desc">${L("按时辰走进围屋的每个房间。", "Walk room by room through a walled house, hour by hour.")}</span>
         </button>
         <button type="button" class="door door-demo" data-go="wanshou">
           <span class="door-head">
             <span class="door-index">04</span>
-            <span class="door-en">Wanshou</span>
+            <span class="door-en">${L("Wanshou", "Wanshou Fair")}</span>
           </span>
-          <span class="door-v" aria-label="Wanshou Palace / 万寿宫"><span>万</span><span>寿</span></span>
+          <span data-no-tr class="door-v" aria-label="${routeName("wanshou")}"><span>万</span><span>寿</span></span>
           <span class="door-rule" aria-hidden="true"></span>
-          <span class="door-desc">扩展线：庙会活动 × 时段约束。</span>
+          <span class="door-desc">${L("扩展线：庙会活动与时段。", "Extension: temple-fair events by time of day.")}</span>
         </button>
       </nav>
       <div class="hall-ask" data-ask></div>
       <footer class="hall-foot">
-        <p class="hall-foot-hint">本地检索 · 无付费 API · 无 GPU</p>
+        <p class="hall-foot-hint">${L("全部离线运行 · 无付费 API · 无需 GPU", "Runs fully offline · no paid API · no GPU needed")}</p>
         <div class="hall-foot-btns">
-          <button type="button" class="chip" data-calib>阈值标定</button>
-          <button type="button" class="text-btn" data-about>开源边界</button>
+          <button type="button" class="text-btn" data-calib>${L("阈值标定", "Threshold calibration")}</button>
+          <button type="button" class="text-btn" data-about>${L("关于本作品", "About this work")}</button>
         </div>
       </footer>
       <dialog class="about" data-dialog>

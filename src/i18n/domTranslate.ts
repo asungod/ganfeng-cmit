@@ -32,9 +32,10 @@ function doText(n: Text): void {
     const span = document.createElement("span");
     span.className = "en-tr";
     span.lang = "en";
-    span.textContent = sk.startsWith("~")
-      ? ` [EN translation of the full excerpt this quote is taken from, ours] ${SRC[sk.slice(1)]}`
-      : ` [EN translation, ours] ${SRC[sk]}`;
+    const tag = document.createElement("small");
+    tag.className = "en-tr-tag";
+    tag.textContent = sk.startsWith("~") ? "EN · full excerpt, our translation" : "EN · our translation";
+    span.append(tag, document.createTextNode(sk.startsWith("~") ? SRC[sk.slice(1)] : SRC[sk]));
     n.after(span);
     return;
   }

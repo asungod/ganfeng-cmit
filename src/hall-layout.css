@@ -143,6 +143,7 @@
 
 /* Four doors: primary focus of the lobby */
 .doors {
+  align-self: center;
   grid-area: doors;
   z-index: 1;
   display: grid;
@@ -427,3 +428,21 @@ body:not([data-route="hall"]) .engine-hud-dock {
   .hall-ask .ask-slips .slip { font-size: 0.68rem; padding: 0.28rem 0.4rem; }
   .hall-innov { margin-top: 0.25rem; }
 }
+
+/* Judge-friendly 3-step intro */
+.hall-steps {
+  list-style: none; margin: 0.9rem auto 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;
+  max-width: 54rem; text-align: left;
+}
+.hall-title:has(.hall-steps) { max-width: 56rem; }
+.hall-steps li {
+  border-top: 1px solid rgba(198, 161, 91, 0.35);
+  padding: 0.55rem 0.2rem 0; display: flex; flex-direction: column; gap: 0.3rem;
+}
+.hall-steps b { color: var(--gold); font-weight: 500; font-size: 0.74rem; letter-spacing: 0.16em; text-transform: uppercase; }
+.hall-steps span { color: var(--paper-dim); font-size: 0.86rem; line-height: 1.6; font-weight: 300; }
+html[lang="en"] .hall-sub { letter-spacing: 0.14em; text-indent: 0.14em; font-size: clamp(1rem, 1.6vw, 1.2rem); }
+html[lang="en"] .eyebrow, html[lang="en"] .eyebrow-sub { letter-spacing: 0.12em; }
+html[lang="en"] .door-en { letter-spacing: 0.08em; }
+@media (max-width: 900px) { .hall-steps { grid-template-columns: 1fr; } }

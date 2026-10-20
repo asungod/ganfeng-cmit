@@ -301,10 +301,29 @@ export function mountTengwang(root: HTMLElement): () => void {
     return { x: Math.min(92, Math.max(8, p.x)), y: Math.min(88, Math.max(10, p.y)) };
   }
 
+  /** Spread hotspot labels that project onto (nearly) the same screen point. */
+  function layoutSpots(): Record<string, { x: number; y: number }> {
+    const out: Record<string, { x: number; y: number }> = {};
+    const placed: { x: number; y: number }[] = [];
+    for (const m of motifs) {
+      const p = { ...spotPos(m.id, m.x, m.y) };
+      for (let i = 0; i < 6; i++) {
+        const hit = placed.find((q) => Math.abs(q.x - p.x) < 11 && Math.abs(q.y - p.y) < 6);
+        if (!hit) break;
+        p.y = p.y > hit.y || hit.y < 20 ? hit.y + 7 : hit.y - 7;
+      }
+      p.y = Math.min(88, Math.max(8, p.y));
+      placed.push(p);
+      out[m.id] = p;
+    }
+    return out;
+  }
+
   function paintSpots(): void {
+    const pos = layoutSpots();
     spots.innerHTML = motifs
       .map((m) => {
-        const p = spotPos(m.id, m.x, m.y);
+        const p = pos[m.id];
         return `<button type="button" class="hot ${m.id === focus ? "is-on" : ""}" data-hot="${m.id}" style="left:${p.x}%;top:${p.y}%"><span>${m.name}</span></button>`;
       })
       .join("");
@@ -417,10 +436,11 @@ export function mountTengwang(root: HTMLElement): () => void {
     painting = new PavilionScene(canvas);
     painting.onProject = (pts) => {
       lastPts = pts;
+      const pos = layoutSpots();
       for (const btn of spots.querySelectorAll<HTMLElement>("[data-hot]")) {
         const id = btn.dataset.hot;
         if (!id || !pts[id as keyof typeof pts]) continue;
-        const p = spotPos(id, 50, 50);
+        const p = pos[id] ?? spotPos(id, 50, 50);
         btn.style.left = `${p.x}%`;
         btn.style.top = `${p.y}%`;
       }

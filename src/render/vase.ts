@@ -290,7 +290,14 @@ export class PorcelainVitrine {
     this.piece = new THREE.Group();
     this.piece.position.y = 0.014; // sit above plinth; avoid foot z-fight / sink
     this.scene.add(this.piece);
-    this.controls.target.set(0, height * 0.62, 0);
+    this.controls.target.set(0, height * 0.52, 0);
+    {
+      // r20 framing: whole piece + plinth edge in view, a little breathing room.
+      const dir = new THREE.Vector3(0.5, 0.36, 0.8).normalize();
+      const vfov = (this.camera.fov * Math.PI) / 180;
+      const dist = Math.min(5.4, Math.max(2.9, ((height * 0.5 + 0.35) / Math.tan(vfov / 2)) * 1.08));
+      this.camera.position.copy(this.controls.target).addScaledVector(dir, dist);
+    }
     this.well.position.set(0, height * 0.92, 0);
     this.relight(glaze, height);
 
@@ -669,7 +676,7 @@ function glazeMaterial(
     map: maps.map,
     normalMap: maps.normalMap,
     roughnessMap: maps.roughnessMap,
-    normalScale: new THREE.Vector2(0.32, 0.32),
+    normalScale: new THREE.Vector2(0.14, 0.14),
     metalness: 0,
     flatShading: false,
     envMapIntensity: 0.55,
@@ -684,7 +691,7 @@ function glazeMaterial(
         clearcoat: 1,
         clearcoatRoughness: 0.07,
         clearcoatNormalMap: maps.normalMap,
-        clearcoatNormalScale: new THREE.Vector2(0.45, 0.45),
+        clearcoatNormalScale: new THREE.Vector2(0.06, 0.06),
         ior: 1.52,
         envMapIntensity: 0.42,
       });
