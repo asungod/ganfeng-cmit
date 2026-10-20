@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { ActId, SlotId } from "../data/wanshou";
 import { curvedRoof } from "./pavilion";
-import { Flight, disposeScene, lantern, loadHdri, makePost, makeRenderer, particles, phMat, wbox, type Post } from "./kit";
+import { makeFigure, makeTree, shadowSize, Flight, disposeScene, lantern, loadHdri, makePost, makeRenderer, particles, phMat, wbox, type Post } from "./kit";
 
 const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; bg: number; lamp: number }> = {
   chendan: { sun: [-30, 12, 20], col: 0xffc4a0, I: 2.6, hemi: 0.45, env: 0.8, exp: 1.0, fog: 0xa89aa4, hdri: "qwantani_puresky", bg: 0.8, lamp: 0.5 },
@@ -52,7 +52,7 @@ export class TempleScene {
     this.controls.target.set(...POSE.overview.look);
     this.flight = new Flight(this.camera, this.controls.target);
     this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(2048, 2048);
+    this.sun.shadow.mapSize.set(shadowSize(), shadowSize());
     const sc = this.sun.shadow.camera;
     sc.left = sc.bottom = -28; sc.right = sc.top = 28; sc.near = 1; sc.far = 140;
     this.sun.shadow.bias = -0.0004;
@@ -200,7 +200,7 @@ export class TempleScene {
     // performers (simple robed figures) — visible during the opera
     const robe = [0xc8302a, 0x2a6aa8, 0xe0b040];
     for (let i = 0; i < 3; i++) {
-      const f = figure(robe[i], 1.05);
+      const f = makeFigure(robe[i], i + 7, 1.05);
       f.position.set(-1.8 + i * 1.8, 1.92, 0.3 - (i % 2) * 0.6);
       f.rotation.y = Math.PI;
       f.name = "performer";
@@ -250,7 +250,7 @@ export class TempleScene {
     }
     // procession: worshippers with incense banners walking the axis
     for (let i = 0; i < 18; i++) {
-      const f = figure(i % 3 === 0 ? 0xd8b040 : 0x8a5a3a, 1);
+      const f = makeFigure(i % 3 === 0 ? 0xd8b040 : 0x8a5a3a, i + 7, 1);
       f.position.set((i % 2 ? 0.8 : -0.8), 0, 14 - i * 1.1);
       this.procession.add(f);
     }
@@ -258,31 +258,23 @@ export class TempleScene {
     // audience facing the stage
     for (let i = 0; i < 46; i++) {
       const row = Math.floor(i / 9), col = i % 9;
-      const f = figure([0x4a5a6a, 0x6a4a3a, 0x3a4a3a, 0x7a6a5a][i % 4], 0.95);
+      const f = makeFigure([0x4a5a6a, i + 7, 0x6a4a3a, 0x3a4a3a, 0x7a6a5a][i % 4], 0.95);
       f.position.set(-6 + col * 1.5 + (row % 2) * 0.6, 0, 6.5 - row * 1.4);
       f.rotation.y = 0;
       this.audience.add(f);
     }
     S.add(this.audience);
-    // ancient camphor trees + distant hills (西山)
-    const leaf = new THREE.MeshStandardMaterial({ color: 0x2c4424, roughness: 0.85, flatShading: true });
-    const bark = new THREE.MeshStandardMaterial({ color: 0x3a2a1c, roughness: 1 });
-    for (const [x, z] of [[-14, -14], [14, -14]]) {
-      const t = new THREE.Group();
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.6, 5, 10), bark);
-      trunk.position.y = 2.5;
-      trunk.castShadow = true;
-      t.add(trunk);
-      for (let i = 0; i < 16; i++) {
-        const c = new THREE.Mesh(new THREE.IcosahedronGeometry(1.3 + (i % 4) * 0.2, 0), leaf);
-        const a = i * 2.4, rr = 0.8 + (i % 5) * 0.5;
-        c.position.set(Math.sin(a) * rr, 5 + (i % 4) * 0.8, Math.cos(a) * rr);
-        c.castShadow = true;
-        t.add(c);
-      }
+    // ancient camphor trees behind the hall + pines outside the walls
+    [[-14, -14, 1.5], [14, -14, 1.4], [-22, 6, 1.2], [22, 4, 1.3]].forEach(([x, z, k], i) => {
+      const t = makeTree(i + 11, k);
       t.position.set(x, 0, z);
       S.add(t);
-    }
+    });
+    [[-20, -22], [20, -24], [-26, -10], [26, -12]].forEach(([x, z], i) => {
+      const t = makeTree(i + 31, 1.4, "pine");
+      t.position.set(x, 0, z);
+      S.add(t);
+    });
     const hillM = new THREE.MeshStandardMaterial({ color: 0x3a4a40, roughness: 1 });
     for (let i = 0; i < 10; i++) {
       const h = new THREE.Mesh(new THREE.SphereGeometry(22 + (i % 3) * 8, 20, 10), hillM);
@@ -384,17 +376,3 @@ export class TempleScene {
   }
 }
 
-/** Stylised robed figure (no faces): cone robe + head + hat. */
-function figure(color: number, s: number): THREE.Group {
-  const g = new THREE.Group();
-  const robe = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.32, 1.25, 10), new THREE.MeshStandardMaterial({ color, roughness: 0.8 }));
-  robe.position.y = 0.62;
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.13, 12, 10), new THREE.MeshStandardMaterial({ color: 0xc8a080, roughness: 0.7 }));
-  head.position.y = 1.4;
-  const hat = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.2, 0.1, 10), new THREE.MeshStandardMaterial({ color: 0x1a1410, roughness: 0.6 }));
-  hat.position.y = 1.53;
-  g.add(robe, head, hat);
-  g.traverse((o) => { o.castShadow = true; });
-  g.scale.setScalar(s);
-  return g;
-}

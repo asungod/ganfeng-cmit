@@ -3,12 +3,12 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { HourId, RoomId } from "../data/hakka";
-import { Flight, disposeScene, gableRoof, lantern, loadHdri, makePost, makeRenderer, particles, phMat, wbox, type Post } from "./kit";
+import { makeBamboo, makeTree, shadowSize, Flight, disposeScene, gableRoof, lantern, loadHdri, makePost, makeRenderer, particles, phMat, wbox, type Post } from "./kit";
 
 type Pose = { eye: [number, number, number]; look: [number, number, number] };
 /** Overview + per-room camera poses (metres; front of the house faces +z). */
 const POSES: Record<RoomId | "overview", Pose> = {
-  overview: { eye: [27, 19, 38], look: [0, 1.5, -1] },
+  overview: { eye: [46, 32, 10], look: [0, 0, -8] },
   heping: { eye: [9, 4.2, 22], look: [0, 2.2, 6] },
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
   tianjing: { eye: [0.4, 1.6, 3.0], look: [0, 3.4, 0.2] },
@@ -63,7 +63,7 @@ export class WeiwuScene {
     canvas.addEventListener("pointerdown", () => (this.controls.autoRotate = false));
 
     this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(2048, 2048);
+    this.sun.shadow.mapSize.set(shadowSize(), shadowSize());
     const sc = this.sun.shadow.camera;
     sc.left = sc.bottom = -30; sc.right = sc.top = 30; sc.near = 1; sc.far = 140;
     this.sun.shadow.bias = -0.0004;
@@ -345,26 +345,17 @@ export class WeiwuScene {
     S.add(this.smoke.points);
     // facade lanterns at the gate
     for (const sx of [-1.4, 1.4]) this.addLantern(S, new THREE.Vector3(sx, 3.6, D / 2 + 1.1));
-    // camphor / bamboo clumps for scale and life
-    const leaf = new THREE.MeshStandardMaterial({ color: 0x2c4424, roughness: 0.85, flatShading: true });
-    const bark = new THREE.MeshStandardMaterial({ color: 0x3a2a1c, roughness: 1 });
+    // camphor trees + bamboo clumps for scale and life (procedural)
     const trees: [number, number, number][] = [[-19, 16, 1.0], [-21, -6, 1.3], [22, -12, 1.2], [-12, -26, 1.4], [12, -27, 1.2], [-27, 8, 0.9], [4, -30, 1.3], [-4, -29, 1.1]];
-    for (const [x, z, k] of trees) {
-      const t = new THREE.Group();
-      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.32, 3.2, 8), bark);
-      trunk.position.y = 1.6;
-      trunk.castShadow = true;
-      t.add(trunk);
-      for (let i = 0; i < 14; i++) {
-        const c = new THREE.Mesh(new THREE.IcosahedronGeometry(0.75 + (i % 4) * 0.12, 0), leaf);
-        const a = i * 2.4, rr = 0.6 + (i % 5) * 0.32;
-        c.position.set(Math.sin(a) * rr, 3.2 + (i % 4) * 0.55 + Math.cos(i) * 0.3, Math.cos(a) * rr);
-        c.castShadow = true;
-        t.add(c);
-      }
-      t.scale.setScalar(k * 1.6);
+    trees.forEach(([x, z, k], i) => {
+      const t = makeTree(i + 1, k * 1.25);
       t.position.set(x, 0, z);
       S.add(t);
+    });
+    for (const [x, z] of [[-17, -16], [18, -18], [19, 14], [-24, 0]]) {
+      const b = makeBamboo(x * 3 + z, 11);
+      b.position.set(x, 0, z);
+      S.add(b);
     }
     // distant hills for silhouette
     const hillM = new THREE.MeshStandardMaterial({ color: 0x4a5a48, roughness: 1 });

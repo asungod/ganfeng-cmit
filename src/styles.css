@@ -2776,3 +2776,15 @@ html[lang="en"] .kicker { letter-spacing: 0.1em; }
 }
 .wanshou.is-immersive .ws-panel .chip { font-size: 0.8rem; }
 .about-credits { font-size: 0.74rem; line-height: 1.6; color: var(--paper-dim); max-height: 12rem; overflow: auto; padding-left: 1rem; } .about-credits-h { font-size: 0.9rem; margin: 0.8rem 0 0.3rem; color: var(--gold); }
+/* r22 tidy right panels: clear hierarchy, quiet secondary sections */
+.immersive .room-panel, .immersive .poem-rail { display: flex; flex-direction: column; gap: 0.7rem; scrollbar-width: thin; }
+.immersive .room-panel > *, .immersive .poem-rail > * { margin: 0 !important; }
+.immersive .room-card { order: -1; padding-bottom: 0.7rem; border-bottom: 1px solid var(--glass-line); }
+.immersive .room-card .lock-main { display: none; }
+.immersive .room-card .lock-k { font-size: 0.62rem; letter-spacing: 0.14em; color: var(--gold-dim); margin: 0; }
+.immersive .room-card h3 { margin: 0.1rem 0 0.35rem; }
+.immersive .room-card .lock-b { font-size: 0.86rem; line-height: 1.65; color: var(--paper); margin: 0 0 0.5rem; }
+.immersive details > summary { font-size: 0.7rem; letter-spacing: 0.08em; color: var(--gold-dim); padding: 0.35rem 0; border: none !important; background: none !important; cursor: pointer; }
+.immersive .matrix, .immersive .lock-dock { border: none !important; background: none !important; padding: 0 !important; }
+.immersive .cites .cite, .immersive .cites > * { background: rgba(255, 240, 210, 0.03); border-radius: 8px; }
+.immersive .field-l, .immersive .kicker { font-size: 0.62rem; letter-spacing: 0.14em; }

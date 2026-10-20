@@ -6,19 +6,27 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 
+let _low: boolean | null = null;
+/** Low graphics: ?lowgfx, or a weak device (few cores / low memory / software GL). ?hifi forces high. */
 export function lowPower(): boolean {
-  const q = /[?&#]lowgfx\b/.test(location.hash + location.search);
-  return q || (navigator.hardwareConcurrency ?? 8) <= 4;
+  if (_low !== null) return _low;
+  const q = location.hash + location.search;
+  if (/[?&#]hifi\b/.test(q)) return (_low = false);
+  const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
+  return (_low = /[?&#]lowgfx\b/.test(q) || (navigator.hardwareConcurrency ?? 8) <= 4 || mem <= 4);
+}
+export function shadowSize(): number {
+  return lowPower() ? 512 : 1024;
 }
 
 export function makeRenderer(canvas: HTMLCanvasElement, exposure = 1.0): THREE.WebGLRenderer {
   const r = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
-  r.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower() ? 1 : 1.75));
+  r.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower() ? 1 : 1.5));
+  r.shadowMap.type = lowPower() ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   r.toneMapping = THREE.ACESFilmicToneMapping;
   r.toneMappingExposure = exposure;
   r.outputColorSpace = THREE.SRGBColorSpace;
   r.shadowMap.enabled = true;
-  r.shadowMap.type = THREE.PCFSoftShadowMap;
   return r;
 }
 
@@ -63,10 +71,12 @@ export function makePost(renderer: THREE.WebGLRenderer, scene: THREE.Scene, came
     bloom,
     grade,
     render: () => {
+      if (lowPower()) return renderer.render(scene, camera);
       grade.uniforms.uTime.value = (performance.now() - t0) / 1000;
       composer.render();
     },
     setSize: (w, h) => {
+      if (lowPower()) return;
       composer.setSize(w, h);
       bloom.setSize(w / 2, h / 2);
     },
@@ -193,6 +203,7 @@ export function softDot(): THREE.Texture {
 
 /** Drifting particle field (mist, smoke, fireflies). update(t) each frame. */
 export function particles(count: number, box: THREE.Box3, color: number, size: number, opacity: number, mode: "mist" | "smoke" | "fly") {
+  if (lowPower()) count = Math.ceil(count / 2);
   const geo = new THREE.BufferGeometry();
   const pos = new Float32Array(count * 3);
   const seed = new Float32Array(count);
@@ -408,4 +419,137 @@ export function wbox(w: number, h: number, d: number, m: THREE.Material, uvScale
   const mesh = new THREE.Mesh(g, m);
   mesh.castShadow = mesh.receiveShadow = true;
   return mesh;
+}
+
+
+// ---------- vegetation & figures (procedural, no external models) ----------
+function noisyBlob(r: number, seed: number, detail = 2): THREE.BufferGeometry {
+  const g = new THREE.IcosahedronGeometry(r, detail);
+  const p = g.attributes.position as THREE.BufferAttribute;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) {
+    v.fromBufferAttribute(p, i);
+    const n = Math.sin(v.x * 3.1 + seed) * Math.cos(v.y * 2.7 + seed * 1.3) * Math.sin(v.z * 3.3 + seed * 0.7);
+    v.multiplyScalar(1 + n * 0.22);
+    v.y *= 0.78;
+    p.setXYZ(i, v.x, v.y, v.z);
+  }
+  g.computeVertexNormals();
+  return g;
+}
+
+/** Camphor-like broadleaf tree: tapered trunk + branches + layered noisy canopy, per-blob colour variation. */
+export function makeTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "camphor"): THREE.Group {
+  const g = new THREE.Group();
+  const r = rng(seed * 977 + 3);
+  const bark = new THREE.MeshStandardMaterial({ color: 0x4a3626, roughness: 0.95 });
+  const trunkH = kind === "pine" ? 5.5 : 3.2 + r() * 1.2;
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.38, trunkH, 9), bark);
+  trunk.position.y = trunkH / 2;
+  trunk.rotation.z = (r() - 0.5) * 0.12;
+  trunk.castShadow = true;
+  g.add(trunk);
+  const greens = kind === "pine" ? [0x23402a, 0x2b4a30, 0x1e3624] : [0x3c5a2c, 0x4a6a34, 0x2f4c26, 0x56703a];
+  if (kind === "pine") {
+    for (let i = 0; i < 5; i++) {
+      const c = new THREE.Mesh(new THREE.ConeGeometry(1.9 - i * 0.32, 1.6, 9), new THREE.MeshStandardMaterial({ color: greens[i % 3], roughness: 0.9 }));
+      c.position.y = 2.4 + i * 0.95;
+      c.castShadow = true;
+      g.add(c);
+    }
+  } else {
+    const nb = 4;
+    for (let b = 0; b < nb; b++) {
+      const a = (b / nb) * Math.PI * 2 + r();
+      const len = 1.6 + r();
+      const br = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.13, len, 6), bark);
+      br.position.set(Math.cos(a) * len * 0.35, trunkH - 0.3 + r() * 0.4, Math.sin(a) * len * 0.35);
+      br.rotation.set(Math.sin(a) * 0.9, 0, -Math.cos(a) * 0.9);
+      br.castShadow = true;
+      g.add(br);
+    }
+    const n = 22;
+    for (let i = 0; i < n; i++) {
+      const a = r() * Math.PI * 2;
+      const rr = Math.sqrt(r()) * 2.3;
+      const y = trunkH + 0.4 + r() * 1.8 - rr * 0.25;
+      const m = new THREE.MeshStandardMaterial({ color: greens[Math.floor(r() * greens.length)], roughness: 0.85 });
+      const blob = new THREE.Mesh(noisyBlob(0.75 + r() * 0.55, seed + i, lowPower() ? 1 : 2), m);
+      blob.position.set(Math.cos(a) * rr, y, Math.sin(a) * rr);
+      blob.castShadow = true;
+      blob.receiveShadow = true;
+      g.add(blob);
+    }
+  }
+  g.scale.setScalar(scale);
+  return g;
+}
+
+/** Bamboo clump (southern Jiangxi villages). */
+export function makeBamboo(seed = 1, n = 9): THREE.Group {
+  const g = new THREE.Group();
+  const r = rng(seed * 31 + 7);
+  const stem = new THREE.MeshStandardMaterial({ color: 0x7a8a40, roughness: 0.6 });
+  const leaf = new THREE.MeshStandardMaterial({ color: 0x4a6a2a, roughness: 0.8, side: THREE.DoubleSide });
+  for (let i = 0; i < n; i++) {
+    const h = 5 + r() * 3;
+    const s = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, h, 6), stem);
+    const x = (r() - 0.5) * 1.6, z = (r() - 0.5) * 1.6;
+    s.position.set(x, h / 2, z);
+    s.rotation.set((r() - 0.5) * 0.25, 0, (r() - 0.5) * 0.25);
+    s.castShadow = true;
+    g.add(s);
+    for (let k = 0; k < 5; k++) {
+      const l = new THREE.Mesh(noisyBlob(0.45 + r() * 0.3, i * 9 + k, 1), leaf);
+      l.position.set(x + (r() - 0.5) * 0.9, h * (0.6 + k * 0.09), z + (r() - 0.5) * 0.9);
+      l.scale.y = 0.5;
+      l.castShadow = true;
+      g.add(l);
+    }
+  }
+  return g;
+}
+
+/** Robed figure: lathe-turned robe, sleeves, sash, head, hair bun or hat. No faces. */
+export function makeFigure(color: number, seed = 1, scale = 1): THREE.Group {
+  const g = new THREE.Group();
+  const r = rng(seed * 53 + 11);
+  const cloth = new THREE.MeshStandardMaterial({ color, roughness: 0.85 });
+  const prof = [
+    new THREE.Vector2(0.0, 0), new THREE.Vector2(0.3, 0), new THREE.Vector2(0.28, 0.25), new THREE.Vector2(0.22, 0.7),
+    new THREE.Vector2(0.17, 0.95), new THREE.Vector2(0.2, 1.15), new THREE.Vector2(0.16, 1.28), new THREE.Vector2(0.06, 1.33),
+  ];
+  const robe = new THREE.Mesh(new THREE.LatheGeometry(prof, 14), cloth);
+  g.add(robe);
+  const sash = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.06, 14), new THREE.MeshStandardMaterial({ color: 0x2a1e18, roughness: 0.7 }));
+  sash.position.y = 0.92;
+  g.add(sash);
+  for (const sx of [-1, 1]) {
+    const sl = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.11, 0.6, 8), cloth);
+    sl.position.set(sx * 0.2, 1.0, 0.04);
+    sl.rotation.z = sx * 0.25;
+    sl.rotation.x = -0.3;
+    g.add(sl);
+  }
+  const skin = new THREE.MeshStandardMaterial({ color: 0xd2aa86, roughness: 0.65 });
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.115, 14, 12), skin);
+  head.position.y = 1.45;
+  head.scale.y = 1.1;
+  g.add(head);
+  const hair = new THREE.MeshStandardMaterial({ color: 0x16120e, roughness: 0.6 });
+  if (r() < 0.5) {
+    const bun = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 8), hair);
+    bun.position.set(0, 1.57, -0.04);
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.118, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), hair);
+    cap.position.y = 1.46;
+    g.add(bun, cap);
+  } else {
+    const hat = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.26, 0.12, 16), new THREE.MeshStandardMaterial({ color: 0xb08a50, roughness: 0.8 }));
+    hat.position.y = 1.58;
+    g.add(hat);
+  }
+  g.traverse((o) => { o.castShadow = true; });
+  g.scale.setScalar(scale * (0.92 + r() * 0.16));
+  g.rotation.y = (r() - 0.5) * 0.6;
+  return g;
 }

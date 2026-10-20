@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { Flight, loadHdri, makePost, particles, phMat, softDot, type Post } from "./kit";
+import { lowPower, shadowSize, Flight, loadHdri, makePost, particles, phMat, softDot, type Post } from "./kit";
 import type { ImageId, MoodId } from "../data/tengwang";
 
 const MARK: Record<ImageId, THREE.Vector3> = {
@@ -48,7 +48,7 @@ export class PavilionScene {
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower() ? 1 : 1.5));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 0.78;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -79,7 +79,7 @@ export class PavilionScene {
     this.sunLight = new THREE.DirectionalLight(0xffd4a0, 3.1);
     this.sunLight.position.copy(MARK.luoxia);
     this.sunLight.castShadow = true;
-    this.sunLight.shadow.mapSize.set(1024, 1024);
+    this.sunLight.shadow.mapSize.set(shadowSize(), shadowSize());
     this.sunLight.shadow.camera.near = 2;
     this.sunLight.shadow.camera.far = 40;
     this.sunLight.shadow.camera.left = -16;
