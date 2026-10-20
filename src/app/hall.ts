@@ -5,6 +5,7 @@ import { mountSys } from "./sysbar";
 import { guideQA, guideCitations } from "../data/guideQA";
 import { archPanelHtml, bindArchProbe, fillThreshTable } from "./archPanel";
 import { getLang, routeName, t } from "./i18n";
+import { LobbyScene } from "../render/lobby";
 const L = (zh: string, en: string): string => (getLang() === "en" ? en : zh);
 
 /** Real ONNX quantized size under public/models (du -b). */
@@ -15,6 +16,8 @@ export function mountHall(root: HTMLElement): () => void {
   const showArch = /[?&#]arch\b/.test(location.hash) || /[?&#]thresh\b/.test(location.hash) || /[?&#]calib\b/.test(location.hash);
   root.innerHTML = `
     <div class="hall${showArch ? " hall-arch" : ""}">
+      <canvas class="hall-bg" aria-hidden="true"></canvas>
+      <div class="hall-veil" aria-hidden="true"></div>
       <div class="grain" aria-hidden="true"></div>
       <div class="hall-frame" aria-hidden="true"></div>
       <div class="hall-frame hall-frame-inner" aria-hidden="true"></div>
@@ -128,6 +131,14 @@ export function mountHall(root: HTMLElement): () => void {
   const sys = mountSys(root.querySelector("[data-ask]") as HTMLElement);
   sys.set({ line: routeName("hall"), lock: t("sys.lockNone"), state: t("sys.stateOk") });
   root.addEventListener("click", onClick);
+  let bg: LobbyScene | null = null;
+  try {
+    bg = new LobbyScene(root.querySelector("canvas.hall-bg") as HTMLCanvasElement);
+  } catch (err) {
+    console.warn("lobby bg: WebGL unavailable", err);
+  }
+  const onResize = () => bg?.resize();
+  window.addEventListener("resize", onResize);
   // Lobby: no floating guide bubble over .hall-ask (welcome lives in tagline / innov).
   guide.stop();
   if (showArch) {
@@ -136,6 +147,8 @@ export function mountHall(root: HTMLElement): () => void {
   }
   return () => {
     root.removeEventListener("click", onClick);
+    window.removeEventListener("resize", onResize);
+    bg?.dispose();
     sys.dispose();
     guide.stop();
   };

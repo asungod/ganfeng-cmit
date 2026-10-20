@@ -321,7 +321,7 @@ function glitterAlpha(): THREE.Texture | null {
   return t;
 }
 
-function makeHills(): THREE.Group {
+export function makeHills(): THREE.Group {
   // 层叠山脊（远淡近浓），替代早期的压扁球体，避免“积木感”
   const g = new THREE.Group();
   const layers: { z: number; base: number; amp: number; color: number; seed: number; gap?: [number, number] }[] = [
@@ -361,7 +361,7 @@ function makeHills(): THREE.Group {
   return g;
 }
 
-function makePavilion(): THREE.Group {
+export function makePavilion(): THREE.Group {
   const g = new THREE.Group();
   const stone = phMat("stone_tiles", [2, 2], { color: 0x9a948a });
   const stoneDark = phMat("stone_tiles", [3, 3], { color: 0x6a645c });
@@ -585,7 +585,7 @@ export function curvedRoof(w: number, d: number, rise: number, tile: THREE.Mater
   return g;
 }
 
-function makeBoats(): THREE.Group {
+export function makeBoats(): THREE.Group {
   // 乌篷小舟：侧面月牙形船身挤出 + 半圆篷 + 细桅，替代胶囊体
   const g = new THREE.Group();
   g.name = "boats";
