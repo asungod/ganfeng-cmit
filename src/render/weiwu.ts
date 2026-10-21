@@ -348,7 +348,7 @@ export class WeiwuScene {
     // camphor trees + bamboo clumps for scale and life (procedural)
     const trees: [number, number, number][] = [[-19, 16, 1.0], [-21, -6, 1.3], [22, -12, 1.2], [-12, -26, 1.4], [12, -27, 1.2], [-27, 8, 0.9], [4, -30, 1.3], [-4, -29, 1.1]];
     trees.forEach(([x, z, k], i) => {
-      const t = makeTree(i + 1, k * 1.25);
+      const t = makeTree(i + 1, k * 1.45);
       t.position.set(x, 0, z);
       S.add(t);
     });

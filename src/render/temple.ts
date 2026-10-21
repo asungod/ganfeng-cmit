@@ -200,7 +200,7 @@ export class TempleScene {
     // performers (simple robed figures) — visible during the opera
     const robe = [0xc8302a, 0x2a6aa8, 0xe0b040];
     for (let i = 0; i < 3; i++) {
-      const f = makeFigure(robe[i], i + 7, 1.05);
+      const f = makeFigure(robe[i], i + 7, 1.12, "performer");
       f.position.set(-1.8 + i * 1.8, 1.92, 0.3 - (i % 2) * 0.6);
       f.rotation.y = Math.PI;
       f.name = "performer";
@@ -238,29 +238,41 @@ export class TempleScene {
       const z = -4 + r * 6;
       for (let i = -3; i <= 3; i++) this.addLantern(new THREE.Vector3(i * 2.6, 5.2 - Math.cos((i / 3) * 1.2) * 0.6, z));
     }
-    // banners
+    // banners — muted cloth, not harsh yellow plastic
+    const bannerMat = new THREE.MeshStandardMaterial({
+      color: 0x6e1e1a, roughness: 0.95, metalness: 0, side: THREE.DoubleSide,
+      transparent: true, opacity: 0.88,
+    });
+    const bannerEdge = new THREE.MeshStandardMaterial({ color: 0x3a1210, roughness: 0.9 });
     for (const x of [-10, 10]) for (const z of [-5, 5]) {
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 7, 8), wood);
       pole.position.set(x, 3.5, z);
       pole.castShadow = true;
       S.add(pole);
-      const flag = wbox(0.9, 3.2, 0.03, new THREE.MeshStandardMaterial({ color: 0xd8b040, roughness: 0.7, side: THREE.DoubleSide }));
-      flag.position.set(x + 0.5, 5, z);
+      const flag = wbox(0.75, 2.8, 0.025, bannerMat);
+      flag.position.set(x + (x > 0 ? -0.45 : 0.45), 4.7, z);
+      flag.rotation.y = (x > 0 ? -0.08 : 0.08);
+      flag.rotation.z = (x > 0 ? 0.04 : -0.04);
       S.add(flag);
+      const trim = wbox(0.78, 0.08, 0.03, bannerEdge);
+      trim.position.set(flag.position.x, 6.12, z);
+      S.add(trim);
     }
     // procession: worshippers with incense banners walking the axis
+    const pilgrimColors = [0x8a5a3a, 0x6a4a2a, 0xa07040, 0x5a4830, 0x9a6840];
     for (let i = 0; i < 18; i++) {
-      const f = makeFigure(i % 3 === 0 ? 0xd8b040 : 0x8a5a3a, i + 7, 1);
+      const f = makeFigure(pilgrimColors[i % pilgrimColors.length], i + 7, 1, "robed");
       f.position.set((i % 2 ? 0.8 : -0.8), 0, 14 - i * 1.1);
       this.procession.add(f);
     }
     S.add(this.procession);
     // audience facing the stage
-    for (let i = 0; i < 46; i++) {
-      const row = Math.floor(i / 9), col = i % 9;
-      const f = makeFigure([0x4a5a6a, i + 7, 0x6a4a3a, 0x3a4a3a, 0x7a6a5a][i % 4], 0.95);
-      f.position.set(-6 + col * 1.5 + (row % 2) * 0.6, 0, 6.5 - row * 1.4);
-      f.rotation.y = 0;
+    const crowdColors = [0x3a4a5a, 0x4a3a2a, 0x2a3a2a, 0x5a4a3a, 0x3a3a4a, 0x4a4a3a];
+    for (let i = 0; i < 40; i++) {
+      const row = Math.floor(i / 8), col = i % 8;
+      const f = makeFigure(crowdColors[i % crowdColors.length], i * 3 + 11, 0.92 + (i % 5) * 0.02, "crowd");
+      f.position.set(-5.6 + col * 1.55 + (row % 2) * 0.55, 0, 6.5 - row * 1.35);
+      f.rotation.y = (i % 7 - 3) * 0.04;
       this.audience.add(f);
     }
     S.add(this.audience);

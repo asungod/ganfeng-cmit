@@ -423,133 +423,303 @@ export function wbox(w: number, h: number, d: number, m: THREE.Material, uvScale
 
 
 // ---------- vegetation & figures (procedural, no external models) ----------
-function noisyBlob(r: number, seed: number, detail = 2): THREE.BufferGeometry {
-  const g = new THREE.IcosahedronGeometry(r, detail);
-  const p = g.attributes.position as THREE.BufferAttribute;
+/** Irregular flattened foliage mass — deliberately non-spherical. */
+function canopyBlob(rx: number, ry: number, rz: number, seed: number, detail = 2): THREE.BufferGeometry {
+  const g = new THREE.IcosahedronGeometry(1, detail);
+  const pos = g.attributes.position as THREE.BufferAttribute;
   const v = new THREE.Vector3();
-  for (let i = 0; i < p.count; i++) {
-    v.fromBufferAttribute(p, i);
-    const n = Math.sin(v.x * 3.1 + seed) * Math.cos(v.y * 2.7 + seed * 1.3) * Math.sin(v.z * 3.3 + seed * 0.7);
-    v.multiplyScalar(1 + n * 0.22);
-    v.y *= 0.78;
-    p.setXYZ(i, v.x, v.y, v.z);
+  for (let i = 0; i < pos.count; i++) {
+    v.fromBufferAttribute(pos, i);
+    const n =
+      Math.sin(v.x * 5.2 + seed) * Math.cos(v.y * 4.1 + seed * 1.4) * Math.sin(v.z * 4.7 + seed * 0.8) * 0.28 +
+      Math.sin((v.x + v.z) * 9.0 + seed * 2.2) * 0.1;
+    v.x *= rx * (1 + n);
+    v.y *= ry * (1 + n * 0.5);
+    v.z *= rz * (1 + n);
+    if (v.y < -0.1) v.y *= 0.55;
+    pos.setXYZ(i, v.x, v.y, v.z);
   }
   g.computeVertexNormals();
   return g;
 }
 
-/** Camphor-like broadleaf tree: tapered trunk + branches + layered noisy canopy, per-blob colour variation. */
+/** Crossed leaf-card spray for bamboo / thin canopy detail. */
+function leafCards(mat: THREE.Material, seed: number): THREE.Group {
+  const g = new THREE.Group();
+  const r = rng(seed);
+  for (let i = 0; i < 3; i++) {
+    const w = 0.55 + r() * 0.35, h = 0.25 + r() * 0.15;
+    const card = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+    card.position.set((r() - 0.5) * 0.2, (r() - 0.5) * 0.1, (r() - 0.5) * 0.2);
+    card.rotation.set(r() * 0.6 - 0.3, (i / 3) * Math.PI + r() * 0.4, r() * 0.5 - 0.25);
+    g.add(card);
+  }
+  return g;
+}
+
+/** Camphor / pine — tapered trunk, limbs, layered flattened canopy (not sphere-on-stick). */
 export function makeTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "camphor"): THREE.Group {
   const g = new THREE.Group();
   const r = rng(seed * 977 + 3);
-  const bark = new THREE.MeshStandardMaterial({ color: 0x4a3626, roughness: 0.95 });
-  const trunkH = kind === "pine" ? 5.5 : 3.2 + r() * 1.2;
-  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.38, trunkH, 9), bark);
-  trunk.position.y = trunkH / 2;
-  trunk.rotation.z = (r() - 0.5) * 0.12;
-  trunk.castShadow = true;
-  g.add(trunk);
-  const greens = kind === "pine" ? [0x23402a, 0x2b4a30, 0x1e3624] : [0x3c5a2c, 0x4a6a34, 0x2f4c26, 0x56703a];
+  const low = lowPower();
+  const bark = phMat("dark_wooden_planks", [0.35, 1.1], { roughness: 0.95 });
+  const barkFlat = new THREE.MeshStandardMaterial({ color: 0x3a281c, roughness: 0.95 });
+
   if (kind === "pine") {
-    for (let i = 0; i < 5; i++) {
-      const c = new THREE.Mesh(new THREE.ConeGeometry(1.9 - i * 0.32, 1.6, 9), new THREE.MeshStandardMaterial({ color: greens[i % 3], roughness: 0.9 }));
-      c.position.y = 2.4 + i * 0.95;
-      c.castShadow = true;
-      g.add(c);
+    const trunkH = 5.4 + r() * 1.2;
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.28, trunkH, 8), bark);
+    trunk.position.y = trunkH / 2;
+    trunk.castShadow = true;
+    g.add(trunk);
+    const greens = [0x152418, 0x1c2e1e, 0x223424, 0x182818];
+    const layers = low ? 5 : 7;
+    for (let i = 0; i < layers; i++) {
+      const t = i / (layers - 1);
+      const cone = new THREE.Mesh(
+        new THREE.ConeGeometry(1.85 - t * 1.4 + r() * 0.12, 1.2 - t * 0.15, low ? 8 : 11),
+        new THREE.MeshStandardMaterial({ color: greens[i % greens.length], roughness: 0.93 }),
+      );
+      cone.position.y = 1.9 + i * 0.78;
+      cone.rotation.y = r() * Math.PI;
+      cone.scale.set(0.92 + r() * 0.16, 1, 0.88 + r() * 0.18);
+      cone.castShadow = true;
+      g.add(cone);
     }
   } else {
-    const nb = 4;
-    for (let b = 0; b < nb; b++) {
-      const a = (b / nb) * Math.PI * 2 + r();
-      const len = 1.6 + r();
-      const br = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.13, len, 6), bark);
-      br.position.set(Math.cos(a) * len * 0.35, trunkH - 0.3 + r() * 0.4, Math.sin(a) * len * 0.35);
-      br.rotation.set(Math.sin(a) * 0.9, 0, -Math.cos(a) * 0.9);
+    const trunkH = 3.6 + r() * 1.5;
+    const trunkProf = [
+      new THREE.Vector2(0.36, 0),
+      new THREE.Vector2(0.3, trunkH * 0.2),
+      new THREE.Vector2(0.22, trunkH * 0.5),
+      new THREE.Vector2(0.13, trunkH * 0.82),
+      new THREE.Vector2(0.07, trunkH),
+    ];
+    const trunk = new THREE.Mesh(new THREE.LatheGeometry(trunkProf, 12), bark);
+    trunk.castShadow = true;
+    trunk.rotation.z = (r() - 0.5) * 0.06;
+    g.add(trunk);
+    const nBranch = low ? 5 : 7;
+    for (let b = 0; b < nBranch; b++) {
+      const a = (b / nBranch) * Math.PI * 2 + r() * 0.35;
+      const len = 1.5 + r() * 1.3;
+      const elev = trunkH * (0.5 + r() * 0.4);
+      const br = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.09, len, 6), barkFlat);
+      br.position.set(Math.cos(a) * len * 0.4, elev, Math.sin(a) * len * 0.4);
+      br.rotation.z = Math.cos(a) * (-0.75 - r() * 0.3);
+      br.rotation.x = Math.sin(a) * (0.75 + r() * 0.3);
       br.castShadow = true;
       g.add(br);
     }
-    const n = 22;
-    for (let i = 0; i < n; i++) {
+    // teardrop canopy: many small irregular clumps in an ellipsoid volume (organic outline)
+    const greens = [0x1a2c14, 0x223418, 0x2a3e20, 0x334828, 0x1e3018, 0x3a4e2c, 0x283a1c];
+    const nClump = low ? 12 : 22;
+    for (let i = 0; i < nClump; i++) {
+      // sample ellipsoid: wider at mid, taper at top (camphor silhouette)
+      const t = r();
+      const yNorm = Math.pow(t, 0.7); // bias upward
+      const y = trunkH * 0.55 + yNorm * trunkH * 0.95;
+      const radAtY = Math.sin(yNorm * Math.PI) * (2.2 + r() * 0.6);
       const a = r() * Math.PI * 2;
-      const rr = Math.sqrt(r()) * 2.3;
-      const y = trunkH + 0.4 + r() * 1.8 - rr * 0.25;
-      const m = new THREE.MeshStandardMaterial({ color: greens[Math.floor(r() * greens.length)], roughness: 0.85 });
-      const blob = new THREE.Mesh(noisyBlob(0.75 + r() * 0.55, seed + i, lowPower() ? 1 : 2), m);
+      const rr = Math.sqrt(r()) * radAtY;
+      const sx = 0.55 + r() * 0.55;
+      const sy = 0.35 + r() * 0.35;
+      const sz = 0.5 + r() * 0.55;
+      const m = new THREE.MeshStandardMaterial({ color: greens[Math.floor(r() * greens.length)], roughness: 0.9 });
+      const blob = new THREE.Mesh(canopyBlob(sx, sy, sz, seed * 19 + i, low ? 1 : 2), m);
       blob.position.set(Math.cos(a) * rr, y, Math.sin(a) * rr);
+      blob.rotation.set(r() * 0.8, r() * Math.PI, r() * 0.8);
       blob.castShadow = true;
       blob.receiveShadow = true;
       g.add(blob);
     }
+    // soft silhouette: thin leaf cards on canopy rim (breaks hard polygon edges)
+    if (!low) {
+      const rimLeaf = new THREE.MeshStandardMaterial({ color: 0x2a3e20, roughness: 0.88, side: THREE.DoubleSide });
+      for (let i = 0; i < 10; i++) {
+        const a = (i / 10) * Math.PI * 2 + r() * 0.3;
+        const cards = leafCards(rimLeaf, seed + 200 + i);
+        cards.position.set(Math.cos(a) * 2.3, trunkH * 0.95 + r() * 0.8, Math.sin(a) * 2.3);
+        cards.scale.setScalar(1.2 + r() * 0.6);
+        g.add(cards);
+      }
+    }
   }
   g.scale.setScalar(scale);
+  g.rotation.y = r() * Math.PI * 2;
   return g;
 }
 
-/** Bamboo clump (southern Jiangxi villages). */
+/** Bamboo — thin culms + elongated leaf cards (not green balls). */
 export function makeBamboo(seed = 1, n = 9): THREE.Group {
   const g = new THREE.Group();
   const r = rng(seed * 31 + 7);
-  const stem = new THREE.MeshStandardMaterial({ color: 0x7a8a40, roughness: 0.6 });
-  const leaf = new THREE.MeshStandardMaterial({ color: 0x4a6a2a, roughness: 0.8, side: THREE.DoubleSide });
-  for (let i = 0; i < n; i++) {
-    const h = 5 + r() * 3;
-    const s = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, h, 6), stem);
+  const stemM = new THREE.MeshStandardMaterial({ color: 0x5a6a30, roughness: 0.55 });
+  const leafM = new THREE.MeshStandardMaterial({ color: 0x2e4820, roughness: 0.85, side: THREE.DoubleSide });
+  const count = lowPower() ? Math.min(n, 6) : n;
+  for (let i = 0; i < count; i++) {
+    const h = 5.2 + r() * 3.2;
     const x = (r() - 0.5) * 1.6, z = (r() - 0.5) * 1.6;
+    const s = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.05, h, 6), stemM);
     s.position.set(x, h / 2, z);
-    s.rotation.set((r() - 0.5) * 0.25, 0, (r() - 0.5) * 0.25);
+    s.rotation.set((r() - 0.5) * 0.18, 0, (r() - 0.5) * 0.18);
     s.castShadow = true;
     g.add(s);
     for (let k = 0; k < 5; k++) {
-      const l = new THREE.Mesh(noisyBlob(0.45 + r() * 0.3, i * 9 + k, 1), leaf);
-      l.position.set(x + (r() - 0.5) * 0.9, h * (0.6 + k * 0.09), z + (r() - 0.5) * 0.9);
-      l.scale.y = 0.5;
-      l.castShadow = true;
-      g.add(l);
+      const spray = leafCards(leafM, seed * 9 + i * 5 + k);
+      spray.position.set(x + (r() - 0.5) * 0.5, h * (0.5 + k * 0.1), z + (r() - 0.5) * 0.5);
+      spray.scale.setScalar(0.85 + r() * 0.4);
+      g.add(spray);
     }
   }
   return g;
 }
 
-/** Robed figure: lathe-turned robe, sleeves, sash, head, hair bun or hat. No faces. */
-export function makeFigure(color: number, seed = 1, scale = 1): THREE.Group {
+/** Stylized low-poly human with clear head / torso / arms / legs.
+ *  No full-body cone robe (that reads as a chess pawn). Cloak = open back panel only.
+ *  role: robed | performer | crowd */
+export function makeFigure(color: number, seed = 1, scale = 1, role: "robed" | "performer" | "crowd" = "robed"): THREE.Group {
   const g = new THREE.Group();
-  const r = rng(seed * 53 + 11);
-  const cloth = new THREE.MeshStandardMaterial({ color, roughness: 0.85 });
-  const prof = [
-    new THREE.Vector2(0.0, 0), new THREE.Vector2(0.3, 0), new THREE.Vector2(0.28, 0.25), new THREE.Vector2(0.22, 0.7),
-    new THREE.Vector2(0.17, 0.95), new THREE.Vector2(0.2, 1.15), new THREE.Vector2(0.16, 1.28), new THREE.Vector2(0.06, 1.33),
-  ];
-  const robe = new THREE.Mesh(new THREE.LatheGeometry(prof, 14), cloth);
-  g.add(robe);
-  const sash = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.06, 14), new THREE.MeshStandardMaterial({ color: 0x2a1e18, roughness: 0.7 }));
-  sash.position.y = 0.92;
-  g.add(sash);
+  const r = rng(Math.floor(seed * 53 + 11));
+  const cloth = new THREE.MeshStandardMaterial({ color, roughness: 0.88 });
+  const under = new THREE.MeshStandardMaterial({ color: new THREE.Color(color).multiplyScalar(0.55).getHex(), roughness: 0.9 });
+  const skin = new THREE.MeshStandardMaterial({ color: 0xc89a72, roughness: 0.7 });
+  const hairM = new THREE.MeshStandardMaterial({ color: 0x12100e, roughness: 0.55 });
+  const shoe = new THREE.MeshStandardMaterial({ color: 0x1a1410, roughness: 0.9 });
+  const segs = role === "crowd" ? 8 : 11;
+
+  // legs (pants) — always visible, slight stance
   for (const sx of [-1, 1]) {
-    const sl = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.11, 0.6, 8), cloth);
-    sl.position.set(sx * 0.2, 1.0, 0.04);
-    sl.rotation.z = sx * 0.25;
-    sl.rotation.x = -0.3;
-    g.add(sl);
+    const pant = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.07, 0.55, segs), under);
+    pant.position.set(sx * 0.1, 0.32, 0);
+    g.add(pant);
+    const boot = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.08, 0.2), shoe);
+    boot.position.set(sx * 0.1, 0.04, 0.03);
+    g.add(boot);
   }
-  const skin = new THREE.MeshStandardMaterial({ color: 0xd2aa86, roughness: 0.65 });
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.115, 14, 12), skin);
-  head.position.y = 1.45;
-  head.scale.y = 1.1;
+  // pelvis
+  const pelvis = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.14, 0.16), under);
+  pelvis.position.y = 0.62;
+  g.add(pelvis);
+
+  // torso — wider shoulders than hips (human proportion cue)
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.42, 0.18), cloth);
+  torso.position.y = 0.9;
+  g.add(torso);
+  const shoulders = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.1, 0.16), cloth);
+  shoulders.position.y = 1.12;
+  g.add(shoulders);
+
+  // neck + head (oversized for distance readability)
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.1, segs), skin);
+  neck.position.y = 1.22;
+  g.add(neck);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.13, segs, 10), skin);
+  head.position.y = 1.38;
+  head.scale.set(1, 1.05, 0.92);
   g.add(head);
-  const hair = new THREE.MeshStandardMaterial({ color: 0x16120e, roughness: 0.6 });
-  if (r() < 0.5) {
-    const bun = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 8), hair);
-    bun.position.set(0, 1.57, -0.04);
-    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.118, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), hair);
-    cap.position.y = 1.46;
-    g.add(bun, cap);
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.132, segs, 8, 0, Math.PI * 2, 0, Math.PI * 0.6), hairM);
+  hair.position.y = 1.39;
+  g.add(hair);
+
+  // arms with elbows
+  for (const sx of [-1, 1] as const) {
+    const arm = new THREE.Group();
+    const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.055, 0.3, segs), cloth);
+    upper.position.y = -0.15;
+    arm.add(upper);
+    const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), cloth);
+    elbow.position.y = -0.3;
+    arm.add(elbow);
+    const lower = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.048, 0.28, segs), role === "performer" ? cloth : skin);
+    lower.position.y = -0.44;
+    arm.add(lower);
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.048, 6, 6), skin);
+    hand.position.y = -0.6;
+    arm.add(hand);
+    if (role === "performer") {
+      // flowing sleeve ribbon
+      const ribbon = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.22, 0.55),
+        new THREE.MeshStandardMaterial({ color, roughness: 0.9, side: THREE.DoubleSide, transparent: true, opacity: 0.85 }),
+      );
+      ribbon.position.set(sx * 0.05, -0.35, -0.02);
+      arm.add(ribbon);
+      arm.rotation.z = sx * (1.15 + r() * 0.35);
+      arm.rotation.x = -0.55 - r() * 0.35;
+    } else if (role === "crowd") {
+      arm.rotation.z = sx * 0.25;
+      arm.rotation.x = 0.2;
+    } else {
+      arm.rotation.z = sx * 0.45;
+      arm.rotation.x = -0.6;
+    }
+    arm.position.set(sx * 0.24, 1.1, 0);
+    g.add(arm);
+  }
+
+  // open cloak behind the body (doesn't hide limbs)
+  if (role !== "crowd" || r() < 0.4) {
+    const cloak = new THREE.Mesh(
+      new THREE.PlaneGeometry(role === "performer" ? 0.7 : 0.55, role === "performer" ? 1.0 : 0.85),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.92, side: THREE.DoubleSide }),
+    );
+    cloak.position.set(0, 0.75, -0.12);
+    cloak.rotation.x = 0.12;
+    g.add(cloak);
+  }
+  // short front apron (waist → mid-thigh) — breaks torso/leg without pawn cone
+  if (role !== "crowd") {
+    const apron = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.26, 0.4),
+      new THREE.MeshStandardMaterial({ color: new THREE.Color(color).offsetHSL(0.02, 0.05, 0.08).getHex(), roughness: 0.9, side: THREE.DoubleSide }),
+    );
+    apron.position.set(0, 0.55, 0.1);
+    g.add(apron);
+  }
+  if (role === "performer") {
+    const sash = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.08, 0.2), new THREE.MeshStandardMaterial({ color: 0xf0e0a0, roughness: 0.5, metalness: 0.25 }));
+    sash.position.y = 0.7;
+    g.add(sash);
+    const crown = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.26, 8), new THREE.MeshStandardMaterial({ color: 0xd4af37, roughness: 0.4, metalness: 0.45 }));
+    crown.position.y = 1.58;
+    g.add(crown);
+    const plume = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.006, 0.38, 5), new THREE.MeshStandardMaterial({ color: 0xf5f0e0, roughness: 0.5 }));
+    plume.position.y = 1.82;
+    g.add(plume);
+  } else if (role === "crowd" && r() < 0.6) {
+    const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.025, 14), new THREE.MeshStandardMaterial({ color: 0x8a7040, roughness: 0.9 }));
+    brim.position.y = 1.42;
+    g.add(brim);
+    const top = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.09, 10), new THREE.MeshStandardMaterial({ color: 0x7a6030, roughness: 0.9 }));
+    top.position.y = 1.48;
+    g.add(top);
+  } else if (r() < 0.55) {
+    const bun = new THREE.Mesh(new THREE.SphereGeometry(0.055, 8, 6), hairM);
+    bun.position.set(0, 1.52, -0.02);
+    g.add(bun);
   } else {
-    const hat = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.26, 0.12, 16), new THREE.MeshStandardMaterial({ color: 0xb08a50, roughness: 0.8 }));
-    hat.position.y = 1.58;
+    const hat = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.18, 0.09, 10), new THREE.MeshStandardMaterial({ color: 0x6a5040, roughness: 0.85 }));
+    hat.position.y = 1.52;
     g.add(hat);
   }
-  g.traverse((o) => { o.castShadow = true; });
-  g.scale.setScalar(scale * (0.92 + r() * 0.16));
-  g.rotation.y = (r() - 0.5) * 0.6;
+
+  if (role === "robed" && r() < 0.6) {
+    const stick = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.55, 5), new THREE.MeshStandardMaterial({ color: 0x5a3a20, roughness: 0.8 }));
+    stick.position.set(0.14, 1.0, 0.2);
+    stick.rotation.x = -0.45;
+    g.add(stick);
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.025, 6, 6), new THREE.MeshStandardMaterial({ color: 0xff6020, emissive: 0xff4010, emissiveIntensity: 0.9 }));
+    tip.position.set(0.14, 1.22, 0.32);
+    g.add(tip);
+  }
+
+  g.traverse((o) => { if ((o as THREE.Mesh).isMesh) o.castShadow = true; });
+  g.scale.setScalar(scale * (role === "performer" ? 1.25 : 1.12) * (0.94 + r() * 0.12));
+  if (role !== "performer") g.rotation.y = (r() - 0.5) * 0.35;
   return g;
 }
+
+
+
+
+
