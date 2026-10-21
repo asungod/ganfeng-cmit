@@ -27,6 +27,7 @@ import { ambience } from "../render/ambience";
 import { guide, lines } from "../app/guide";
 import { bindDemoDetailToggle } from "../app/demoDetail";
 import { WeiwuScene } from "../render/weiwu";
+import { preloadGltfKit } from "../render/gltfKit";
 import { markTry, renderEvidence } from "../app/evidence";
 import { hakkaRule } from "../data/evidenceRules";
 import { routeName, t } from "../app/i18n";
@@ -499,14 +500,21 @@ export function mountHakka(root: HTMLElement): () => void {
     }
   });
 
-  try {
-    view = new WeiwuScene(root.querySelector("canvas.room-view") as HTMLCanvasElement);
-  } catch (err) {
-    console.warn("kejia weiwu: WebGL unavailable", err);
-    view = null;
-  }
+  const roomCanvas = root.querySelector("canvas.room-view") as HTMLCanvasElement;
   const onResize = () => view?.resize();
   window.addEventListener("resize", onResize);
+  void (async () => {
+    try {
+      await preloadGltfKit();
+      view = new WeiwuScene(roomCanvas);
+      view.setHour(hour);
+      view.setRoom(room);
+      onResize();
+    } catch (err) {
+      console.warn("kejia weiwu: WebGL unavailable", err);
+      view = null;
+    }
+  })();
   void ambience.set("earth");
   paintHours();
   const hashRoom = location.hash.replace(/^#\/?kejia\/?/, "").split("?")[0] as RoomId;

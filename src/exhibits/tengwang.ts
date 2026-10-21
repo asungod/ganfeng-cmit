@@ -19,6 +19,7 @@ import {
   type ImageId,
   type MoodId,
 } from "../data/tengwang";
+import { preloadGltfKit } from "../render/gltfKit";
 import { PavilionScene } from "../render/pavilion";
 import { ambience } from "../render/ambience";
 import { guide, lines } from "../app/guide";
@@ -432,23 +433,27 @@ export function mountTengwang(root: HTMLElement): () => void {
     }
   }
 
-  try {
-    painting = new PavilionScene(canvas);
-    painting.onProject = (pts) => {
-      lastPts = pts;
-      const pos = layoutSpots();
-      for (const btn of spots.querySelectorAll<HTMLElement>("[data-hot]")) {
-        const id = btn.dataset.hot;
-        if (!id || !pts[id as keyof typeof pts]) continue;
-        const p = pos[id] ?? spotPos(id, 50, 50);
-        btn.style.left = `${p.x}%`;
-        btn.style.top = `${p.y}%`;
-      }
-    };
-  } catch (err) {
-    console.warn("tengwang pavilion: WebGL unavailable", err);
-    painting = null;
-  }
+  void (async () => {
+    try {
+      await preloadGltfKit();
+      painting = new PavilionScene(canvas);
+      painting.onProject = (pts) => {
+        lastPts = pts;
+        const pos = layoutSpots();
+        for (const btn of spots.querySelectorAll<HTMLElement>("[data-hot]")) {
+          const id = btn.dataset.hot;
+          if (!id || !pts[id as keyof typeof pts]) continue;
+          const p = pos[id] ?? spotPos(id, 50, 50);
+          btn.style.left = `${p.x}%`;
+          btn.style.top = `${p.y}%`;
+        }
+      };
+      painting.resize();
+    } catch (err) {
+      console.warn("tengwang pavilion: WebGL unavailable", err);
+      painting = null;
+    }
+  })();
   const onResize = () => painting?.resize();
   window.addEventListener("resize", onResize);
 

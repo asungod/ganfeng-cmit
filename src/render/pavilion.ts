@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { lowPower, shadowSize, Flight, loadHdri, makePost, particles, phMat, softDot, type Post } from "./kit";
+import { cloneGltfBush, cloneGltfTree } from "./gltfKit";
 import type { ImageId, MoodId } from "../data/tengwang";
 
 const MARK: Record<ImageId, THREE.Vector3> = {
@@ -102,14 +103,21 @@ export class PavilionScene {
     pavilion.rotation.y = -0.42;
     pavilion.scale.setScalar(1.1);
     this.scene.add(pavilion);
-    // riverbank embankment the pavilion stands on
-    const bankTop = phMat("brown_mud_dry", [8, 4], { color: 0x8a7a68 });
-    const bankWall = phMat("stone_tiles", [10, 1], { color: 0x8a847a });
-    const bank = new THREE.Mesh(new THREE.BoxGeometry(18, 0.7, 9), [bankWall, bankWall, bankTop, bankTop, bankWall, bankWall]);
-    bank.position.set(4.2, 0.15, -14.2);
-    bank.rotation.y = -0.42;
-    bank.receiveShadow = true;
-    this.scene.add(bank);
+    // riverbank: terraced mud + stone face + willow fringe (not a flat box)
+    this.scene.add(makeRiverbank());
+    for (let i = 0; i < (lowPower() ? 3 : 5); i++) {
+      const willow = cloneGltfTree(40 + i, 0.85 + (i % 3) * 0.12, "camphor");
+      if (!willow) continue;
+      willow.position.set(10.5 - i * 2.2, 0.35, -17.5 - (i % 2) * 1.4);
+      willow.rotation.y = i * 0.9;
+      this.scene.add(willow);
+    }
+    for (let i = 0; i < 4; i++) {
+      const bush = cloneGltfBush(55 + i, 0.9);
+      if (!bush) continue;
+      bush.position.set(-2 + i * 1.8, 0.2, -10.5 - (i % 2) * 0.8);
+      this.scene.add(bush);
+    }
     this.markers.set("feige", pavilion);
 
     this.scene.add(makeBoats());
@@ -192,13 +200,36 @@ export class PavilionScene {
     if (geese) geese.position.x = 6.5 + Math.sin(t * 0.12) * 0.8;
     const pos = this.waterMesh.geometry.attributes.position as THREE.BufferAttribute;
     const orig = this.waterOrig;
+    const amp = lowPower() ? 0.035 : 0.055;
     for (let i = 0; i < pos.count; i++) {
       const x = orig[i * 3];
       const y = orig[i * 3 + 1];
-      pos.setZ(i, Math.sin(x * 0.22 + t * 1.2) * 0.04 + Math.sin(y * 0.16 + t * 0.8) * 0.025);
+      const z =
+        Math.sin(x * 0.18 + t * 1.15) * amp +
+        Math.sin(y * 0.14 + t * 0.85) * amp * 0.7 +
+        Math.sin((x + y) * 0.35 + t * 1.8) * amp * 0.35 +
+        Math.sin(x * 0.55 - t * 2.2) * amp * 0.18;
+      pos.setZ(i, z);
     }
     pos.needsUpdate = true;
-    this.waterMesh.geometry.computeVertexNormals();
+    if (!lowPower() || (this.raf % 2 === 0)) this.waterMesh.geometry.computeVertexNormals();
+    // glitter path gently pulses with the sun path
+    const glitter = this.water.getObjectByName("glitterPath") as THREE.Mesh | undefined;
+    if (glitter) {
+      const gm = glitter.material as THREE.MeshBasicMaterial;
+      gm.opacity = 0.42 + Math.sin(t * 0.6) * 0.12;
+    }
+    // wing flap on geese + lone duck
+    const flap = (bird: THREE.Object3D, phase: number) => {
+      const a = Math.sin(t * 4.5 + phase) * 0.35;
+      const l = bird.getObjectByName("wingL");
+      const r = bird.getObjectByName("wingR");
+      if (l) l.rotation.z = 0.15 + a;
+      if (r) r.rotation.z = -0.15 - a;
+    };
+    flap(this.duck, 0);
+    const geeseG = this.markers.get("yanzhen");
+    if (geeseG) geeseG.children.forEach((c, i) => flap(c, i * 0.7));
     const now = performance.now();
     this.flight.step(Math.min(0.3, (now - this.lastT) / 1000));
     this.lastT = now;
@@ -263,26 +294,43 @@ function mat(color: number, roughness = 0.7, metalness = 0.05): THREE.MeshStanda
 
 function makeWater(): THREE.Group {
   const g = new THREE.Group();
+  const segs = lowPower() ? 64 : 96;
   const m = new THREE.Mesh(
-    new THREE.PlaneGeometry(90, 90, 56, 56),
-    new THREE.MeshStandardMaterial({ color: 0x6a7a88, roughness: 0.06, metalness: 0.92, envMapIntensity: 1.5 }),
+    new THREE.PlaneGeometry(100, 100, segs, segs),
+    new THREE.MeshStandardMaterial({
+      color: 0x5a7088,
+      roughness: 0.08,
+      metalness: 0.85,
+      envMapIntensity: 1.85,
+      flatShading: false,
+    }),
   );
   m.rotation.x = -Math.PI / 2;
   m.receiveShadow = true;
+  m.name = "waterMain";
   g.add(m);
+  // deeper tint layer underneath for river body
+  const deep = new THREE.Mesh(
+    new THREE.PlaneGeometry(100, 100),
+    new THREE.MeshStandardMaterial({ color: 0x1a2838, roughness: 1, metalness: 0, transparent: true, opacity: 0.35 }),
+  );
+  deep.rotation.x = -Math.PI / 2;
+  deep.position.y = -0.35;
+  g.add(deep);
   const path = new THREE.Mesh(
-    new THREE.PlaneGeometry(3.4, 22),
-    new THREE.MeshBasicMaterial({ color: 0xffd0a0, transparent: true, opacity: 0.5, depthWrite: false, alphaMap: glitterAlpha() }),
+    new THREE.PlaneGeometry(4.2, 28),
+    new THREE.MeshBasicMaterial({ color: 0xffd8a8, transparent: true, opacity: 0.55, depthWrite: false, alphaMap: glitterAlpha() }),
   );
   path.rotation.x = -Math.PI / 2;
-  path.position.set(-6.4, 0.06, -4.2);
+  path.position.set(-6.4, 0.08, -4.2);
+  path.name = "glitterPath";
   g.add(path);
   const rim = new THREE.Mesh(
-    new THREE.PlaneGeometry(90, 12),
-    new THREE.MeshBasicMaterial({ color: 0xf2d7a2, transparent: true, opacity: 0.14, depthWrite: false }),
+    new THREE.PlaneGeometry(100, 14),
+    new THREE.MeshBasicMaterial({ color: 0xf2d7a2, transparent: true, opacity: 0.12, depthWrite: false }),
   );
   rim.rotation.x = -Math.PI / 2;
-  rim.position.set(0, 0.05, -16);
+  rim.position.set(0, 0.05, -18);
   g.add(rim);
   return g;
 }
@@ -626,28 +674,113 @@ export function makeBoats(): THREE.Group {
   return g;
 }
 
-function makeDuck(): THREE.Group {
+/** Low-poly goose / 孤鹜: body + neck + head + flared wings (not a cone). */
+function makeBird(scale = 1, dark = 0x1a1410): THREE.Group {
   const g = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), mat(0x1a120e, 0.7, 0));
-  body.scale.set(1.6, 0.7, 1);
-  const wing = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 6), mat(0x24160e, 0.7, 0));
-  wing.scale.set(2.2, 0.2, 0.7);
-  wing.position.set(0.1, 0.02, 0);
-  g.add(body, wing);
+  const feather = mat(dark, 0.75, 0);
+  const belly = mat(0x2a2218, 0.8, 0);
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), belly);
+  body.scale.set(1.7, 0.75, 1);
+  body.castShadow = true;
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 0.28, 8), feather);
+  neck.position.set(0.18, 0.12, 0);
+  neck.rotation.z = -0.9;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), feather);
+  head.position.set(0.32, 0.22, 0);
+  const beak = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.08, 5), mat(0xc07030, 0.6, 0.1));
+  beak.rotation.z = -Math.PI / 2;
+  beak.position.set(0.4, 0.2, 0);
+  const wingL = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), feather);
+  wingL.scale.set(1.8, 0.12, 0.7);
+  wingL.position.set(0, 0.04, 0.16);
+  wingL.rotation.y = 0.25;
+  wingL.rotation.z = 0.15;
+  wingL.name = "wingL";
+  const wingR = wingL.clone();
+  wingR.position.z = -0.16;
+  wingR.rotation.y = -0.25;
+  wingR.rotation.z = -0.15;
+  wingR.name = "wingR";
+  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.22, 5), feather);
+  tail.rotation.z = Math.PI / 2;
+  tail.position.set(-0.28, 0.02, 0);
+  g.add(body, neck, head, beak, wingL, wingR, tail);
+  g.scale.setScalar(scale);
   return g;
 }
 
+function makeDuck(): THREE.Group {
+  // 孤鹜 — single wild goose silhouette against the dusk
+  return makeBird(2.4, 0x18120e);
+}
+
 function makeGeese(): THREE.Group {
+  // 雁阵 — loose V of articulated geese, not cone placeholders
   const g = new THREE.Group();
   g.position.copy(MARK.yanzhen);
-  const m = new THREE.MeshBasicMaterial({ color: 0x1a120e });
-  for (let i = 0; i < 9; i++) {
-    const side = i < 5 ? -1 : 1;
-    const k = i < 5 ? i : i - 4;
-    const bird = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.28, 3), m);
-    bird.rotation.x = Math.PI / 2;
-    bird.position.set(side * k * 0.55, -k * 0.28, 0);
-    g.add(bird);
+  g.name = "geese";
+  const slots: [number, number, number, number][] = [
+    [0, 0, 0, 1.8],
+    [-1.2, -0.45, 0.25, 1.55],
+    [1.2, -0.45, 0.25, 1.55],
+    [-2.3, -0.95, 0.4, 1.4],
+    [2.3, -0.95, 0.4, 1.4],
+    [-3.3, -1.5, 0.55, 1.25],
+    [3.3, -1.5, 0.55, 1.25],
+    [-4.2, -2.1, 0.7, 1.15],
+    [4.2, -2.1, 0.7, 1.15],
+  ];
+  for (let i = 0; i < slots.length; i++) {
+    const [x, y, z, sc] = slots[i];
+    const b = makeBird(sc, i === 0 ? 0x1c1410 : 0x15100c);
+    b.position.set(x, y, z);
+    b.rotation.y = Math.PI * 0.5 + (i % 2 ? -0.08 : 0.08);
+    b.rotation.z = (i % 2 ? -0.05 : 0.05);
+    g.add(b);
+  }
+  return g;
+}
+
+/** Terraced riverbank with irregular waterline — replaces flat embankment box. */
+function makeRiverbank(): THREE.Group {
+  const g = new THREE.Group();
+  const mud = phMat("brown_mud_dry", [6, 3], { color: 0x7a6a58 });
+  const stone = phMat("stone_tiles", [8, 2], { color: 0x7a7468 });
+  // main terrace under pavilion
+  const top = new THREE.Mesh(new THREE.BoxGeometry(16, 0.55, 7.5), mud);
+  top.position.set(4.0, 0.35, -14.0);
+  top.rotation.y = -0.42;
+  top.receiveShadow = true;
+  top.castShadow = true;
+  g.add(top);
+  // stone retaining face toward the river
+  const face = new THREE.Mesh(new THREE.BoxGeometry(16.2, 1.1, 0.45), stone);
+  face.position.set(2.6, 0.05, -10.6);
+  face.rotation.y = -0.42;
+  face.castShadow = true;
+  g.add(face);
+  // sloping mud steps into water (irregular boxes)
+  const steps: [number, number, number, number][] = [
+    [1.2, -0.15, -9.2, 10],
+    [-0.5, -0.28, -8.0, 12],
+    [-2.0, -0.38, -6.8, 14],
+  ];
+  for (const [x, y, z, w] of steps) {
+    const step = new THREE.Mesh(new THREE.BoxGeometry(w, 0.35, 1.6), mud);
+    step.position.set(x + 3.5, y, z - 4);
+    step.rotation.y = -0.38 + (x * 0.02);
+    step.receiveShadow = true;
+    g.add(step);
+  }
+  // rocky waterline scatter
+  const rockM = new THREE.MeshStandardMaterial({ color: 0x5a544c, roughness: 0.92 });
+  for (let i = 0; i < 14; i++) {
+    const r = new THREE.Mesh(new THREE.DodecahedronGeometry(0.18 + (i % 4) * 0.06, 0), rockM);
+    r.position.set(-4 + i * 1.15 + (i % 3) * 0.2, -0.35, -7.5 - (i % 5) * 0.4);
+    r.rotation.set(i * 0.4, i * 0.7, i * 0.2);
+    r.scale.set(1 + (i % 3) * 0.3, 0.6 + (i % 2) * 0.3, 1);
+    r.castShadow = true;
+    g.add(r);
   }
   return g;
 }

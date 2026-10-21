@@ -376,6 +376,7 @@ export function disposeScene(scene: THREE.Scene): void {
 
 // ---------- CC0 assets (Poly Haven), lazy-loaded per hall ----------
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+import { cloneGltfBamboo, cloneGltfFigure, cloneGltfTree } from "./gltfKit";
 const ASSET = "./assets3d/";
 const texLoader = new THREE.TextureLoader();
 
@@ -459,6 +460,8 @@ function leafCards(mat: THREE.Material, seed: number): THREE.Group {
 
 /** Camphor / pine — tapered trunk, limbs, layered flattened canopy (not sphere-on-stick). */
 export function makeTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "camphor"): THREE.Group {
+  const glb = cloneGltfTree(seed, scale, kind);
+  if (glb) return glb;
   const g = new THREE.Group();
   const r = rng(seed * 977 + 3);
   const low = lowPower();
@@ -551,6 +554,8 @@ export function makeTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "campho
 
 /** Bamboo — thin culms + elongated leaf cards (not green balls). */
 export function makeBamboo(seed = 1, n = 9): THREE.Group {
+  const glb = cloneGltfBamboo(seed);
+  if (glb) return glb;
   const g = new THREE.Group();
   const r = rng(seed * 31 + 7);
   const stemM = new THREE.MeshStandardMaterial({ color: 0x5a6a30, roughness: 0.55 });
@@ -578,6 +583,8 @@ export function makeBamboo(seed = 1, n = 9): THREE.Group {
  *  No full-body cone robe (that reads as a chess pawn). Cloak = open back panel only.
  *  role: robed | performer | crowd */
 export function makeFigure(color: number, seed = 1, scale = 1, role: "robed" | "performer" | "crowd" = "robed"): THREE.Group {
+  const glb = cloneGltfFigure(color, seed, scale, role);
+  if (glb) return glb;
   const g = new THREE.Group();
   const r = rng(Math.floor(seed * 53 + 11));
   const cloth = new THREE.MeshStandardMaterial({ color, roughness: 0.88 });

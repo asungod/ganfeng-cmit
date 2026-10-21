@@ -164,5 +164,76 @@
    "weathered_planks_nor_1k.jpg",
    "weathered_planks_rough_1k.jpg"
   ]
+ },
+ {
+  "id": "kenney_nature_kit",
+  "name": "Nature Kit (selected trees, bamboo, bushes)",
+  "type": "3D models (glTF)",
+  "authors": [
+   "Kenney"
+  ],
+  "license": "CC0 1.0",
+  "url": "https://kenney.nl/assets/nature-kit",
+  "files": [
+   "models/k_tree_detailed_dark.glb",
+   "models/k_tree_oak_dark.glb",
+   "models/k_tree_default_dark.glb",
+   "models/k_tree_pineDefaultA.glb",
+   "models/k_tree_pineRoundC.glb",
+   "models/k_tree_cone_dark.glb",
+   "models/k_crops_bambooStageB.glb",
+   "models/k_plant_bush.glb",
+   "models/k_plant_bushDetailed.glb"
+  ]
+ },
+ {
+  "id": "quaternius_nature",
+  "name": "Ultimate Nature Pack (CommonTree, PineTree, Willow, Bush)",
+  "type": "3D models (glTF)",
+  "authors": [
+   "Quaternius"
+  ],
+  "license": "CC0 1.0",
+  "url": "https://quaternius.com/packs/ultimatenature.html",
+  "files": [
+   "models/q_CommonTree_1.glb",
+   "models/q_CommonTree_2.glb",
+   "models/q_CommonTree_3.glb",
+   "models/q_CommonTree_4.glb",
+   "models/q_CommonTree_5.glb",
+   "models/q_PineTree_1.glb",
+   "models/q_PineTree_2.glb",
+   "models/q_PineTree_3.glb",
+   "models/q_PineTree_4.glb",
+   "models/q_PineTree_5.glb",
+   "models/q_Willow_1.glb",
+   "models/q_Willow_2.glb",
+   "models/q_Willow_3.glb",
+   "models/q_Bush_1.glb",
+   "models/q_Bush_2.glb"
+  ]
+ },
+ {
+  "id": "quaternius_modular_chars",
+  "name": "Modular Men / Modular Women (Farmer, King, Medieval, …)",
+  "type": "3D models (glTF)",
+  "authors": [
+   "Quaternius"
+  ],
+  "license": "CC0 1.0",
+  "url": "https://quaternius.com/packs/ultimatemodularcharacters.html",
+  "files": [
+   "models/q_men_Adventurer.glb",
+   "models/q_men_Casual.glb",
+   "models/q_men_Farmer.glb",
+   "models/q_men_King.glb",
+   "models/q_men_Worker.glb",
+   "models/q_women_Adventurer.glb",
+   "models/q_women_Casual.glb",
+   "models/q_women_Medieval.glb",
+   "models/q_women_Witch.glb",
+   "models/q_women_Worker.glb"
+  ],
+  "note": "Used for 万寿宫 pilgrims/audience/performers. Arms reposed from T-pose; cloth tinted per role. Not historically Chinese costume — stylized stand-ins."
  }
 ]

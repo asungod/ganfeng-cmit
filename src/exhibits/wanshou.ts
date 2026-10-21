@@ -6,6 +6,7 @@ import { formatLookupLine, pushLookupLog } from "../app/engineHud";
 import { compatWord, routeName, t } from "../app/i18n";
 import { bindDemoDetailToggle } from "../app/demoDetail";
 import { wanshouRule } from "../data/evidenceRules";
+import { preloadGltfKit } from "../render/gltfKit";
 import { TempleScene } from "../render/temple";
 import { acts, actCompat, preferredSlot, slotByAct, slots, type ActId, type SlotId } from "../data/wanshou";
 
@@ -51,11 +52,16 @@ export function mountWanshou(root: HTMLElement): () => void {
     </div>`;
   const $ = (s: string) => root.querySelector(s) as HTMLElement;
   let scene: TempleScene | null = null;
-  try {
-    scene = new TempleScene(root.querySelector("canvas.temple") as HTMLCanvasElement);
-  } catch (err) {
-    console.warn("wanshou temple: WebGL unavailable", err);
-  }
+  const canvasEl = root.querySelector("canvas.temple") as HTMLCanvasElement;
+  void (async () => {
+    try {
+      await preloadGltfKit();
+      scene = new TempleScene(canvasEl);
+      scene.set(act, slot, true);
+    } catch (err) {
+      console.warn("wanshou temple: WebGL unavailable", err);
+    }
+  })();
   const onResize = () => scene?.resize();
   window.addEventListener("resize", onResize);
   bindDemoDetailToggle(root);
