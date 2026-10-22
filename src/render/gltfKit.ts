@@ -347,22 +347,30 @@ function addFace(g: THREE.Group, obj: THREE.Object3D, role: FigureRole, seed: nu
     if (sm.isSkinnedMesh) sm.computeBoundingBox(); else m.geometry.computeBoundingBox();
     const b = (sm.isSkinnedMesh ? sm.boundingBox! : m.geometry.boundingBox!).clone().applyMatrix4(m.matrixWorld);
     box.union(b);
-    if (hide) m.visible = false;
+    void hide;
+    m.visible = false; // v20: whole original head hidden; replaced by our own head + painted face
   }
   if (box.isEmpty()) return;
   const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
   box.applyMatrix4(inv);
   const c = box.getCenter(new THREE.Vector3());
   const sz = box.getSize(new THREE.Vector3());
-  const r = Math.min(sz.x, sz.z) * 0.5 * 1.04;
+  const r = Math.min(sz.x, sz.z) * 0.5;
+  const skinHex = role === "performer" ? 0xe8d8c8 : [0xe2b894, 0xd6a882, 0xe8c4a2, 0xc99a74][seed % 4];
+  const head = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 18), new THREE.MeshStandardMaterial({ color: skinHex, roughness: 0.75 }));
+  head.scale.set(sz.x / (2 * r) * 0.92, sz.y / (2 * r) * 0.8, 0.95);
+  head.position.set(c.x, box.min.y + sz.y * 0.44, c.z);
+  head.castShadow = true;
+  head.name = "ownHead";
+  g.add(head);
   const fh = sz.y * 0.62;
-  const geo = new THREE.CylinderGeometry(r * 1.02, r * 1.02, fh, 20, 1, true, -Math.PI * 0.32, Math.PI * 0.64);
-  const mat = new THREE.MeshStandardMaterial({ map: faceTexture(role, seed), transparent: true, alphaTest: 0.05, roughness: role === "performer" ? 0.45 : 0.8, side: THREE.FrontSide });
-  // alpha: transparent outside the painted oval
+  const rr = r * 0.97;
+  const geo = new THREE.CylinderGeometry(rr, rr, fh / head.scale.y, 24, 1, true, -Math.PI * 0.36, Math.PI * 0.72);
+  const mat = new THREE.MeshStandardMaterial({ map: faceTexture(role, seed), transparent: true, alphaTest: 0.05, roughness: role === "performer" ? 0.45 : 0.8, polygonOffset: true, polygonOffsetFactor: -2 });
   const face = new THREE.Mesh(geo, mat);
-  face.position.set(c.x, box.min.y + sz.y * 0.42, c.z);
   face.name = "faceDecal";
-  g.add(face);
+  face.scale.set(1.02, 1, 1.02);
+  head.add(face);
   // hide the original western eyes/brows so they don't show beside the decal
   obj.traverse((o) => {
     const m = o as THREE.Mesh;

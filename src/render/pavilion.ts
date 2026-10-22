@@ -254,7 +254,7 @@ export class PavilionScene {
     this.sunLight.intensity = pal.key;
     {
       const wmat = (this.water.children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial & THREE.ShaderMaterial;
-      if (wmat.uniforms?.waterColor) wmat.uniforms.waterColor.value.set(pal.water).multiplyScalar(0.45);
+      if (wmat.uniforms?.waterColor) wmat.uniforms.waterColor.value.set(pal.water).multiplyScalar(0.3);
       else wmat.color.set(pal.water);
     }
     this.glow.material.color.set(pal.glow);
@@ -297,28 +297,23 @@ function makeWater(): THREE.Group {
     const w = new Water(new THREE.PlaneGeometry(100, 100), {
       textureWidth: 1024, textureHeight: 1024, waterNormals: nt,
       sunDirection: MARK.luoxia.clone().normalize(), sunColor: 0xffd8a8,
-      waterColor: 0x1c3446, distortionScale: 2.4, alpha: 1, fog: false,
+      waterColor: 0x1c3446, distortionScale: 1.2, alpha: 1, fog: false,
     });
     w.rotation.x = -Math.PI / 2;
     w.name = "waterMain";
     const wm = w.material as THREE.ShaderMaterial;
-    wm.uniforms.size.value = 1.6;
+    wm.uniforms.size.value = 4.0;
     // guard against HDR inf/NaN from the reflected sun disc (would blacken the bloom chain)
     wm.fragmentShader = wm.fragmentShader
       .replace("vec3 reflectionSample = vec3( texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.w + distortion ) );",
-        "vec3 reflectionSample = vec3( texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.w + distortion ) ); reflectionSample = (any(isnan(reflectionSample)) || any(isinf(reflectionSample))) ? vec3(1.0) : min(reflectionSample, vec3(6.0)) * 0.72;")
+        "vec3 reflectionSample = vec3( texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.w + distortion ) ); reflectionSample = (any(isnan(reflectionSample)) || any(isinf(reflectionSample))) ? vec3(1.0) : min(reflectionSample, vec3(6.0)) * 0.62;")
+      .replace("float rf0 = 0.3;", "float rf0 = 0.18;")
+      .replace("vec3( 0.1 ) + reflectionSample * 0.9", "vec3( 0.02 ) + reflectionSample * 0.95")
       .replace("vec3 outgoingLight = albedo;", "vec3 outgoingLight = (any(isnan(albedo)) || any(isinf(albedo))) ? waterColor : min(albedo, vec3(8.0));");
     wm.fog = false;
     g.add(w);
     g.userData.reflective = w;
-    // soft shoreline: translucent warm gradient strip blending water into the bank
-    const sc = document.createElement("canvas"); sc.width = 4; sc.height = 128;
-    const cx = sc.getContext("2d")!; const gr = cx.createLinearGradient(0, 0, 0, 128);
-    gr.addColorStop(0, "rgba(120,100,80,0.85)"); gr.addColorStop(1, "rgba(120,100,80,0)");
-    cx.fillStyle = gr; cx.fillRect(0, 0, 4, 128);
-    const shore = new THREE.Mesh(new THREE.PlaneGeometry(18, 2.4), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false, fog: true }));
-    shore.rotation.order = "YXZ"; shore.rotation.set(-Math.PI / 2, -0.42, 0); shore.position.set(2.1, 0.05, -9.4);
-    g.add(shore);
+    // v20: shoreline strip removed (it read as a dark line)
     return g;
   }
   const m = new THREE.Mesh(
