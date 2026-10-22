@@ -268,6 +268,110 @@ export function cloneGltfBush(seed = 1, scale = 1): THREE.Group | null {
   return g;
 }
 
+/** v19: painted face decal (opera 脸谱 or plain friendly Chinese features), drawn on a canvas. */
+const faceTexCache = new Map<string, THREE.CanvasTexture>();
+function faceTexture(role: FigureRole, seed: number): THREE.CanvasTexture {
+  const kind = role === "performer" ? ["red", "white", "black"][seed % 3] : `c${seed % 4}`;
+  const hit = faceTexCache.get(kind);
+  if (hit) return hit;
+  const c = document.createElement("canvas"); c.width = c.height = 256;
+  const x = c.getContext("2d")!;
+  const E = (cx: number, cy: number, rx: number, ry: number, rot = 0) => { x.beginPath(); x.ellipse(cx, cy, rx, ry, rot, 0, Math.PI * 2); x.fill(); };
+  if (role === "performer") {
+    // base paint
+    const base = kind === "red" ? "#b81e1e" : kind === "white" ? "#f2ece4" : "#1a1614";
+    x.fillStyle = base; E(128, 136, 104, 120);
+    // forehead / central stripe
+    x.fillStyle = kind === "black" ? "#f2ece4" : kind === "red" ? "#1a1614" : "#c02828";
+    x.beginPath(); x.moveTo(118, 20); x.lineTo(138, 20); x.lineTo(132, 92); x.lineTo(124, 92); x.fill();
+    // eye sockets painted white/black, upswept
+    x.fillStyle = kind === "black" ? "#f2ece4" : "#141010";
+    E(84, 112, 34, 15, -0.35); E(172, 112, 34, 15, 0.35);
+    // bold upswept eyebrows
+    x.strokeStyle = "#0c0808"; x.lineWidth = 11; x.lineCap = "round";
+    x.beginPath(); x.moveTo(52, 104); x.quadraticCurveTo(80, 70, 116, 88); x.stroke();
+    x.beginPath(); x.moveTo(204, 104); x.quadraticCurveTo(176, 70, 140, 88); x.stroke();
+    // eyes
+    x.fillStyle = "#fff"; E(88, 114, 15, 7, -0.3); E(168, 114, 15, 7, 0.3);
+    x.fillStyle = "#120c0a"; E(90, 114, 6, 6); E(166, 114, 6, 6);
+    // nose shade + mouth: firm, slight determined smile
+    x.fillStyle = kind === "white" ? "#d8c8c0" : "rgba(0,0,0,0.35)"; E(128, 160, 12, 8);
+    x.strokeStyle = kind === "black" ? "#f2ece4" : "#7a0e0e"; x.lineWidth = 6;
+    x.beginPath(); x.moveTo(104, 196); x.quadraticCurveTo(128, 210, 152, 196); x.stroke();
+    if (kind !== "black") { x.fillStyle = "#d83030"; E(128, 200, 10, 5); }
+  } else {
+    const n = seed % 4;
+    const skin = ["#e2b894", "#d6a882", "#e8c4a2", "#c99a74"][n];
+    x.fillStyle = skin; E(128, 136, 100, 118);
+    // soft cheeks
+    x.fillStyle = "rgba(210,110,100,0.25)"; E(74, 160, 20, 12); E(182, 160, 20, 12);
+    // eyebrows
+    x.strokeStyle = "#2a1c14"; x.lineWidth = 6; x.lineCap = "round";
+    const raise = n === 2 ? -6 : 0;
+    x.beginPath(); x.moveTo(66, 98 + raise); x.quadraticCurveTo(88, 88 + raise, 110, 96); x.stroke();
+    x.beginPath(); x.moveTo(190, 98 + raise); x.quadraticCurveTo(168, 88 + raise, 146, 96); x.stroke();
+    // almond eyes (smiling eyes are arcs)
+    x.fillStyle = "#1a120e";
+    if (n === 0 || n === 3) {
+      x.lineWidth = 5; x.strokeStyle = "#1a120e";
+      x.beginPath(); x.arc(88, 122, 12, Math.PI * 1.1, Math.PI * 1.9); x.stroke();
+      x.beginPath(); x.arc(168, 122, 12, Math.PI * 1.1, Math.PI * 1.9); x.stroke();
+    } else { E(88, 118, 11, 5); E(168, 118, 11, 5); }
+    // nose
+    x.strokeStyle = "rgba(120,70,50,0.5)"; x.lineWidth = 4;
+    x.beginPath(); x.moveTo(122, 160); x.quadraticCurveTo(128, 166, 134, 160); x.stroke();
+    // mouth: smile / open smile / calm watch
+    x.strokeStyle = "#8a3a30"; x.lineWidth = 5;
+    if (n === 1) { x.fillStyle = "#7a2a24"; x.beginPath(); x.arc(128, 192, 16, 0, Math.PI); x.fill(); }
+    else { const k = n === 2 ? 4 : 12; x.beginPath(); x.moveTo(106, 192); x.quadraticCurveTo(128, 192 + k, 150, 192); x.stroke(); }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  faceTexCache.set(kind, t);
+  return t;
+}
+
+function addFace(g: THREE.Group, obj: THREE.Object3D, role: FigureRole, seed: number): void {
+  g.updateMatrixWorld(true);
+  const box = new THREE.Box3();
+  const headMeshes: THREE.Mesh[] = [];
+  obj.traverse((o) => {
+    let p: THREE.Object3D | null = o, isHead = false;
+    while (p) { if (/head/i.test(p.name)) { isHead = true; break; } p = p.parent; }
+    if ((o as THREE.Mesh).isMesh && isHead) headMeshes.push(o as THREE.Mesh);
+  });
+  for (const m of headMeshes) {
+    const mt = (Array.isArray(m.material) ? m.material[0] : m.material) as THREE.MeshStandardMaterial;
+    const hide = !/skin/i.test(mt.name); // hats, hair, beards, eyes: replaced by costume + decal
+    const sm = m as THREE.SkinnedMesh;
+    if (sm.isSkinnedMesh) sm.computeBoundingBox(); else m.geometry.computeBoundingBox();
+    const b = (sm.isSkinnedMesh ? sm.boundingBox! : m.geometry.boundingBox!).clone().applyMatrix4(m.matrixWorld);
+    box.union(b);
+    if (hide) m.visible = false;
+  }
+  if (box.isEmpty()) return;
+  const inv = new THREE.Matrix4().copy(g.matrixWorld).invert();
+  box.applyMatrix4(inv);
+  const c = box.getCenter(new THREE.Vector3());
+  const sz = box.getSize(new THREE.Vector3());
+  const r = Math.min(sz.x, sz.z) * 0.5 * 1.04;
+  const fh = sz.y * 0.62;
+  const geo = new THREE.CylinderGeometry(r * 1.02, r * 1.02, fh, 20, 1, true, -Math.PI * 0.32, Math.PI * 0.64);
+  const mat = new THREE.MeshStandardMaterial({ map: faceTexture(role, seed), transparent: true, alphaTest: 0.05, roughness: role === "performer" ? 0.45 : 0.8, side: THREE.FrontSide });
+  // alpha: transparent outside the painted oval
+  const face = new THREE.Mesh(geo, mat);
+  face.position.set(c.x, box.min.y + sz.y * 0.42, c.z);
+  face.name = "faceDecal";
+  g.add(face);
+  // hide the original western eyes/brows so they don't show beside the decal
+  obj.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (!m.isMesh) return;
+    for (const mt of (Array.isArray(m.material) ? m.material : [m.material]) as THREE.MeshStandardMaterial[])
+      if (/^(eye|eyebrows)$/i.test(mt.name)) { mt.transparent = true; mt.opacity = 0; mt.depthWrite = false; }
+  });
+}
+
 export type FigureRole = "robed" | "performer" | "crowd";
 
 export function cloneGltfFigure(color: number, seed = 1, scale = 1, role: FigureRole = "robed"): THREE.Group | null {
@@ -284,6 +388,7 @@ export function cloneGltfFigure(color: number, seed = 1, scale = 1, role: Figure
   const H = 1.7 * scale * (role === "performer" ? 1.08 : 0.94 + (seed % 7) * 0.025);
   normalizeHeight(obj, H);
   addHanCostume(g, color, role, Math.abs(Math.floor(seed)), H);
+  addFace(g, obj, role, Math.abs(Math.floor(seed)));
   // v18: hide original hair (headwear replaces it) to stop hair poking through crowns/hats
   obj.traverse((o) => {
     const m = o as THREE.Mesh;

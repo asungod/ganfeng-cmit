@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { Water } from "three/examples/jsm/objects/Water.js";
 import { lowPower, shadowSize, Flight, loadHdri, makePost, particles, phMat, softDot, type Post } from "./kit";
 import type { ImageId, MoodId } from "../data/tengwang";
 
@@ -184,6 +185,9 @@ export class PavilionScene {
     this.duck.rotation.y = Math.sin(t * 0.35) * 0.4;
     const geese = this.markers.get("yanzhen");
     if (geese) geese.position.x = 6.5 + Math.sin(t * 0.12) * 0.8;
+    const rw = this.water.userData.reflective as Water | undefined;
+    if (rw) (rw.material as THREE.ShaderMaterial).uniforms.time.value = t * 0.5;
+    if (!rw) {
     const pos = this.waterMesh.geometry.attributes.position as THREE.BufferAttribute;
     const orig = this.waterOrig;
     const amp = lowPower() ? 0.035 : 0.055;
@@ -199,6 +203,7 @@ export class PavilionScene {
     }
     pos.needsUpdate = true;
     if (!lowPower() || (this.raf % 2 === 0)) this.waterMesh.geometry.computeVertexNormals();
+    }
     // glitter path gently pulses with the sun path
     const glitter = this.water.getObjectByName("glitterPath") as THREE.Mesh | undefined;
     if (glitter) {
@@ -247,7 +252,11 @@ export class PavilionScene {
     this.hemi.groundColor.set(pal.hill);
     this.sunLight.color.set(pal.sun);
     this.sunLight.intensity = pal.key;
-    ((this.water.children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial).color.set(pal.water);
+    {
+      const wmat = (this.water.children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial & THREE.ShaderMaterial;
+      if (wmat.uniforms?.waterColor) wmat.uniforms.waterColor.value.set(pal.water).multiplyScalar(0.45);
+      else wmat.color.set(pal.water);
+    }
     this.glow.material.color.set(pal.glow);
     this.look.copy(MARK[this.focus]);
     if (this.focus === "qiushui" || this.focus === "hantan") this.look.y = 0.4;
@@ -281,6 +290,37 @@ function mat(color: number, roughness = 0.7, metalness = 0.05): THREE.MeshStanda
 function makeWater(): THREE.Group {
   const g = new THREE.Group();
   const segs = lowPower() ? 64 : 96;
+  if (!lowPower()) {
+    // v19: planar-reflection water (three.js Water.js) with a procedurally generated normal map
+    const nt = new THREE.TextureLoader().load(`${import.meta.env.BASE_URL}assets3d/water_normal_gen.jpg`);
+    nt.wrapS = nt.wrapT = THREE.RepeatWrapping;
+    const w = new Water(new THREE.PlaneGeometry(100, 100), {
+      textureWidth: 1024, textureHeight: 1024, waterNormals: nt,
+      sunDirection: MARK.luoxia.clone().normalize(), sunColor: 0xffd8a8,
+      waterColor: 0x1c3446, distortionScale: 2.4, alpha: 1, fog: false,
+    });
+    w.rotation.x = -Math.PI / 2;
+    w.name = "waterMain";
+    const wm = w.material as THREE.ShaderMaterial;
+    wm.uniforms.size.value = 1.6;
+    // guard against HDR inf/NaN from the reflected sun disc (would blacken the bloom chain)
+    wm.fragmentShader = wm.fragmentShader
+      .replace("vec3 reflectionSample = vec3( texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.w + distortion ) );",
+        "vec3 reflectionSample = vec3( texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.w + distortion ) ); reflectionSample = (any(isnan(reflectionSample)) || any(isinf(reflectionSample))) ? vec3(1.0) : min(reflectionSample, vec3(6.0)) * 0.72;")
+      .replace("vec3 outgoingLight = albedo;", "vec3 outgoingLight = (any(isnan(albedo)) || any(isinf(albedo))) ? waterColor : min(albedo, vec3(8.0));");
+    wm.fog = false;
+    g.add(w);
+    g.userData.reflective = w;
+    // soft shoreline: translucent warm gradient strip blending water into the bank
+    const sc = document.createElement("canvas"); sc.width = 4; sc.height = 128;
+    const cx = sc.getContext("2d")!; const gr = cx.createLinearGradient(0, 0, 0, 128);
+    gr.addColorStop(0, "rgba(120,100,80,0.85)"); gr.addColorStop(1, "rgba(120,100,80,0)");
+    cx.fillStyle = gr; cx.fillRect(0, 0, 4, 128);
+    const shore = new THREE.Mesh(new THREE.PlaneGeometry(18, 2.4), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false, fog: true }));
+    shore.rotation.order = "YXZ"; shore.rotation.set(-Math.PI / 2, -0.42, 0); shore.position.set(2.1, 0.05, -9.4);
+    g.add(shore);
+    return g;
+  }
   const m = new THREE.Mesh(
     new THREE.PlaneGeometry(100, 100, segs, segs),
     new THREE.MeshStandardMaterial({

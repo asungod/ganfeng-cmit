@@ -51,6 +51,7 @@ export class TempleScene {
     this.controls.maxDistance = 70;
     this.controls.target.set(...POSE.overview.look);
     this.flight = new Flight(this.camera, this.controls.target);
+    (window as unknown as { __templeCam?: unknown }).__templeCam = { camera: this.camera, controls: this.controls, flight: this.flight };
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(shadowSize(), shadowSize());
     const sc = this.sun.shadow.camera;
