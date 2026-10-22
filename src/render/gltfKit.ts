@@ -149,7 +149,7 @@ function addHanCostume(g: THREE.Group, color: number, role: FigureRole, seed: nu
   const prof = [
     new THREE.Vector2(hem, 0.05), new THREE.Vector2(hem * 0.95, 0.35), new THREE.Vector2(0.24, 0.8),
     new THREE.Vector2(0.2, 1.05), new THREE.Vector2(0.23, 1.3), new THREE.Vector2(0.2, 1.42), new THREE.Vector2(0.09, 1.47),
-  ].map((v) => new THREE.Vector2(v.x * k, v.y * k));
+  ].map((v) => new THREE.Vector2(v.x * k * 1.14, v.y * k));
   const body = new THREE.Mesh(new THREE.LatheGeometry(prof, 16), robe);
   body.scale.z = 0.78;
   body.castShadow = true;
@@ -162,8 +162,8 @@ function addHanCostume(g: THREE.Group, color: number, role: FigureRole, seed: nu
   // wide sleeves (袖) over each arm, hanging
   for (const sx of [-1, 1]) {
     const sl = new THREE.Mesh(new THREE.CylinderGeometry(0.06 * k, 0.12 * k, 0.5 * k, 10, 1, true), robe);
-    sl.position.set(sx * 0.24 * k, 1.12 * k, 0.02 * k);
-    sl.rotation.z = sx * (role === "performer" ? 0.9 : 0.12);
+    sl.position.set(sx * 0.27 * k, 1.1 * k, 0.02 * k);
+    sl.rotation.z = sx * 0.1; sl.scale.set(1.15, 1, 1.15);
     g.add(sl);
   }
   const hatY = 1.72 * k;
@@ -278,12 +278,20 @@ export function cloneGltfFigure(color: number, seed = 1, scale = 1, role: Figure
   const obj = picked.obj;
   const g = new THREE.Group();
   g.add(obj);
-  const raise = role === "performer" ? 0.6 + (seed % 2) * 0.3 : (seed % 5 === 0 ? 0.35 : 0);
+  const raise = role === "performer" ? 0.12 + (seed % 2) * 0.08 : (seed % 5 === 0 ? 0.12 : 0);
   dropArms(obj, raise, seed);
   tintClothes(obj, color, 0.8);
   const H = 1.7 * scale * (role === "performer" ? 1.08 : 0.94 + (seed % 7) * 0.025);
   normalizeHeight(obj, H);
   addHanCostume(g, color, role, Math.abs(Math.floor(seed)), H);
+  // v18: hide original hair (headwear replaces it) to stop hair poking through crowns/hats
+  obj.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (!m.isMesh) return;
+    const mats = Array.isArray(m.material) ? m.material : [m.material];
+    if (/hair|hat|helmet|crown|hood/i.test(m.name)) m.visible = false;
+    for (const mt of mats) if (/hair|hat|helmet|hood/i.test(mt.name)) { mt.transparent = true; mt.opacity = 0; mt.depthWrite = false; }
+  });
   g.userData.sway = { phase: (seed * 1.37) % 6.28, amp: role === "performer" ? 0.25 : 0.05 + (seed % 4) * 0.02 };
   if (role !== "performer") g.rotation.y = ((seed * 0.31) % 1 - 0.5) * 0.7;
   return g;

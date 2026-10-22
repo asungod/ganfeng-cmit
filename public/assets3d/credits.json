@@ -62,8 +62,12 @@
   "files": [
    "clay_plaster_diff_1k.jpg",
    "clay_plaster_nor_1k.jpg",
-   "clay_plaster_rough_1k.jpg"
-  ]
+   "clay_plaster_rough_1k.jpg",
+   "plaster_grey_diff_1k.jpg",
+   "plaster_grey_nor_1k.jpg",
+   "plaster_grey_rough_1k.jpg"
+  ],
+  "note": "plaster_grey_* 为本项目对其去饱和的衍生版（围屋夯土墙）"
  },
  {
   "id": "grey_roof_tiles",
@@ -118,8 +122,12 @@
   "files": [
    "brown_mud_dry_diff_1k.jpg",
    "brown_mud_dry_nor_1k.jpg",
-   "brown_mud_dry_rough_1k.jpg"
-  ]
+   "brown_mud_dry_rough_1k.jpg",
+   "earth_grey_diff_1k.jpg",
+   "earth_grey_nor_1k.jpg",
+   "earth_grey_rough_1k.jpg"
+  ],
+  "note": "earth_grey_* 为本项目对其去饱和的衍生版（围屋夯土墙）"
  },
  {
   "id": "red_plaster_weathered",
@@ -235,5 +243,21 @@
    "models/q_women_Worker.glb"
   ],
   "note": "Used for 万寿宫 pilgrims/audience/performers. Arms reposed from T-pose; cloth tinted per role. Not historically Chinese costume — stylized stand-ins."
+ },
+ {
+  "id": "ceramic_roof_01",
+  "name": "Ceramic Roof 01",
+  "type": "Texture",
+  "authors": [
+   "Rob Tuytel"
+  ],
+  "license": "CC0 1.0",
+  "url": "https://polyhaven.com/a/ceramic_roof_01",
+  "files": [
+   "ceramic_roof_01_diff_1k.jpg",
+   "ceramic_roof_01_nor_1k.jpg",
+   "ceramic_roof_01_rough_1k.jpg"
+  ],
+  "note": "围屋瓦顶（灰调着色）"
  }
 ]

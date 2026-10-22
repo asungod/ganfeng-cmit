@@ -1,5 +1,5 @@
 // 客家围龙屋 — procedural architecture + CC0 Poly Haven materials/sky.
-// Art direction: earthy rammed-earth ochre, grey tile, soft low sun; night = lantern glow + fireflies.
+// Art direction: weathered rammed-earth grey-brown, grey tile, soft low sun; night = lantern glow + fireflies.
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { HourId, RoomId } from "../data/hakka";
@@ -22,7 +22,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
 const HOURS: Record<HourId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; lamp: number }> = {
   dawn: { sun: [-30, 9, 18], col: 0xffc7a0, I: 2.2, hemi: 0.35, env: 0.6, exp: 0.95, fog: 0xb7b0b4, hdri: "qwantani_puresky", lamp: 0.2 },
   noon: { sun: [12, 40, 14], col: 0xfff2dc, I: 3.4, hemi: 0.45, env: 0.9, exp: 0.85, fog: 0xc8d2dc, hdri: "qwantani_puresky", lamp: 0 },
-  dusk: { sun: [34, 7, 10], col: 0xffa05a, I: 2.8, hemi: 0.3, env: 0.7, exp: 1.0, fog: 0xc89878, hdri: "qwantani_sunset_puresky", lamp: 0.6 },
+  dusk: { sun: [34, 7, 10], col: 0xf2e6da, I: 2.0, hemi: 0.42, env: 0.75, exp: 0.9, fog: 0xb8aca0, hdri: "qwantani_sunset_puresky", lamp: 0.6 },
   night: { sun: [-14, 30, -10], col: 0x8aa4ff, I: 0.35, hemi: 0.12, env: 0.25, exp: 1.15, fog: 0x10131e, hdri: "qwantani_night_puresky", lamp: 2.6 },
 };
 
@@ -48,7 +48,7 @@ export class WeiwuScene {
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = makeRenderer(canvas, 1);
     (window as unknown as { __weiwu: unknown }).__weiwu = this;
-    this.scene.fog = new THREE.Fog(0xc89878, 40, 170);
+    this.scene.fog = new THREE.Fog(0xb8aca0, 40, 170);
     this.scene.background = new THREE.Color(0xc89878);
     this.camera.position.set(...POSES.overview.eye);
     this.controls = new OrbitControls(this.camera, canvas);
@@ -81,10 +81,10 @@ export class WeiwuScene {
 
   private build(): void {
     const S = this.scene;
-    const earth = phMat("brown_mud_dry", [0.5, 0.5], { color: 0xd8b48a });
-    const earthAlt = phMat("clay_plaster", [1, 1], { color: 0xb89a78 });
+    const earth = phMat("earth_grey", [0.5, 0.5], { color: 0xb8ac9c });
+    const earthAlt = phMat("plaster_grey", [1, 1], { color: 0xa89c8c });
     const earthIn = phMat("clay_plaster", [1, 1], { color: 0xeee6d6 });
-    const tile = phMat("grey_roof_tiles", [3, 2], { color: 0x8a8a90 });
+    const tile = phMat("ceramic_roof_01", [3, 2], { color: 0x4e4e50 });
     const ridge = new THREE.MeshStandardMaterial({ color: 0x3e3e44, roughness: 0.7 });
     const wood = phMat("dark_wooden_planks", [1, 1]);
     const lac = phMat("lacquered_cherry_wood", [1, 1], { color: 0x9a3a26 });
@@ -96,9 +96,9 @@ export class WeiwuScene {
     g.receiveShadow = true;
     S.add(g);
     // 禾坪 threshing yard (packed earth/stone) + 半月塘 pond
-    const yard = wbox(26, 0.08, 9, phMat("brown_mud_dry", [1, 1], { color: 0xc8b090 }), 1);
+    const yard = wbox(26, 0.08, 9, phMat("stone_tiles", [1, 1], { color: 0xa8a090 }), 0.5);
     yard.position.set(0, 0.04, 13);
-    S.add(yard);
+    // v18: dark slab removed (yard no longer added)
     const pond = new THREE.Mesh(
       new THREE.CircleGeometry(8.5, 48, Math.PI, Math.PI),
       new THREE.MeshStandardMaterial({ color: 0x2e4a48, roughness: 0.04, metalness: 0.75, envMapIntensity: 2.2 }),
@@ -365,7 +365,7 @@ export class WeiwuScene {
     // facade lanterns at the gate
     for (const sx of [-1.4, 1.4]) this.addLantern(S, new THREE.Vector3(sx, 3.6, D / 2 + 1.1));
     // camphor trees + bamboo clumps for scale and life (procedural)
-    const trees: [number, number, number][] = [[-26, 14, 1.0], [27, -16, 1.15], [-14, -32, 1.25]];
+    const trees: [number, number, number][] = []; // v18: low-poly trees removed
     trees.forEach(([x, z, k], i) => {
       const t = makeTree(i + 1, k * 1.45);
       t.position.set(x, 0, z);
