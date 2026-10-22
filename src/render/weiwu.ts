@@ -81,7 +81,8 @@ export class WeiwuScene {
 
   private build(): void {
     const S = this.scene;
-    const earth = phMat("clay_plaster", [1, 1], { color: 0xa9a097 });
+    const earth = phMat("brown_mud_dry", [0.5, 0.5], { color: 0xd8b48a });
+    const earthAlt = phMat("clay_plaster", [1, 1], { color: 0xb89a78 });
     const earthIn = phMat("clay_plaster", [1, 1], { color: 0xeee6d6 });
     const tile = phMat("grey_roof_tiles", [3, 2], { color: 0x8a8a90 });
     const ridge = new THREE.MeshStandardMaterial({ color: 0x3e3e44, roughness: 0.7 });
@@ -95,17 +96,35 @@ export class WeiwuScene {
     g.receiveShadow = true;
     S.add(g);
     // 禾坪 threshing yard (packed earth/stone) + 半月塘 pond
-    const yard = wbox(26, 0.08, 9, stone, 1);
+    const yard = wbox(26, 0.08, 9, phMat("brown_mud_dry", [1, 1], { color: 0xc8b090 }), 1);
     yard.position.set(0, 0.04, 13);
     S.add(yard);
     const pond = new THREE.Mesh(
       new THREE.CircleGeometry(8.5, 48, Math.PI, Math.PI),
-      new THREE.MeshStandardMaterial({ color: 0x4a6a70, roughness: 0.08, metalness: 0.55, envMapIntensity: 1.6 }),
+      new THREE.MeshStandardMaterial({ color: 0x2e4a48, roughness: 0.04, metalness: 0.75, envMapIntensity: 2.2 }),
     );
     pond.rotation.x = -Math.PI / 2;
     pond.position.set(0, 0.03, 26);
     pond.rotation.z = Math.PI;
     S.add(pond);
+    // stone kerb + reeds so the 半月塘 sits in the ground instead of a flat disc
+    const kerbM = phMat("stone_tiles", [1, 1], { color: 0x9a9080 });
+    for (let i = 0; i <= 24; i++) {
+      const a = Math.PI + (i / 24) * Math.PI;
+      const k = wbox(1.3, 0.28, 0.5, kerbM);
+      k.position.set(Math.cos(a) * 8.7, 0.12, 26 - Math.sin(a) * 8.7);
+      k.rotation.y = -a + Math.PI / 2;
+      S.add(k);
+    }
+    const reedM = new THREE.MeshStandardMaterial({ color: 0x5a6a38, roughness: 0.9 });
+    for (let i = 0; i < 40; i++) {
+      const a = Math.PI + Math.random() * Math.PI;
+      const rr = 7.6 + Math.random() * 0.8;
+      const reed = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.9 + Math.random() * 0.6, 4), reedM);
+      reed.position.set(Math.cos(a) * rr, 0.45, 26 - Math.sin(a) * rr);
+      reed.rotation.z = (Math.random() - 0.5) * 0.3;
+      S.add(reed);
+    }
 
     // Outer rammed-earth enclosure (main block 22 × 18), wall rooms with inner roofs
     const W = 22, D = 18, H = 5.2, T = 0.6;
@@ -298,7 +317,7 @@ export class WeiwuScene {
     // 角楼 corner towers (4 storeys, hip-ish roof)
     for (const [x, z] of [[-W / 2, -D / 2], [W / 2, -D / 2], [-W / 2, D / 2], [W / 2, D / 2]]) {
       const tw = new THREE.Group();
-      const b = wbox(3.6, 9.5, 3.6, earth);
+      const b = wbox(3.6, 9.5, 3.6, earthAlt);
       b.position.y = 4.75;
       tw.add(b);
       for (let lv = 0; lv < 3; lv++)
@@ -346,13 +365,13 @@ export class WeiwuScene {
     // facade lanterns at the gate
     for (const sx of [-1.4, 1.4]) this.addLantern(S, new THREE.Vector3(sx, 3.6, D / 2 + 1.1));
     // camphor trees + bamboo clumps for scale and life (procedural)
-    const trees: [number, number, number][] = [[-19, 16, 1.0], [-21, -6, 1.3], [22, -12, 1.2], [-12, -26, 1.4], [12, -27, 1.2], [-27, 8, 0.9], [4, -30, 1.3], [-4, -29, 1.1]];
+    const trees: [number, number, number][] = [[-26, 14, 1.0], [27, -16, 1.15], [-14, -32, 1.25]];
     trees.forEach(([x, z, k], i) => {
       const t = makeTree(i + 1, k * 1.45);
       t.position.set(x, 0, z);
       S.add(t);
     });
-    for (const [x, z] of [[-17, -16], [18, -18], [19, 14], [-24, 0]]) {
+    for (const [x, z] of [[-18, -17], [20, 16]]) {
       const b = makeBamboo(x * 3 + z, 11);
       b.position.set(x, 0, z);
       S.add(b);

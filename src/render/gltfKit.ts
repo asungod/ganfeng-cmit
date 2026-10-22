@@ -17,11 +17,7 @@ function isLow(): boolean {
   return /[?&#]lowgfx\b/.test(q) || (navigator.hardwareConcurrency ?? 8) <= 4 || mem <= 4;
 }
 
-const TREE_CAMPHOR = [
-  "q_CommonTree_1.glb", "q_CommonTree_2.glb", "q_CommonTree_3.glb", "q_CommonTree_4.glb", "q_CommonTree_5.glb",
-  "q_Willow_1.glb", "q_Willow_2.glb", "q_Willow_3.glb",
-  "k_tree_detailed_dark.glb", "k_tree_oak_dark.glb", "k_tree_default_dark.glb",
-];
+const TREE_CAMPHOR = ["q_Willow_1.glb", "q_Willow_2.glb", "q_Willow_3.glb"];
 const TREE_PINE = [
   "q_PineTree_1.glb", "q_PineTree_2.glb", "q_PineTree_3.glb", "q_PineTree_4.glb", "q_PineTree_5.glb",
   "k_tree_pineDefaultA.glb", "k_tree_pineRoundC.glb", "k_tree_cone_dark.glb",
@@ -76,6 +72,13 @@ export function preloadGltfKit(): Promise<void> {
                   if (m.isMesh) {
                     m.castShadow = true;
                     m.receiveShadow = true;
+                    if (/Tree|Willow|Pine|Bush/.test(f) && m.geometry) {
+                      m.geometry = m.geometry.clone();
+                      m.geometry.deleteAttribute("normal");
+                      const merged = (m.geometry.index ? m.geometry.toNonIndexed() : m.geometry);
+                      m.geometry = merged;
+                      m.geometry.computeVertexNormals();
+                    }
                     if (m.material) {
                       const mats = Array.isArray(m.material) ? m.material : [m.material];
                       for (const mat of mats) {
@@ -111,26 +114,91 @@ function pick(list: string[], seed: number): { obj: THREE.Object3D; file: string
 }
 
 /** Drop T-pose arms to a natural hang (Quaternius modular rig). */
-function dropArms(root: THREE.Object3D, raise = 0): void {
+function dropArms(root: THREE.Object3D, raise = 0, seed = 0): void {
+  // Quaternius modular rig binds in T-pose. Solved offline: multiply UpperArm by Euler(-1.35, ±1.75, 0)
+  // brings hands to the hips. "raise" lifts toward a stage gesture.
+  const jitter = ((seed * 37) % 10) / 10 - 0.5;
   root.traverse((o) => {
     if (!(o as THREE.Bone).isBone) return;
     const b = o as THREE.Bone;
-    // Quaternius modular bind is T-pose; set absolute hang (not +=)
-    if (b.name === "UpperArmL") { b.rotation.x = 1.45 - raise; b.rotation.z = 0.35; }
-    if (b.name === "UpperArmR") { b.rotation.x = 1.45 - raise; b.rotation.z = -0.35; }
-    if (b.name === "LowerArmL" || b.name === "LowerArmR") b.rotation.x = 0.35;
-    if (b.name === "ShoulderL") b.rotation.z = 0.25;
-    if (b.name === "ShoulderR") b.rotation.z = -0.25;
+    const L = b.name.endsWith("L");
+    if (b.name === "UpperArmL" || b.name === "UpperArmR") {
+      const sgn = L ? 1 : -1;
+      const ex = -1.35 + raise * 0.9 + jitter * 0.12;
+      const ey = sgn * (1.75 - raise * 0.8 + jitter * 0.1);
+      b.quaternion.multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(ex, ey, 0)));
+    }
+    if (b.name === "LowerArmL" || b.name === "LowerArmR") {
+      b.quaternion.multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, (L ? 1 : -1) * (0.25 + raise * 0.6))));
+    }
   });
   root.traverse((o) => {
     const m = o as THREE.SkinnedMesh;
-    if (m.isSkinnedMesh) {
-      m.frustumCulled = false;
-      m.skeleton.bones.forEach((b) => b.updateMatrixWorld(true));
-      m.computeBoundingSphere();
-    }
+    if (m.isSkinnedMesh) m.frustumCulled = false;
   });
   root.updateMatrixWorld(true);
+}
+
+/** Chinese costume layer over the CC0 body: long robe (褂/袍), sash, role headwear. Hides modern/medieval clothes. */
+function addHanCostume(g: THREE.Group, color: number, role: FigureRole, seed: number, h: number): void {
+  const robeC = new THREE.Color(color);
+  const robe = new THREE.MeshStandardMaterial({ color: robeC, roughness: 0.85, side: THREE.DoubleSide });
+  const trim = new THREE.MeshStandardMaterial({ color: role === "performer" ? 0xe8c060 : robeC.clone().multiplyScalar(0.5), roughness: 0.6, metalness: role === "performer" ? 0.3 : 0 });
+  const k = h / 1.7;
+  const hem = role === "performer" ? 0.36 : 0.3;
+  const prof = [
+    new THREE.Vector2(hem, 0.05), new THREE.Vector2(hem * 0.95, 0.35), new THREE.Vector2(0.24, 0.8),
+    new THREE.Vector2(0.2, 1.05), new THREE.Vector2(0.23, 1.3), new THREE.Vector2(0.2, 1.42), new THREE.Vector2(0.09, 1.47),
+  ].map((v) => new THREE.Vector2(v.x * k, v.y * k));
+  const body = new THREE.Mesh(new THREE.LatheGeometry(prof, 16), robe);
+  body.scale.z = 0.78;
+  body.castShadow = true;
+  g.add(body);
+  // cross collar (交领) + sash
+  const sash = new THREE.Mesh(new THREE.CylinderGeometry(0.205 * k, 0.205 * k, 0.07 * k, 16), trim);
+  sash.scale.z = 0.8; sash.position.y = 1.0 * k; g.add(sash);
+  const collar = new THREE.Mesh(new THREE.BoxGeometry(0.05 * k, 0.34 * k, 0.02 * k), trim);
+  collar.position.set(0.03 * k, 1.28 * k, 0.17 * k); collar.rotation.z = 0.5; g.add(collar);
+  // wide sleeves (袖) over each arm, hanging
+  for (const sx of [-1, 1]) {
+    const sl = new THREE.Mesh(new THREE.CylinderGeometry(0.06 * k, 0.12 * k, 0.5 * k, 10, 1, true), robe);
+    sl.position.set(sx * 0.24 * k, 1.12 * k, 0.02 * k);
+    sl.rotation.z = sx * (role === "performer" ? 0.9 : 0.12);
+    g.add(sl);
+  }
+  const hatY = 1.72 * k;
+  if (role === "performer") {
+    const gold = new THREE.MeshStandardMaterial({ color: 0xd8a830, roughness: 0.35, metalness: 0.6, emissive: 0x3a2400 });
+    const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.1 * k, 0.13 * k, 0.14 * k, 12), gold);
+    crown.position.y = hatY; g.add(crown);
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(0.05 * k, 10, 8), new THREE.MeshStandardMaterial({ color: 0xd02020, roughness: 0.5 }));
+    ball.position.y = hatY + 0.11 * k; g.add(ball);
+    for (const sx of [-1, 1]) { // 雉翎 pheasant plumes
+      const pl = new THREE.Mesh(new THREE.CylinderGeometry(0.006 * k, 0.012 * k, 0.9 * k, 5), new THREE.MeshStandardMaterial({ color: 0xc8b088, roughness: 0.6 }));
+      pl.position.set(sx * 0.12 * k, hatY + 0.4 * k, -0.05 * k); pl.rotation.z = -sx * 0.45; g.add(pl);
+    }
+    // back flags (靠旗) for the martial role
+    if (seed % 3 === 0) for (const sx of [-1, 1]) {
+      const f = new THREE.Mesh(new THREE.PlaneGeometry(0.22 * k, 0.4 * k), new THREE.MeshStandardMaterial({ color: 0xe0c040, side: THREE.DoubleSide, roughness: 0.7 }));
+      f.position.set(sx * 0.14 * k, 1.7 * k, -0.22 * k); f.rotation.z = sx * 0.35; g.add(f);
+    }
+  } else {
+    const r = seed % 3;
+    if (r === 0) { // 斗笠 conical straw hat
+      const hat = new THREE.Mesh(new THREE.ConeGeometry(0.3 * k, 0.16 * k, 18), new THREE.MeshStandardMaterial({ color: 0xa88a58, roughness: 0.9 }));
+      hat.position.y = hatY + 0.02 * k; g.add(hat);
+    } else if (r === 1) { // 瓜皮帽 skullcap
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(0.12 * k, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x141010, roughness: 0.6 }));
+      cap.position.y = hatY - 0.07 * k; g.add(cap);
+      const knob = new THREE.Mesh(new THREE.SphereGeometry(0.025 * k, 8, 6), new THREE.MeshStandardMaterial({ color: 0xa02020 }));
+      knob.position.y = hatY + 0.05 * k; g.add(knob);
+    } else { // 发髻 hair bun with wrap
+      const bun = new THREE.Mesh(new THREE.SphereGeometry(0.11 * k, 12, 10), new THREE.MeshStandardMaterial({ color: 0x14100c, roughness: 0.5 }));
+      bun.position.y = hatY - 0.07 * k; bun.scale.y = 0.75; g.add(bun);
+      const knot = new THREE.Mesh(new THREE.SphereGeometry(0.05 * k, 8, 6), bun.material);
+      knot.position.set(0, hatY + 0.03 * k, -0.04 * k); g.add(knot);
+    }
+  }
 }
 
 /** Tint non-skin materials toward a costume color (opera / crowd variety). */
@@ -185,20 +253,9 @@ export function cloneGltfTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "c
   return g;
 }
 
-export function cloneGltfBamboo(seed = 1): THREE.Group | null {
-  if (!ready) return null;
-  const g = new THREE.Group();
-  const n = isLow() ? 3 : 5;
-  for (let i = 0; i < n; i++) {
-    const picked = pick(BAMBOO, seed + i * 3);
-    if (!picked) continue;
-    const obj = picked.obj;
-    normalizeHeight(obj, 6 + ((seed + i) % 5) * 0.4);
-    obj.position.set(((i * 37 + seed) % 10) * 0.18 - 0.7, 0, ((i * 19 + seed) % 10) * 0.18 - 0.7);
-    obj.rotation.y = i * 0.7;
-    g.add(obj);
-  }
-  return g.children.length ? g : null;
+export function cloneGltfBamboo(_seed = 1): THREE.Group | null {
+  // Kenney bamboo reads as glowing bars under bloom — keep procedural bamboo.
+  return null;
 }
 
 export function cloneGltfBush(seed = 1, scale = 1): THREE.Group | null {
@@ -221,9 +278,13 @@ export function cloneGltfFigure(color: number, seed = 1, scale = 1, role: Figure
   const obj = picked.obj;
   const g = new THREE.Group();
   g.add(obj);
-  dropArms(obj, role === "performer" ? 0.55 : 0);
-  tintClothes(obj, color, role === "performer" ? 0.75 : role === "crowd" ? 0.55 : 0.65);
-  normalizeHeight(obj, 1.7 * scale * (role === "performer" ? 1.08 : 1));
-  if (role !== "performer") g.rotation.y = ((seed * 0.31) % 1 - 0.5) * 0.5;
+  const raise = role === "performer" ? 0.6 + (seed % 2) * 0.3 : (seed % 5 === 0 ? 0.35 : 0);
+  dropArms(obj, raise, seed);
+  tintClothes(obj, color, 0.8);
+  const H = 1.7 * scale * (role === "performer" ? 1.08 : 0.94 + (seed % 7) * 0.025);
+  normalizeHeight(obj, H);
+  addHanCostume(g, color, role, Math.abs(Math.floor(seed)), H);
+  g.userData.sway = { phase: (seed * 1.37) % 6.28, amp: role === "performer" ? 0.25 : 0.05 + (seed % 4) * 0.02 };
+  if (role !== "performer") g.rotation.y = ((seed * 0.31) % 1 - 0.5) * 0.7;
   return g;
 }

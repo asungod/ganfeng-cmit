@@ -198,7 +198,7 @@ export class TempleScene {
     sroof.position.y = 6;
     stage.add(sroof);
     // performers (simple robed figures) — visible during the opera
-    const robe = [0xc8302a, 0x2a6aa8, 0xe0b040];
+    const robe = [0xb8202a, 0x1e5aa0, 0xd8a820];
     for (let i = 0; i < 3; i++) {
       const f = makeFigure(robe[i], i + 7, 1.12, "performer");
       f.position.set(-1.8 + i * 1.8, 1.92, 0.3 - (i % 2) * 0.6);
@@ -267,11 +267,11 @@ export class TempleScene {
     }
     S.add(this.procession);
     // audience facing the stage
-    const crowdColors = [0x3a4a5a, 0x4a3a2a, 0x2a3a2a, 0x5a4a3a, 0x3a3a4a, 0x4a4a3a];
+    const crowdColors = [0x2e4a6a, 0x6a3a2a, 0x3a5a4a, 0x7a6040, 0x4a3a5a, 0x8a7a60, 0x5a2a2a, 0x3a4048];
     for (let i = 0; i < 40; i++) {
       const row = Math.floor(i / 8), col = i % 8;
       const f = makeFigure(crowdColors[i % crowdColors.length], i * 3 + 11, 0.92 + (i % 5) * 0.02, "crowd");
-      f.position.set(-5.6 + col * 1.55 + (row % 2) * 0.55, 0, 6.5 - row * 1.35);
+      f.position.set(-5.6 + col * 1.55 + (row % 2) * 0.55 + Math.sin(i * 7.1) * 0.35, 0, 6.5 - row * 1.35 + Math.cos(i * 3.3) * 0.3);
       f.rotation.y = (i % 7 - 3) * 0.04;
       this.audience.add(f);
     }
@@ -374,7 +374,16 @@ export class TempleScene {
         f.position.z = 15 - ((t * 0.6 + i * 1.1) % 20);
         f.position.y = Math.abs(Math.sin(t * 3 + i)) * 0.04;
       });
-    this.scene.traverse((o) => { if (o.name === "performer" && o.visible) o.rotation.y = Math.PI + Math.sin(t * 0.8 + o.position.x) * 0.6; });
+    this.scene.traverse((o) => {
+      const sw = o.userData.sway as { phase: number; amp: number } | undefined;
+      if (o.name === "performer" && o.visible) {
+        o.rotation.y = Math.PI + Math.sin(t * 0.8 + o.position.x) * 0.5;
+        o.rotation.z = Math.sin(t * 1.6 + o.position.x) * 0.05;
+      } else if (sw && o.parent?.visible) {
+        o.rotation.z = Math.sin(t * 0.9 + sw.phase) * sw.amp * 0.4;
+        o.rotation.x = Math.sin(t * 0.6 + sw.phase * 1.3) * sw.amp * 0.3;
+      }
+    });
     this.controls.update();
     this.post.render();
   };

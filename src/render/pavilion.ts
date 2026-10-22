@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { lowPower, shadowSize, Flight, loadHdri, makePost, particles, phMat, softDot, type Post } from "./kit";
-import { cloneGltfBush, cloneGltfTree } from "./gltfKit";
 import type { ImageId, MoodId } from "../data/tengwang";
 
 const MARK: Record<ImageId, THREE.Vector3> = {
@@ -105,19 +104,6 @@ export class PavilionScene {
     this.scene.add(pavilion);
     // riverbank: terraced mud + stone face + willow fringe (not a flat box)
     this.scene.add(makeRiverbank());
-    for (let i = 0; i < (lowPower() ? 3 : 5); i++) {
-      const willow = cloneGltfTree(40 + i, 0.85 + (i % 3) * 0.12, "camphor");
-      if (!willow) continue;
-      willow.position.set(10.5 - i * 2.2, 0.35, -17.5 - (i % 2) * 1.4);
-      willow.rotation.y = i * 0.9;
-      this.scene.add(willow);
-    }
-    for (let i = 0; i < 4; i++) {
-      const bush = cloneGltfBush(55 + i, 0.9);
-      if (!bush) continue;
-      bush.position.set(-2 + i * 1.8, 0.2, -10.5 - (i % 2) * 0.8);
-      this.scene.add(bush);
-    }
     this.markers.set("feige", pavilion);
 
     this.scene.add(makeBoats());
