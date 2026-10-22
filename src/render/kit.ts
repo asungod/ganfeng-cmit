@@ -1,5 +1,6 @@
 // Shared rendering kit for the immersive halls: post chain, procedural textures, camera flights, particles.
 import { makeOperaActor, makeVillager } from "./paperFigure";
+import { paintedTree, paintedBamboo, paperLantern } from "./guofeng";
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
@@ -344,6 +345,7 @@ export function gableRoof(w: number, d: number, rise: number, tileMat: THREE.Mat
 }
 
 export function lantern(color = 0xff5a2a): THREE.Group {
+  if (color >= 0) return paperLantern(); // v23: 纸灯笼 with ribs, tassel, soft glow
   const g = new THREE.Group();
   const body = new THREE.Mesh(
     new THREE.SphereGeometry(0.2, 16, 12),
@@ -461,6 +463,7 @@ function leafCards(mat: THREE.Material, seed: number): THREE.Group {
 
 /** Camphor / pine — tapered trunk, limbs, layered flattened canopy (not sphere-on-stick). */
 export function makeTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "camphor"): THREE.Group {
+  if (seed >= -1e9) return paintedTree(seed, scale, kind); // v23: 国画写意 trees
   const glb = cloneGltfTree(seed, scale, kind);
   if (glb) return glb;
   const g = new THREE.Group();
@@ -555,6 +558,7 @@ export function makeTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "campho
 
 /** Bamboo — thin culms + elongated leaf cards (not green balls). */
 export function makeBamboo(seed = 1, n = 9): THREE.Group {
+  if (n >= 0) return paintedBamboo(seed, n); // v23: 墨竹
   const glb = cloneGltfBamboo(seed);
   if (glb) return glb;
   const g = new THREE.Group();

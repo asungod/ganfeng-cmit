@@ -1,6 +1,7 @@
 // 客家围龙屋 — procedural architecture + CC0 Poly Haven materials/sky.
 // Art direction: weathered rammed-earth grey-brown, grey tile, soft low sun; night = lantern glow + fireflies.
 import * as THREE from "three";
+import { qingwaMat } from "./guofeng";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { HourId, RoomId } from "../data/hakka";
 import { makeBamboo, makeTree, shadowSize, Flight, disposeScene, gableRoof, lantern, loadHdri, makePost, makeRenderer, particles, phMat, wbox, type Post } from "./kit";
@@ -81,10 +82,10 @@ export class WeiwuScene {
 
   private build(): void {
     const S = this.scene;
-    const earth = phMat("earth_grey", [0.5, 0.5], { color: 0xb8ac9c });
-    const earthAlt = phMat("plaster_grey", [1, 1], { color: 0xa89c8c });
+    const earth = phMat("earth_grey", [0.5, 0.5], { color: 0xa9a7a2 });
+    const earthAlt = phMat("plaster_grey", [1, 1], { color: 0xa2a09c });
     const earthIn = phMat("clay_plaster", [1, 1], { color: 0xeee6d6 });
-    const tile = phMat("ceramic_roof_01", [3, 2], { color: 0x4e4e50 });
+    const tile = qingwaMat([3, 2]); // v23: 小青瓦
     const ridge = new THREE.MeshStandardMaterial({ color: 0x3e3e44, roughness: 0.7 });
     const wood = phMat("dark_wooden_planks", [1, 1]);
     const lac = phMat("lacquered_cherry_wood", [1, 1], { color: 0x9a3a26 });

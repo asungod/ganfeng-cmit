@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { inkGoose } from "./guofeng";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Water } from "three/examples/jsm/objects/Water.js";
 import { lowPower, shadowSize, Flight, loadHdri, makePost, particles, phMat, softDot, type Post } from "./kit";
@@ -71,7 +72,7 @@ export class PavilionScene {
     this.controls.minDistance = 5;
     this.controls.maxDistance = 30;
     this.controls.minPolarAngle = Math.PI * 0.32;
-    this.controls.maxPolarAngle = Math.PI * 0.49;
+    this.controls.maxPolarAngle = Math.PI * 0.5;
     this.controls.target.copy(this.look);
 
     this.hemi = new THREE.HemisphereLight(0xffc8a0, 0x1a1418, 0.85);
@@ -148,8 +149,8 @@ export class PavilionScene {
     this.resize();
     this.applyMood();
     // hero composition: pavilion right, setting sun left over the river
-    this.camera.position.set(-9.5, 2.4, 3.5);
-    this.controls.target.set(1.0, 3.6, -12.5);
+    this.camera.position.set(-9.0, 1.5, 5.5);
+    this.controls.target.set(1.6, 1.3, -12.5);
     this.started = true;
     this.loop();
   }
@@ -215,8 +216,8 @@ export class PavilionScene {
       const a = Math.sin(t * 4.5 + phase) * 0.35;
       const l = bird.getObjectByName("wingL");
       const r = bird.getObjectByName("wingR");
-      if (l) l.rotation.z = 0.15 + a;
-      if (r) r.rotation.z = -0.15 - a;
+      if (l) l.rotation.x = -(0.1 + a * 1.4);
+      if (r) r.rotation.x = 0.1 + a * 1.4;
     };
     flap(this.duck, 0);
     const geeseG = this.markers.get("yanzhen");
@@ -265,10 +266,11 @@ export class PavilionScene {
     const key = this.focus + "|" + this.mood;
     if (this.started && this.lastKey && key !== this.lastKey) {
       const d = { luoxia: 20, guwu: 9, qiushui: 10, changtian: 15, yuzhou: 8, yanzhen: 12, feige: 15, hantan: 8 }[this.focus] ?? 10;
-      const dir = new THREE.Vector3(-0.42, 0.18, 1).normalize();
+      const dir = new THREE.Vector3(-0.42, 0.07, 1).normalize(); // v23: low eye so the pavilion's reflection shows in the river
       const eye = this.look.clone().addScaledVector(dir, d);
-      eye.y = Math.max(1.4, eye.y);
-      this.flight.go(eye, this.look.clone(), 2.0);
+      eye.y = Math.max(1.15, eye.y);
+      const look = this.look.clone(); look.y -= 0.8;
+      this.flight.go(eye, look, 2.0);
     }
     if (this.started) this.lastKey = key;
   }
@@ -696,43 +698,13 @@ export function makeBoats(): THREE.Group {
 }
 
 /** Low-poly goose / 孤鹜: body + neck + head + flared wings (not a cone). */
-function makeBird(scale = 1, dark = 0x1a1410): THREE.Group {
-  const g = new THREE.Group();
-  const feather = mat(dark, 0.75, 0);
-  const belly = mat(0x2a2218, 0.8, 0);
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), belly);
-  body.scale.set(1.7, 0.75, 1);
-  body.castShadow = true;
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 0.28, 8), feather);
-  neck.position.set(0.18, 0.12, 0);
-  neck.rotation.z = -0.9;
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 6), feather);
-  head.position.set(0.32, 0.22, 0);
-  const beak = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.08, 5), mat(0xc07030, 0.6, 0.1));
-  beak.rotation.z = -Math.PI / 2;
-  beak.position.set(0.4, 0.2, 0);
-  const wingL = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), feather);
-  wingL.scale.set(1.8, 0.12, 0.7);
-  wingL.position.set(0, 0.04, 0.16);
-  wingL.rotation.y = 0.25;
-  wingL.rotation.z = 0.15;
-  wingL.name = "wingL";
-  const wingR = wingL.clone();
-  wingR.position.z = -0.16;
-  wingR.rotation.y = -0.25;
-  wingR.rotation.z = -0.15;
-  wingR.name = "wingR";
-  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.22, 5), feather);
-  tail.rotation.z = Math.PI / 2;
-  tail.position.set(-0.28, 0.02, 0);
-  g.add(body, neck, head, beak, wingL, wingR, tail);
-  g.scale.setScalar(scale);
-  return g;
+function makeBird(scale = 1, _dark = 0x1a1410): THREE.Group {
+  return inkGoose(scale * 0.9); // v23: 水墨雁
 }
 
 function makeDuck(): THREE.Group {
   // 孤鹜 — single wild goose silhouette against the dusk
-  return makeBird(2.4, 0x18120e);
+  return makeBird(1.3, 0x18120e);
 }
 
 function makeGeese(): THREE.Group {

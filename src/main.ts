@@ -1,6 +1,7 @@
 import "./fonts.css";
 import "./styles.css";
 import "./hall-layout.css";
+import "./guofeng-ui.css";
 import { parseRoute } from "./app/router";
 import { mountHall } from "./app/hall";
 import { mountPorcelain } from "./exhibits/porcelain";

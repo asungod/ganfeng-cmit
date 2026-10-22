@@ -189,20 +189,21 @@ function paintFace(x: Ctx, kind: Face, skin: string, cy: number, seed: number): 
   const r = rng(seed * 7 + 3);
   if (kind === "jing") {
     // 花脸: 红整脸 base with black 揉/勾 swirls, white 眼窝, red 印堂
-    faceBase(x, "#c8302a", cy, 0.086, 0.108);
+    faceBase(x, "#e0402e", cy, 0.086, 0.108);
     x.save(); path(x, [[0, cy + 0.108], [0.067, cy + 0.078], [0.086, cy + 0.01], [0.07, cy - 0.054], [0.036, cy - 0.099], [0, cy - 0.108], [-0.036, cy - 0.099], [-0.07, cy - 0.054], [-0.086, cy + 0.01], [-0.067, cy + 0.078]]); x.clip();
     for (const s of [-1, 1]) {
       x.save(); x.scale(s, 1);
-      shape(x, [[0.012, cy + 0.06], [0.05, cy + 0.085], [0.09, cy + 0.06], [0.085, cy - 0.01], [0.06, cy - 0.03], [0.03, cy - 0.012], [0.014, cy + 0.02]], "#151012", 0);
-      shape(x, [[0.02, cy + 0.03], [0.045, cy + 0.045], [0.072, cy + 0.03], [0.06, cy + 0.0], [0.03, cy + 0.0]], "#f4efe6", 0);
-      shape(x, [[0.04, cy - 0.04], [0.08, cy - 0.03], [0.09, cy - 0.09], [0.05, cy - 0.07]], "#151012", 0); // cheek swirl
+      shape(x, [[0.014, cy + 0.058], [0.05, cy + 0.08], [0.082, cy + 0.06], [0.078, cy + 0.0], [0.058, cy - 0.016], [0.03, cy - 0.006], [0.016, cy + 0.022]], "#151012", 0.006, "#fbf4e6");
+      shape(x, [[0.018, cy + 0.032], [0.045, cy + 0.05], [0.074, cy + 0.032], [0.062, cy + 0.004], [0.028, cy + 0.004]], "#fbf6ee", 0);
+      line(x, [[0.04, cy - 0.035], [0.07, cy - 0.04], [0.08, cy - 0.07]], 0.008, "#151012"); // cheek swirl
       line(x, [[0.07, cy + 0.07], [0.04, cy + 0.1]], 0.006, "#151012");
       x.restore();
     }
     shape(x, [[-0.007, cy + 0.11], [0.007, cy + 0.11], [0.012, cy + 0.05], [0, cy + 0.035], [-0.012, cy + 0.05]], "#f4efe6", 0); // 印堂 white with red core
     shape(x, [[-0.003, cy + 0.1], [0.003, cy + 0.1], [0.005, cy + 0.055], [-0.005, cy + 0.055]], "#e0202a", 0);
     shape(x, [[-0.013, cy - 0.005], [0.013, cy - 0.005], [0.018, cy - 0.025], [0, cy - 0.032], [-0.018, cy - 0.025]], "#151012", 0); // nose
-    shape(x, [[-0.04, cy - 0.05], [0, cy - 0.04], [0.04, cy - 0.05], [0.03, cy - 0.08], [0, cy - 0.09], [-0.03, cy - 0.08]], "#151012", 0); // mouth patch
+    shape(x, [[-0.03, cy - 0.052], [0, cy - 0.045], [0.03, cy - 0.052], [0.022, cy - 0.075], [0, cy - 0.082], [-0.022, cy - 0.075]], "#151012", 0.005, "#fbf4e6"); // mouth patch
+    shape(x, [[-0.012, cy - 0.06], [0.012, cy - 0.06], [0, cy - 0.068]], "#e0202a", 0);
     x.restore();
     for (const s of [-1, 1]) { x.save(); x.translate(s * 0.045, cy + 0.015); x.scale(s, 1); ell(x, 0, 0, 0.011, 0.006, "#fbf6ee", 0.0025); ell(x, 0.001, 0, 0.004, 0.004, "#100806"); x.restore(); }
     return;
@@ -481,6 +482,13 @@ function faceCam(rig: { root: THREE.Group; turn: THREE.Group }, maxYaw: number):
 
 const sm = (a: number, b: number, v: number) => { const k = Math.min(1, Math.max(0, (v - a) / (b - a))); return k * k * (3 - 2 * k); };
 
+/** keep 水袖 hanging toward the ground: cancel the arm's rotation inside the forearm frame, lagged */
+function hang(a: { s: number; up: THREE.Group; lo: THREE.Group }, p: Part, up: number, lo: number, swing: number): void {
+  const target = -(up + lo) * 0.92 + swing;
+  p.g.rotation.z += (target - p.g.rotation.z) * 0.18;
+  void a;
+}
+
 export function makeOperaActor(color: number, seed: number, scale: number): THREE.Group {
   const role: ActorRole = (["jing", "laosheng", "dan"] as const)[seed % 3];
   const rig = actorRig(role, color);
@@ -511,8 +519,10 @@ export function makeOperaActor(color: number, seed: number, scale: number): THRE
       body.rotation.z = Math.sin(c * Math.PI * 2 + 0.5) * 0.035;
       head.rotation.z = 0.08 + Math.sin(t * 0.9) * 0.05;
       const fl = Math.sin(sm(0.28, 0.5, c) * Math.PI);
-      flow(extra["xiu1"], (_x, y) => [Math.sin(t * 3 + y * 6) * 0.04 * -y + fl * -y * -y * 0.35, Math.cos(t * 2.4 + y * 5) * 0.03 * -y]);
-      flow(extra["xiu-1"], (_x, y) => [Math.sin(t * 2 + y * 5) * 0.025 * -y, 0]);
+      hang(B, extra.xiu1, 0.2 + throwUp * 1.1, 0.2 + throwUp * 0.6, fl * 1.1 + Math.sin(t * 1.7) * 0.08);
+      hang(A, extra["xiu-1"], -0.45, -1.2, Math.sin(t * 1.3) * 0.06);
+      flow(extra["xiu1"], (_x, y) => [Math.sin(t * 3 + y * 6) * 0.03 * -y * (0.4 + fl), Math.cos(t * 2.4 + y * 5) * 0.03 * -y]);
+      flow(extra["xiu-1"], (_x, y) => [Math.sin(t * 2 + y * 5) * 0.02 * -y, 0]);
       extra.hair.g.rotation.z = -body.rotation.z * 1.5;
       flow(extra.hair, (_x, y) => [Math.sin(t * 1.5 + y * 3) * 0.02 * -y, 0]);
     } else { // 老生 · 捋髯 / 踱方步 / 帽翅功, 7 s
@@ -528,6 +538,8 @@ export function makeOperaActor(color: number, seed: number, scale: number): THRE
       extra["chi-1"].g.rotation.z = wing; extra.chi1.g.rotation.z = -wing;
       extra.beard.g.rotation.z = -head.rotation.z * 0.8 + Math.sin(t * 1.3) * 0.03;
       flow(extra.beard, (_x, y) => [Math.sin(t * 1.7 + y * 6) * 0.015 * -y, 0]);
+      hang(B, extra.xiu1, -(0.55 * stroke), -(1.9 * stroke) + slide + 0.1, Math.sin(t * 1.4) * 0.05);
+      hang(A, extra["xiu-1"], 0.35 + Math.sin(t * 0.7) * 0.05, 0.35, Math.sin(t * 1.1) * 0.05);
       flow(extra["xiu-1"], (_x, y) => [Math.sin(t * 2 + y * 6) * 0.02 * -y, 0]);
       flow(extra.xiu1, (_x, y) => [Math.sin(t * 2.3 + y * 6) * 0.02 * -y, 0]);
     }
@@ -573,6 +585,13 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
     shape(x, top, hgrad(x, -0.22, 0.22, main), 0);
     x.save(); path(x, top); x.clip();
     folds(x, [-0.12, -0.04, 0.06, 0.13], 1.0, 0.1, shade(main, -0.5));
+    folds(x, [-0.1, -0.02, 0.08, 0.15], 0.95, 0.12, shade(main, 0.35));
+    if (type === "gown" || type === "elder" || type === "woman") { // 暗花 团花 woven pattern
+      x.save(); x.globalAlpha = 0.18;
+      for (let row = 0; row < 9; row++) for (let k = -2; k <= 2; k++) { const px = k * 0.09 + (row % 2) * 0.045, py = 0.2 + row * 0.13; ell(x, px, py, 0.025, 0.025, null, 0.004, shade(main, 0.6)); cloud(x, px, py, 0.008, shade(main, 0.6), 0.003); }
+      x.restore();
+    }
+    { const sh = x.createLinearGradient(-0.22, 0, 0.22, 0); sh.addColorStop(0, "rgba(0,0,0,0.25)"); sh.addColorStop(0.4, "rgba(0,0,0,0)"); sh.addColorStop(1, "rgba(0,0,0,0.3)"); x.fillStyle = sh; x.fillRect(-0.3, 0, 0.6, 1.45); }
     if (!back) {
       if (type === "woman") { // 大襟 curved front edge with contrasting 镶滚 trim
         line(x, [[-0.04, 1.4], [0.04, 1.33], [0.12, 1.26], [0.15, 1.0], [0.17, 0.66]], 0.018, trim);
@@ -638,9 +657,9 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
   head.add(hp.g);
 
   const arms: Rig["arms"] = [];
-  const mode = (seed * 7) % 6; // 0 idle 1 clap 2 fan 3 拱手 4 point 5 chat/nod
+  const mode = Math.floor(seed / 3) % 6; // 0 idle 1 clap 2 fan 3 拱手 4 point 5 chat/nod
   for (const s of [-1, 1]) {
-    const a = armPart(key + "a", s, P, 0.26, 0.32,
+    const a = armPart(key + "a", s, P, 0.26, mode === 2 && s === 1 ? 0.52 : 0.32,
       (x) => { const c = type === "jacket" ? sec : main; const pts: P2[] = [[-0.05, 0.05], [0.05, 0.06], [0.062, -0.12], [0.058, -0.28], [-0.052, -0.28], [-0.056, -0.12]]; shape(x, pts, hgrad(x, -0.06, 0.06, c), 0.005); line(x, [[0.01, -0.04], [0.02, -0.16], [0.012, -0.26]], 0.003, shade(c, -0.45)); },
       (x) => {
         const c = type === "jacket" ? main : main;
@@ -665,7 +684,9 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
   const rig = { root, turn };
   const ph = r() * 20, sp = 0.8 + r() * 0.4;
   const [A, B] = arms;
-  const set = (a: typeof A, up: number, lo: number) => { a.up.rotation.z = a.s * up; a.lo.rotation.z = lo; };
+  const v1 = (r() - 0.5) * 0.12;
+  // fs = forearm foreshortening (皮影 trick: a forearm pointing at the viewer is drawn shorter)
+  const set = (a: typeof A, up: number, lo: number, fs = 1) => { a.up.rotation.z = a.s * up; a.lo.rotation.z = lo; a.lo.scale.y += (fs - a.lo.scale.y) * 0.2; };
   const anim = (t0: number) => {
     faceCam(rig, 0.55);
     const t = t0 * sp + ph;
@@ -674,13 +695,13 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
     head.position.x = Math.sin(t * 0.23) * 0.006;
     if (mode === 1) { // clapping in bursts
       const burst = Math.sin(t * 0.35) > 0.5 ? Math.abs(Math.sin(t * 8)) : 0.5;
-      set(A, -0.3 - burst * 0.08, -1.25); set(B, -0.3 - burst * 0.08, -1.25);
-      head.position.y = burst * 0.008;
+      set(A, -0.35 + v1, -1.9 - burst * 0.25 + Math.sin(t * 1.1) * 0.04, 0.45); set(B, -0.35 - v1, -1.9 - burst * 0.25 + Math.sin(t * 1.3) * 0.04, 0.48);
+      head.position.y = 1.4 + burst * 0.008;
     } else if (mode === 2) { // fanning
-      set(A, 0.08, -0.3); set(B, -0.45 + Math.sin(t * 5) * 0.08, -1.6 + Math.sin(t * 5) * 0.25);
+      set(A, 0.08, -0.3); set(B, -0.15 + Math.sin(t * 5) * 0.05, -2.45 + Math.sin(t * 5) * 0.22, 0.62);
     } else if (mode === 3) { // 拱手 with a small bow
-      set(A, -0.28, -1.32); set(B, -0.28, -1.32);
-      const bow = Math.max(0, Math.sin(t * 0.5)) ** 4; head.position.y = -bow * 0.02; body.rotation.z = 0;
+      const bw = Math.sin(t * 0.5); set(A, -0.35 + v1 + bw * 0.03, -1.95 + bw * 0.1, 0.42); set(B, -0.36 - v1 + bw * 0.03, -1.92 + bw * 0.1, 0.42);
+      const bow = Math.max(0, Math.sin(t * 0.5)) ** 4; head.position.y = 1.4 - bow * 0.02; body.rotation.z = 0;
     } else if (mode === 4) { // pointing at the stage, then lowering
       const k = sm(0.2, 0.4, (t % 9) / 9) * (1 - sm(0.7, 0.9, (t % 9) / 9));
       set(A, 0.1, -0.15); set(B, 0.2 + k * 1.9, k * 0.3);

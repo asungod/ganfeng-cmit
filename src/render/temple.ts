@@ -4,6 +4,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { ActId, SlotId } from "../data/wanshou";
 import { curvedRoof } from "./pavilion";
 import { setPaperCamera } from "./paperFigure";
+import { xuandeLu } from "./guofeng";
 import { makeFigure, makeTree, shadowSize, Flight, disposeScene, lantern, loadHdri, makePost, makeRenderer, particles, phMat, wbox, type Post } from "./kit";
 
 const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; bg: number; lamp: number }> = {
@@ -16,7 +17,7 @@ const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, n
   kaichao: { eye: [5, 2.6, 9], look: [0, 3.2, -6] },
   xiban: { eye: [2.2, 4.4, -1.5], look: [0, 2.6, 10.5] },
   // judge views: actors from the front row, crowd faces from the stage apron
-  kanxi: { eye: [0.6, 3.2, 7.4], look: [0, 3.25, 11.6] },
+  kanxi: { eye: [0.9, 3.2, 6.5], look: [0.45, 3.1, 11.6] },
   guanzhong: { eye: [0.8, 2.75, 9.2], look: [0, 1.25, 3.6] },
 };
 
@@ -63,7 +64,7 @@ export class TempleScene {
     this.sun.shadow.normalBias = 0.03;
     this.scene.add(this.sun, this.hemi);
     this.build();
-    this.smoke = particles(160, new THREE.Box3(new THREE.Vector3(-0.6, 1.4, -0.6), new THREE.Vector3(0.6, 9, 0.6)), 0xe8e0d8, 0.9, 0.22, "smoke");
+    this.smoke = particles(160, new THREE.Box3(new THREE.Vector3(-0.35, 2.6, -0.35), new THREE.Vector3(0.35, 9, 0.35)), 0xe8e0d8, 0.9, 0.22, "smoke");
     this.scene.add(this.smoke.points);
     this.haze = particles(160, new THREE.Box3(new THREE.Vector3(-16, 0.5, -14), new THREE.Vector3(16, 4, 16)), 0xf0e0d0, 2.4, 0.035, "mist");
     this.scene.add(this.haze.points);
@@ -82,7 +83,6 @@ export class TempleScene {
     const wood = phMat("dark_wooden_planks", [1, 1], { color: 0x7a4a34 });
     const tile = new THREE.MeshStandardMaterial({ color: 0x2e3a36, roughness: 0.5, metalness: 0.2, side: THREE.DoubleSide });
     const gold = new THREE.MeshStandardMaterial({ color: 0xd6a548, metalness: 0.85, roughness: 0.3 });
-    const bronze = new THREE.MeshStandardMaterial({ color: 0x5a4a30, metalness: 0.9, roughness: 0.45 });
 
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), paving);
     ground.rotation.x = -Math.PI / 2;
@@ -221,24 +221,13 @@ export class TempleScene {
     const rimB = new THREE.DirectionalLight(0xffe2c0, 0.8); rimB.position.set(6, 5, -2); rimB.target.position.set(0, 1, 5); S.add(rimB, rimB.target);
     const faceFill = new THREE.PointLight(0xffe6cc, 1.4, 14, 1.6); faceFill.position.set(0, 3.2, 7.8); S.add(faceFill);
 
-    // 香炉 incense burner (ding) on the axis
-    const ding = new THREE.Group();
-    const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.7, 1.0, 24), bronze);
-    bowl.position.y = 1.3;
-    ding.add(bowl);
-    for (let i = 0; i < 3; i++) {
-      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.08, 0.8, 8), bronze);
-      const a = (i / 3) * Math.PI * 2;
-      leg.position.set(Math.cos(a) * 0.6, 0.4, Math.sin(a) * 0.6);
-      ding.add(leg);
-    }
-    const lid = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.0, 24), bronze);
-    lid.position.y = 2.3;
-    ding.add(lid);
-    const pedestal = wbox(2.4, 0.3, 2.4, stone);
+    // 宣德炉 bronze censer on the axis (v23)
+    const ding = xuandeLu();
+    ding.scale.setScalar(1.15);
+    ding.position.y = 0.3;
+    const pedestal = wbox(2.6, 0.3, 2.6, stone);
     pedestal.position.y = 0.15;
-    ding.add(pedestal);
-    ding.traverse((o) => { o.castShadow = true; });
+    S.add(pedestal);
     S.add(ding);
 
     // lantern strings across the courtyard
