@@ -1,4 +1,5 @@
 // Shared rendering kit for the immersive halls: post chain, procedural textures, camera flights, particles.
+import { makeHanFigure } from "./hanFigure";
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
@@ -376,7 +377,7 @@ export function disposeScene(scene: THREE.Scene): void {
 
 // ---------- CC0 assets (Poly Haven), lazy-loaded per hall ----------
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
-import { cloneGltfBamboo, cloneGltfFigure, cloneGltfTree } from "./gltfKit";
+import { cloneGltfBamboo, cloneGltfTree } from "./gltfKit";
 const ASSET = "./assets3d/";
 const texLoader = new THREE.TextureLoader();
 
@@ -583,8 +584,8 @@ export function makeBamboo(seed = 1, n = 9): THREE.Group {
  *  No full-body cone robe (that reads as a chess pawn). Cloak = open back panel only.
  *  role: robed | performer | crowd */
 export function makeFigure(color: number, seed = 1, scale = 1, role: "robed" | "performer" | "crowd" = "robed"): THREE.Group {
-  const glb = cloneGltfFigure(color, seed, scale, role);
-  if (glb) return glb;
+  // v21: one coherent 中国风 figure style, built in code (Quaternius bodies retired)
+  return makeHanFigure(color, seed, scale, role);
   const g = new THREE.Group();
   const r = rng(Math.floor(seed * 53 + 11));
   const cloth = new THREE.MeshStandardMaterial({ color, roughness: 0.88 });

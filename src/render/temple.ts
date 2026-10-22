@@ -10,10 +10,13 @@ const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: numb
   baitian: { sun: [14, 38, 18], col: 0xfff0d8, I: 3.6, hemi: 0.6, env: 1.0, exp: 0.95, fog: 0xc0c8d0, hdri: "qwantani_puresky", bg: 1, lamp: 0 },
   yewan: { sun: [-10, 30, -14], col: 0x7a90ff, I: 0.45, hemi: 0.14, env: 0.3, exp: 0.95, fog: 0x0e1018, hdri: "qwantani_night_puresky", bg: 0.45, lamp: 2.8 },
 };
-const POSE: Record<ActId | "overview", { eye: [number, number, number]; look: [number, number, number] }> = {
+const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, number, number]; look: [number, number, number] }> = {
   overview: { eye: [11, 12, 15], look: [0, 3, -7] },
   kaichao: { eye: [5, 2.6, 9], look: [0, 3.2, -6] },
-  xiban: { eye: [-9, 3.6, -3.5], look: [0, 3.2, 12] },
+  xiban: { eye: [2.2, 4.4, -1.5], look: [0, 2.6, 10.5] },
+  // judge views: actors from the front row, crowd faces from the stage apron
+  kanxi: { eye: [0.6, 3.2, 7.4], look: [0, 3.25, 11.6] },
+  guanzhong: { eye: [0.8, 2.75, 9.2], look: [0, 1.25, 3.6] },
 };
 
 export class TempleScene {
@@ -51,7 +54,6 @@ export class TempleScene {
     this.controls.maxDistance = 70;
     this.controls.target.set(...POSE.overview.look);
     this.flight = new Flight(this.camera, this.controls.target);
-    if (import.meta.env.VITE_SHOTCAM) (window as unknown as { __templeCam?: unknown }).__templeCam = { camera: this.camera, controls: this.controls, flight: this.flight };
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(shadowSize(), shadowSize());
     const sc = this.sun.shadow.camera;
@@ -201,7 +203,7 @@ export class TempleScene {
     // performers (simple robed figures) — visible during the opera
     const robe = [0xb8202a, 0x1e5aa0, 0xd8a820];
     for (let i = 0; i < 3; i++) {
-      const f = makeFigure(robe[i], i + 7, 1.12, "performer");
+      const f = makeFigure(robe[i], i + 8, 1.12, "performer");
       f.position.set(-1.8 + i * 1.8, 1.92, 0.3 - (i % 2) * 0.6);
       f.rotation.y = Math.PI;
       f.name = "performer";
@@ -213,6 +215,10 @@ export class TempleScene {
     this.stageLight.target.position.set(0, 2, 11.5);
     this.stageLight.castShadow = true;
     S.add(this.stageLight, this.stageLight.target);
+    // cool rim lights so cloth silhouettes read against the dark stage / courtyard
+    const rimA = new THREE.DirectionalLight(0xbcd0ff, 1.1); rimA.position.set(-6, 6, 16); rimA.target.position.set(0, 2, 10); S.add(rimA, rimA.target);
+    const rimB = new THREE.DirectionalLight(0xffe2c0, 0.8); rimB.position.set(6, 5, -2); rimB.target.position.set(0, 1, 5); S.add(rimB, rimB.target);
+    const faceFill = new THREE.PointLight(0xffe6cc, 1.4, 14, 1.6); faceFill.position.set(0, 3.2, 7.8); S.add(faceFill);
 
     // 香炉 incense burner (ding) on the axis
     const ding = new THREE.Group();
@@ -269,10 +275,10 @@ export class TempleScene {
     S.add(this.procession);
     // audience facing the stage
     const crowdColors = [0x2e4a6a, 0x6a3a2a, 0x3a5a4a, 0x7a6040, 0x4a3a5a, 0x8a7a60, 0x5a2a2a, 0x3a4048];
-    for (let i = 0; i < 40; i++) {
-      const row = Math.floor(i / 8), col = i % 8;
+    for (let i = 0; i < 28; i++) {
+      const row = Math.floor(i / 7), col = i % 7;
       const f = makeFigure(crowdColors[i % crowdColors.length], i * 3 + 11, 0.92 + (i % 5) * 0.02, "crowd");
-      f.position.set(-5.6 + col * 1.55 + (row % 2) * 0.55 + Math.sin(i * 7.1) * 0.35, 0, 6.5 - row * 1.35 + Math.cos(i * 3.3) * 0.3);
+      f.position.set(-5.0 + col * 1.65 + (row % 2) * 0.55 + Math.sin(i * 7.1) * 0.35, 0, 6.5 - row * 1.35 + Math.cos(i * 3.3) * 0.3);
       f.rotation.y = (i % 7 - 3) * 0.04;
       this.audience.add(f);
     }
@@ -348,6 +354,12 @@ export class TempleScene {
     }
   }
 
+  /** Named judge camera: "kanxi" (actors close) or "guanzhong" (crowd faces). */
+  view(name: "kanxi" | "guanzhong"): void {
+    const p = POSE[name];
+    this.flight.go(new THREE.Vector3(...p.eye), new THREE.Vector3(...p.look), 1.4);
+  }
+
   overview(): void {
     this.flight.go(new THREE.Vector3(...POSE.overview.eye), new THREE.Vector3(...POSE.overview.look), 2.0);
   }
@@ -376,14 +388,8 @@ export class TempleScene {
         f.position.y = Math.abs(Math.sin(t * 3 + i)) * 0.04;
       });
     this.scene.traverse((o) => {
-      const sw = o.userData.sway as { phase: number; amp: number } | undefined;
-      if (o.name === "performer" && o.visible) {
-        o.rotation.y = Math.PI + Math.sin(t * 0.8 + o.position.x) * 0.5;
-        o.rotation.z = Math.sin(t * 1.6 + o.position.x) * 0.05;
-      } else if (sw && o.parent?.visible) {
-        o.rotation.z = Math.sin(t * 0.9 + sw.phase) * sw.amp * 0.4;
-        o.rotation.x = Math.sin(t * 0.6 + sw.phase * 1.3) * sw.amp * 0.3;
-      }
+      const an = o.userData.anim as ((t: number) => void) | undefined;
+      if (an && o.visible && o.parent?.visible) an(t);
     });
     this.controls.update();
     this.post.render();

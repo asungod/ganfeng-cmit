@@ -33,6 +33,7 @@ export function mountWanshou(root: HTMLElement): () => void {
         </details>
         <p class="kicker">活动</p><div class="chips" data-acts></div>
         <p class="kicker">时段</p><div class="chips" data-slots></div>
+        <p class="kicker">看戏机位</p><div class="chips"><button type="button" class="chip" data-cam="kanxi">近看戏台</button><button type="button" class="chip" data-cam="guanzhong">台上望众</button></div>
         <p class="ws-pick" data-pick></p>
         <section class="matrix" data-matrix>
           <details class="matrix-fold" data-matrix-fold>
@@ -151,6 +152,13 @@ export function mountWanshou(root: HTMLElement): () => void {
       slot = tryBtn.dataset.tryB as SlotId;
       note = "";
       render();
+      return;
+    }
+    const cam = t.closest("[data-cam]") as HTMLElement | null;
+    if (cam) {
+      if (act !== "xiban") choose("xiban" as ActId, slot);
+      const name = cam.dataset.cam as "kanxi" | "guanzhong";
+      window.setTimeout(() => scene?.view(name), act === "xiban" ? 0 : 2100);
       return;
     }
     const a = t.closest("[data-act]") as HTMLElement | null;
