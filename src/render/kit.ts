@@ -1,5 +1,5 @@
 // Shared rendering kit for the immersive halls: post chain, procedural textures, camera flights, particles.
-import { makeHanFigure } from "./hanFigure";
+import { makeOperaActor, makeVillager } from "./paperFigure";
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
@@ -584,8 +584,8 @@ export function makeBamboo(seed = 1, n = 9): THREE.Group {
  *  No full-body cone robe (that reads as a chess pawn). Cloak = open back panel only.
  *  role: robed | performer | crowd */
 export function makeFigure(color: number, seed = 1, scale = 1, role: "robed" | "performer" | "crowd" = "robed"): THREE.Group {
-  // v21: one coherent 中国风 figure style, built in code (Quaternius bodies retired)
-  return makeHanFigure(color, seed, scale, role);
+  // v22: painted 工笔/年画/皮影 cut-out figures with jointed pieces (all painted in code)
+  return role === "performer" ? makeOperaActor(color, seed, scale) : makeVillager(color, seed, scale);
   const g = new THREE.Group();
   const r = rng(Math.floor(seed * 53 + 11));
   const cloth = new THREE.MeshStandardMaterial({ color, roughness: 0.88 });

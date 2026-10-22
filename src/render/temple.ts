@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { ActId, SlotId } from "../data/wanshou";
 import { curvedRoof } from "./pavilion";
+import { setPaperCamera } from "./paperFigure";
 import { makeFigure, makeTree, shadowSize, Flight, disposeScene, lantern, loadHdri, makePost, makeRenderer, particles, phMat, wbox, type Post } from "./kit";
 
 const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; bg: number; lamp: number }> = {
@@ -387,6 +388,7 @@ export class TempleScene {
         f.position.z = 15 - ((t * 0.6 + i * 1.1) % 20);
         f.position.y = Math.abs(Math.sin(t * 3 + i)) * 0.04;
       });
+    setPaperCamera(this.camera);
     this.scene.traverse((o) => {
       const an = o.userData.anim as ((t: number) => void) | undefined;
       if (an && o.visible && o.parent?.visible) an(t);
