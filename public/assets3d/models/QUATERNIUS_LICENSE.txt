@@ -1,5 +1,0 @@
-Quaternius low-poly models (Ultimate Nature Pack / Modular Men / Modular Women)
-License: CC0 1.0 Universal (public domain dedication)
-Source: https://quaternius.com/  (packs: ultimatenature, ultimatemodularcharacters, ultimatemodularwomen)
-Mirrored GLB via https://github.com/trebeljahr/quaternius-showcase (models remain Quaternius CC0)
-Attribution not required; credit appreciated.

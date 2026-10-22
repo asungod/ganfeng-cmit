@@ -658,24 +658,45 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
 
   const arms: Rig["arms"] = [];
   const mode = Math.floor(seed / 3) % 6; // 0 idle 1 clap 2 fan 3 拱手 4 point 5 chat/nod
+  // v24: puffier sleeves for 拱手/clap volume; larger 团扇
+  const thickArm = mode === 1 || mode === 3;
   for (const s of [-1, 1]) {
-    const a = armPart(key + "a", s, P, 0.26, mode === 2 && s === 1 ? 0.52 : 0.32,
-      (x) => { const c = type === "jacket" ? sec : main; const pts: P2[] = [[-0.05, 0.05], [0.05, 0.06], [0.062, -0.12], [0.058, -0.28], [-0.052, -0.28], [-0.056, -0.12]]; shape(x, pts, hgrad(x, -0.06, 0.06, c), 0.005); line(x, [[0.01, -0.04], [0.02, -0.16], [0.012, -0.26]], 0.003, shade(c, -0.45)); },
+    const a = armPart(key + "a", s, P, 0.26, mode === 2 && s === 1 ? 0.55 : 0.34,
+      (x) => {
+        const c = type === "jacket" ? sec : main;
+        const w = thickArm ? 0.072 : 0.055;
+        const pts: P2[] = [[-w, 0.05], [w, 0.06], [w + 0.012, -0.12], [w + 0.008, -0.28], [-w - 0.002, -0.28], [-w - 0.006, -0.12]];
+        shape(x, pts, hgrad(x, -w - 0.01, w + 0.01, c), 0.005);
+        line(x, [[0.01, -0.04], [0.025, -0.16], [0.015, -0.26]], 0.0035, shade(c, -0.45));
+        line(x, [[-0.02, -0.06], [-0.03, -0.2]], 0.003, shade(c, 0.3));
+      },
       (x) => {
         const c = type === "jacket" ? main : main;
-        const sl: P2[] = [[-0.05, 0.04], [0.05, 0.04], [0.06, -0.1], [0.07, -0.235], [0.03, -0.25], [-0.02, -0.25], [-0.062, -0.235], [-0.056, -0.1]];
-        shape(x, sl, hgrad(x, -0.065, 0.07, c), 0.005);
-        x.save(); path(x, sl); x.clip(); x.globalAlpha = 0.5; line(x, [[-0.03, -0.02], [-0.02, -0.12], [-0.035, -0.22]], 0.003, shade(c, -0.5)); line(x, [[0.025, -0.06], [0.035, -0.2]], 0.003, shade(c, 0.35)); x.restore();
-        if (type === "woman") line(x, [[-0.065, -0.24], [0.07, -0.24]], 0.016, trim);
-        if (type === "farmer") hand(x, 0, -0.28, s, skin, "open", 0.95);
-        else hand(x, 0, -0.28, s, skin, mode === 4 && s === 1 ? "fist" : "open", 0.9);
-        if (mode === 2 && s === 1) { // 团扇 painted with 梅
-          x.fillStyle = "#8a5a2a"; x.fillRect(-0.004, -0.33, 0.008, 0.08);
-          ell(x, 0, -0.42, 0.075, 0.08, "#f4ecd8", 0.004, "#8a5a2a");
-          line(x, [[-0.04, -0.46], [0.0, -0.42], [0.03, -0.37]], 0.004, "#4a3020");
-          for (const [px, py] of [[-0.02, -0.44], [0.01, -0.4], [0.03, -0.38], [-0.03, -0.46]] as const) for (let p = 0; p < 5; p++) { const an = (p / 5) * Math.PI * 2; ell(x, px + Math.cos(an) * 0.006, py + Math.sin(an) * 0.006, 0.005, 0.005, "#d84a5a"); }
+        const flare = thickArm ? 0.03 : 0.015;
+        const sl: P2[] = [[-0.06 - flare, 0.04], [0.06 + flare, 0.04], [0.075 + flare, -0.1], [0.08 + flare, -0.24], [0.04, -0.28], [-0.03, -0.28], [-0.075 - flare, -0.24], [-0.065 - flare, -0.1]];
+        shape(x, sl, hgrad(x, -0.08, 0.09, c), 0.005);
+        x.save(); path(x, sl); x.clip(); x.globalAlpha = 0.55;
+        line(x, [[-0.035, -0.02], [-0.025, -0.12], [-0.04, -0.24]], 0.004, shade(c, -0.5));
+        line(x, [[0.03, -0.05], [0.045, -0.2]], 0.004, shade(c, 0.35));
+        // soft volume shade across the cuff
+        const vg = x.createLinearGradient(-0.08, 0, 0.09, 0);
+        vg.addColorStop(0, "rgba(0,0,0,0.22)"); vg.addColorStop(0.45, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.25)");
+        x.fillStyle = vg; x.fillRect(-0.1, -0.3, 0.22, 0.34);
+        x.restore();
+        if (type === "woman") line(x, [[-0.07, -0.26], [0.08, -0.26]], 0.018, trim);
+        if (type === "farmer") hand(x, 0, -0.3, s, skin, "open", 1.0);
+        else hand(x, 0, -0.3, s, skin, mode === 4 && s === 1 ? "fist" : "open", 0.95);
+        if (mode === 2 && s === 1) { // 团扇 — larger, readable 梅
+          x.fillStyle = "#8a5a2a"; x.fillRect(-0.006, -0.34, 0.012, 0.1);
+          ell(x, 0, -0.48, 0.13, 0.14, "#f4ecd8", 0.005, "#8a5a2a");
+          // woven rim
+          x.strokeStyle = "#6a4020"; x.lineWidth = 0.008; x.beginPath(); x.ellipse(0, -0.48, 0.125, 0.135, 0, 0, 7); x.stroke();
+          line(x, [[-0.06, -0.54], [0.0, -0.48], [0.05, -0.4]], 0.005, "#4a3020");
+          for (const [px, py] of [[-0.04, -0.52], [0.02, -0.46], [0.05, -0.42], [-0.05, -0.55], [0.0, -0.5], [0.04, -0.54]] as const)
+            for (let p = 0; p < 5; p++) { const an = (p / 5) * Math.PI * 2; ell(x, px + Math.cos(an) * 0.01, py + Math.sin(an) * 0.01, 0.008, 0.008, "#d84a5a"); }
+          ell(x, 0.0, -0.5, 0.006, 0.006, "#f0d060");
         }
-      }, 0.09, mode === 2 ? 0.1 : 0.09);
+      }, thickArm ? 0.12 : 0.1, mode === 2 ? 0.16 : (thickArm ? 0.13 : 0.1));
     a.up.position.set(s * 0.16, sY, 0.03); a.up.scale.x = s;
     body.add(a.up); arms.push({ s, up: a.up, lo: a.lo });
   }
@@ -695,12 +716,12 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
     head.position.x = Math.sin(t * 0.23) * 0.006;
     if (mode === 1) { // clapping in bursts
       const burst = Math.sin(t * 0.35) > 0.5 ? Math.abs(Math.sin(t * 8)) : 0.5;
-      set(A, -0.35 + v1, -1.9 - burst * 0.25 + Math.sin(t * 1.1) * 0.04, 0.45); set(B, -0.35 - v1, -1.9 - burst * 0.25 + Math.sin(t * 1.3) * 0.04, 0.48);
+      set(A, -0.28 + v1, -1.75 - burst * 0.2 + Math.sin(t * 1.1) * 0.04, 0.5); set(B, -0.28 - v1, -1.75 - burst * 0.2 + Math.sin(t * 1.3) * 0.04, 0.5);
       head.position.y = 1.4 + burst * 0.008;
     } else if (mode === 2) { // fanning
       set(A, 0.08, -0.3); set(B, -0.15 + Math.sin(t * 5) * 0.05, -2.45 + Math.sin(t * 5) * 0.22, 0.62);
     } else if (mode === 3) { // 拱手 with a small bow
-      const bw = Math.sin(t * 0.5); set(A, -0.35 + v1 + bw * 0.03, -1.95 + bw * 0.1, 0.42); set(B, -0.36 - v1 + bw * 0.03, -1.92 + bw * 0.1, 0.42);
+      const bw = Math.sin(t * 0.5); set(A, -0.28 + v1 + bw * 0.03, -1.8 + bw * 0.08, 0.48); set(B, -0.3 - v1 + bw * 0.03, -1.78 + bw * 0.08, 0.48);
       const bow = Math.max(0, Math.sin(t * 0.5)) ** 4; head.position.y = 1.4 - bow * 0.02; body.rotation.z = 0;
     } else if (mode === 4) { // pointing at the stage, then lowering
       const k = sm(0.2, 0.4, (t % 9) / 9) * (1 - sm(0.7, 0.9, (t % 9) / 9));

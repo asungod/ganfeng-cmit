@@ -82,7 +82,7 @@ export class WeiwuScene {
 
   private build(): void {
     const S = this.scene;
-    const earth = phMat("earth_grey", [0.5, 0.5], { color: 0xa9a7a2 });
+    const earth = phMat("earth_grey", [0.5, 0.5], { color: 0x9e9c98 });
     const earthAlt = phMat("plaster_grey", [1, 1], { color: 0xa2a09c });
     const earthIn = phMat("clay_plaster", [1, 1], { color: 0xeee6d6 });
     const tile = qingwaMat([3, 2]); // v23: 小青瓦
@@ -90,7 +90,7 @@ export class WeiwuScene {
     const wood = phMat("dark_wooden_planks", [1, 1]);
     const lac = phMat("lacquered_cherry_wood", [1, 1], { color: 0x9a3a26 });
     const stone = phMat("stone_tiles", [1, 1], { color: 0xb0a898 });
-    const ground = phMat("brown_mud_dry", [24, 24]);
+    const ground = phMat("stone_tiles", [18, 18], { color: 0x8a8884 }); // v24: cool grey stone yard (was warm brown mud)
 
     const g = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), ground);
     g.rotation.x = -Math.PI / 2;
@@ -365,16 +365,22 @@ export class WeiwuScene {
     S.add(this.smoke.points);
     // facade lanterns at the gate
     for (const sx of [-1.4, 1.4]) this.addLantern(S, new THREE.Vector3(sx, 3.6, D / 2 + 1.1));
-    // camphor trees + bamboo clumps for scale and life (procedural)
-    const trees: [number, number, number][] = []; // v18: low-poly trees removed
-    trees.forEach(([x, z, k], i) => {
-      const t = makeTree(i + 1, k * 1.45);
+    // v24: 墨竹 flanking the 门楼 approach (visible in menlou cam) + courtyard sides; 樟 at enclosure corners
+    for (const [x, z, k] of [[-11, 7, 1.1], [11, 6.5, 1.05], [-13, -6, 1.2], [13, -5, 1.15], [-8, 12.5, 0.95], [8.5, 12.2, 0.9]] as [number, number, number][]) {
+      const t = makeTree(Math.abs(x * 3 + z) | 0, k);
       t.position.set(x, 0, z);
       S.add(t);
-    });
-    for (const [x, z] of [[-18, -17], [20, 16]]) {
-      const b = makeBamboo(x * 3 + z, 11);
+    }
+    // approach path (menlou eye z≈16.5 → gate z≈9): bamboo just off-path left/right
+    for (const [x, z, n, sc] of [
+      [-3.4, 14.0, 14, 1.0], [3.6, 13.8, 13, 1.0],
+      [-4.6, 11.2, 12, 0.95], [4.8, 11.0, 12, 0.95],
+      [-2.8, 15.5, 10, 0.8], [3.0, 15.3, 10, 0.8],
+      [-9.5, 4.5, 10, 0.85], [9.2, 4.8, 11, 0.85],
+    ] as [number, number, number, number][]) {
+      const b = makeBamboo(Math.abs(x * 5 + z) | 0, n);
       b.position.set(x, 0, z);
+      b.scale.setScalar(sc);
       S.add(b);
     }
     // distant hills for silhouette

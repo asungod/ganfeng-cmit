@@ -64,7 +64,7 @@ export class TempleScene {
     this.sun.shadow.normalBias = 0.03;
     this.scene.add(this.sun, this.hemi);
     this.build();
-    this.smoke = particles(160, new THREE.Box3(new THREE.Vector3(-0.35, 2.6, -0.35), new THREE.Vector3(0.35, 9, 0.35)), 0xe8e0d8, 0.9, 0.22, "smoke");
+    this.smoke = particles(160, new THREE.Box3(new THREE.Vector3(-0.3, 1.8, -3.5), new THREE.Vector3(0.3, 7.5, -2.9)), 0xe8e0d8, 0.9, 0.22, "smoke");
     this.scene.add(this.smoke.points);
     this.haze = particles(160, new THREE.Box3(new THREE.Vector3(-16, 0.5, -14), new THREE.Vector3(16, 4, 16)), 0xf0e0d0, 2.4, 0.035, "mist");
     this.scene.add(this.haze.points);
@@ -222,11 +222,12 @@ export class TempleScene {
     const faceFill = new THREE.PointLight(0xffe6cc, 1.4, 14, 1.6); faceFill.position.set(0, 3.2, 7.8); S.add(faceFill);
 
     // 宣德炉 bronze censer on the axis (v23)
+    // v24: smaller 宣德炉, closer to the hall so 台上望众 doesn't hide the courtyard
     const ding = xuandeLu();
-    ding.scale.setScalar(1.15);
-    ding.position.y = 0.3;
-    const pedestal = wbox(2.6, 0.3, 2.6, stone);
-    pedestal.position.y = 0.15;
+    ding.scale.setScalar(0.72);
+    ding.position.set(0, 0.18, -3.2);
+    const pedestal = wbox(1.7, 0.22, 1.7, stone);
+    pedestal.position.set(0, 0.11, -3.2);
     S.add(pedestal);
     S.add(ding);
 

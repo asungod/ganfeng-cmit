@@ -22,15 +22,31 @@ function paint(key: string, wM: number, hM: number, ppm: number, draw: (x: Ctx) 
 function cardMat(map: THREE.Texture, glow = 0.3): THREE.MeshStandardMaterial {
   return new THREE.MeshStandardMaterial({ map, alphaTest: 0.35, side: THREE.DoubleSide, roughness: 0.95, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: glow });
 }
-/** crossed painted cards (国画 billboard volume) */
-function crossed(map: THREE.Texture, w: number, h: number, n = 3, glow = 0.3): THREE.Group {
+/** crossed painted cards (国画 billboard volume) — v24: extra offset layers so the canopy reads as a volume */
+function crossed(map: THREE.Texture, w: number, h: number, n = 5, glow = 0.3): THREE.Group {
   const g = new THREE.Group();
   const m = cardMat(map, glow);
   const dm = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map, alphaTest: 0.35 });
   for (let i = 0; i < n; i++) {
     const geo = new THREE.PlaneGeometry(w, h); geo.translate(0, h / 2, 0);
-    const p = new THREE.Mesh(geo, m); p.rotation.y = (i / n) * Math.PI; p.customDepthMaterial = dm; g.add(p);
+    const p = new THREE.Mesh(geo, m);
+    const a = (i / n) * Math.PI;
+    p.rotation.y = a;
+    // slight radial offset so cards don't occupy one plane (less paper-thin)
+    const off = 0.12 + (i % 2) * 0.08;
+    p.position.set(Math.sin(a) * off, 0, Math.cos(a) * off);
+    p.customDepthMaterial = dm;
+    g.add(p);
   }
+  // soft outer silhouette (extra wide, low-alpha) — fills gaps between cards
+  const soft = document.createElement("canvas"); soft.width = soft.height = 64;
+  const sx = soft.getContext("2d")!;
+  const gr = sx.createRadialGradient(32, 28, 4, 32, 28, 30);
+  gr.addColorStop(0, "rgba(40,60,36,0.55)"); gr.addColorStop(0.55, "rgba(30,48,28,0.28)"); gr.addColorStop(1, "rgba(20,30,18,0)");
+  sx.fillStyle = gr; sx.fillRect(0, 0, 64, 64);
+  const st = new THREE.CanvasTexture(soft); st.colorSpace = THREE.SRGBColorSpace;
+  const sm = new THREE.SpriteMaterial({ map: st, transparent: true, depthWrite: false, opacity: 0.55 });
+  const sil = new THREE.Sprite(sm); sil.position.y = h * 0.62; sil.scale.set(w * 1.15, h * 0.85, 1); g.add(sil);
   return g;
 }
 
@@ -70,7 +86,7 @@ export function paintedTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "cam
       }
       // 点叶: layered blue-green dabs (石绿 / 花青), dark ink accents
       const cols = ["#3e5a3a", "#4f6e46", "#5f7f52", "#355038", "#6f8c5c"];
-      for (let i = 0; i < 1400; i++) {
+      for (let i = 0; i < (low() ? 900 : 2200); i++) {
         const [tx, ty] = tips[Math.floor(r() * tips.length)];
         const rr = 0.25 + r() * 0.9, a = r() * Math.PI * 2;
         const px = tx + Math.cos(a) * rr, py = ty + Math.sin(a) * rr * 0.6 + 0.2;
@@ -79,7 +95,11 @@ export function paintedTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "cam
         x.beginPath(); x.ellipse(px, py, 0.07 + r() * 0.06, 0.04 + r() * 0.03, r() * 3, 0, Math.PI * 2); x.fill();
       }
       x.globalAlpha = 1; x.fillStyle = "#1a2418";
-      for (let i = 0; i < 260; i++) { const [tx, ty] = tips[Math.floor(r() * tips.length)]; x.beginPath(); x.arc(tx + (r() - 0.5) * 1.6, ty + (r() - 0.3) * 1.0, 0.03 + r() * 0.025, 0, 7); x.fill(); }
+      for (let i = 0; i < (low() ? 180 : 420); i++) { const [tx, ty] = tips[Math.floor(r() * tips.length)]; x.beginPath(); x.arc(tx + (r() - 0.5) * 1.8, ty + (r() - 0.3) * 1.15, 0.035 + r() * 0.03, 0, 7); x.fill(); }
+      // second leaf layer: larger, softer dabs for canopy thickness
+      x.globalAlpha = 0.55;
+      for (let i = 0; i < (low() ? 200 : 500); i++) { const [tx, ty] = tips[Math.floor(r() * tips.length)]; const a = r() * Math.PI * 2, rr = 0.4 + r() * 1.1; x.fillStyle = cols[Math.floor(r() * cols.length)]; x.beginPath(); x.ellipse(tx + Math.cos(a) * rr, ty + Math.sin(a) * rr * 0.55 + 0.35, 0.11 + r() * 0.08, 0.06 + r() * 0.04, r() * 2, 0, 7); x.fill(); }
+      x.globalAlpha = 1;
     } else {
       // 松: crooked scaly trunk, flat needle clouds
       const trunk = branchPath(0, 0, 0.05, 7.2, r, 9);
@@ -91,7 +111,7 @@ export function paintedTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "cam
         const p = branchPath(base[0], base[1], side * (1.2 + r() * 0.3), 1.2 + r() * 1.2, r, 4);
         stroke(x, p, 0.14, 0.04, "#3a2a1e", r);
         const [ex, ey] = p[p.length - 1];
-        for (let c = 0; c < 3; c++) { // needle fan cluster
+        for (let c = 0; c < 5; c++) { // needle fan cluster
           const cx = ex + (r() - 0.5) * 1.0, cy = ey + 0.15 + r() * 0.3;
           for (let k = 0; k < 34; k++) { const a = -Math.PI * 0.95 + (k / 33) * Math.PI * 0.9 + Math.PI; const l = 0.35 + r() * 0.2;
             x.strokeStyle = k % 3 ? "#203424" : "#2e4a34"; x.lineWidth = 0.025; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(a) * l * 1.3, cy + Math.sin(a) * l * 0.5 + 0.2); x.stroke(); }
@@ -101,7 +121,7 @@ export function paintedTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "cam
       for (let c = 0; c < 3; c++) for (let k = 0; k < 30; k++) { const a = (k / 29) * Math.PI; x.strokeStyle = "#1e3222"; x.lineWidth = 0.025; x.beginPath(); x.moveTo(tx + (c - 1) * 0.5, ty - 0.3); x.lineTo(tx + (c - 1) * 0.5 + Math.cos(a) * 0.55, ty - 0.3 + Math.sin(a) * 0.3); x.stroke(); }
     }
   });
-  const g = crossed(tex, W, H, 3, 0.28);
+  const g = crossed(tex, W, H, low() ? 4 : 5, 0.28);
   g.scale.setScalar(scale);
   g.rotation.y = r() * Math.PI;
   return g;
@@ -132,7 +152,7 @@ export function paintedBamboo(seed = 1, n = 9): THREE.Group {
       }
     }
   });
-  const g = crossed(tex, W, H, 3, 0.26);
+  const g = crossed(tex, W, H, low() ? 3 : 4, 0.26);
   return g;
 }
 
