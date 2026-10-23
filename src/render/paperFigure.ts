@@ -136,6 +136,24 @@ function paintTex(key: string, b: [number, number, number, number], ppm: number,
 function paperMat(map: THREE.Texture, side: THREE.Side): THREE.MeshStandardMaterial {
   return new THREE.MeshStandardMaterial({ map, alphaTest: 0.45, side, roughness: 0.92, metalness: 0, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: 0.32 });
 }
+const rimCache = new Map<THREE.Texture, THREE.MeshBasicMaterial>();
+function rimMat(m: THREE.MeshStandardMaterial): THREE.MeshBasicMaterial {
+  const map = m.map!; let r = rimCache.get(map);
+  if (!r) { r = new THREE.MeshBasicMaterial({ map, color: 0x2a1810, alphaTest: 0.45, side: THREE.DoubleSide }); rimCache.set(map, r); }
+  return r;
+}
+let shadowTex: THREE.Texture | null = null;
+/** soft painted contact shadow under the feet */
+export function contactShadow(w = 0.75, d = 0.42): THREE.Mesh {
+  if (!shadowTex) {
+    const c = document.createElement("canvas"); c.width = c.height = 128; const x = c.getContext("2d")!;
+    const g = x.createRadialGradient(64, 64, 4, 64, 64, 62); g.addColorStop(0, "rgba(20,12,8,0.62)"); g.addColorStop(0.55, "rgba(20,12,8,0.3)"); g.addColorStop(1, "rgba(20,12,8,0)");
+    x.fillStyle = g; x.fillRect(0, 0, 128, 128); shadowTex = new THREE.CanvasTexture(c); shadowTex.colorSpace = THREE.SRGBColorSpace;
+  }
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+  m.rotation.x = -Math.PI / 2; m.position.y = 0.012; m.renderOrder = 1;
+  return m;
+}
 function part(key: string, b: [number, number, number, number], ppm: number, draw: Draw, opts: { back?: boolean; seg?: [number, number]; z?: number } = {}): Part {
   const [x0, y0, x1, y1] = b;
   const seg = opts.seg ?? [1, 1];
@@ -146,6 +164,10 @@ function part(key: string, b: [number, number, number, number], ppm: number, dra
   g.add(front);
   if (opts.back !== false) g.add(paperTexMesh(key + ":b", b, ppm, (x) => draw(x, true), geo, THREE.BackSide));
   if (opts.z) front.position.z = opts.z, g.children[1] && (g.children[1].position.z = opts.z);
+  // 纸板厚度: dark inked rim behind every cut piece so side views read as a carved board, not a sheet
+  const rim = new THREE.Mesh(geo, rimMat(front.material as THREE.MeshStandardMaterial));
+  rim.position.z = (opts.z ?? 0) - 0.007; rim.scale.set(1.035, 1.02, 1); rim.renderOrder = -1;
+  g.add(rim);
   return { g, geo, base: Float32Array.from(geo.attributes.position.array as Float32Array) };
 }
 function paperTexMesh(key: string, b: [number, number, number, number], ppm: number, draw: (x: Ctx) => void, geo: THREE.BufferGeometry, side: THREE.Side): THREE.Mesh {
@@ -264,7 +286,7 @@ function armPart(key: string, s: number, ppm: number, upLen: number, loLen: numb
 function actorRig(role: ActorRole, _color: number): Rig {
   const P = low() ? 230 : 460;
   const root = new THREE.Group(), turn = new THREE.Group(), body = new THREE.Group();
-  root.add(turn); turn.add(body);
+  root.add(turn); turn.add(body); root.add(contactShadow());
   const extra: Record<string, Part> = {};
   const skin = role === "dan" ? "#f7e7dd" : "#efd2b8";
   const robeCol = role === "jing" ? "#2f6a40" : role === "dan" ? "#9cc6cf" : "#9e1b22";
@@ -354,7 +376,7 @@ function actorRig(role: ActorRole, _color: number): Rig {
         shape(x, tri, flagCol, 0.004, GOLD);
         x.save(); path(x, tri); x.clip(); cloud(x, 0.08, 0.82, 0.02, GOLD); cloud(x, 0.06, 0.65, 0.016, GOLD); scales(x, 0, 0.3, 0.44, 0.93, shade(GOLD, -0.2), 0.016); x.restore();
       }, { back: false, seg: [6, 10] });
-      f.g.position.set(s * 0.05, 1.18, -0.05);
+      f.g.position.set(s * 0.05, 1.18, -0.09);
       f.g.rotation.z = -s * (0.45 + hi * 0.4);
       f.g.scale.x = s;
       extra["flag" + k] = f; body.add(f.g);
@@ -456,7 +478,7 @@ function actorRig(role: ActorRole, _color: number): Rig {
           if (role === "laosheng") hand(x, 0.02, -0.41, s, skin, "open", 1.0);
         }
       }, 0.12, role === "jing" ? 0.1 : 0.3);
-    a.up.position.set(s * 0.19, sY, 0.035);
+    a.up.position.set(s * 0.19, sY, 0.06);
     a.up.scale.x = s;
     body.add(a.up);
     arms.push({ s, up: a.up, lo: a.lo });
@@ -468,7 +490,7 @@ function actorRig(role: ActorRole, _color: number): Rig {
         shape(x, sh, g, 0.003, "#9aa0a0");
         x.save(); x.globalAlpha = 0.25; for (let k = 0; k < 5; k++) line(x, [[-0.04 + k * 0.03, -0.01], [-0.045 + k * 0.032, -len * 0.5], [-0.05 + k * 0.034, -len + 0.01]], 0.004, "#a0a8a8"); x.restore();
       }, { back: false, seg: [2, 14] });
-      w.g.position.set(0.02, role === "dan" ? -0.36 : -0.4, 0.004);
+      w.g.position.set(0.02, role === "dan" ? -0.36 : -0.4, 0.018);
       a.lo.add(w.g); extra["xiu" + s] = w;
     }
   }
@@ -479,9 +501,10 @@ function faceCam(rig: { root: THREE.Group; turn: THREE.Group }, maxYaw: number):
   if (!CAM) return;
   const v = rig.root.worldToLocal(CAM.getWorldPosition(new THREE.Vector3()));
   let yaw = Math.atan2(v.x, v.z);
-  if (Math.abs(yaw) > Math.PI / 2) yaw = yaw - Math.sign(yaw) * Math.PI; // viewer behind: show the back square-on
-  yaw = Math.max(-maxYaw, Math.min(maxYaw, yaw));
-  rig.turn.rotation.y += (yaw - rig.turn.rotation.y) * 0.08;
+  if (Math.abs(yaw) > Math.PI * 0.75) yaw = yaw - Math.sign(yaw) * Math.PI; // v33: only well behind (>135°) show the back; side views keep the painted front
+  void maxYaw; // v33: full Y billboard (no cap) so a side view never sees the board edge-on
+  let d = yaw - rig.turn.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
+  rig.turn.rotation.y += d * 0.12;
 }
 
 const sm = (a: number, b: number, v: number) => { const k = Math.min(1, Math.max(0, (v - a) / (b - a))); return k * k * (3 - 2 * k); };
@@ -570,7 +593,7 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
   const trim = type === "woman" ? ["#f0d070", "#e8e0d0", "#2a3a6a"][seed % 3] : "#2a2420";
   const hatKind = type === "farmer" ? "douli" : type === "elder" ? (r() < 0.5 ? "cap" : "none") : type === "gown" || type === "jacket" ? (r() < 0.55 ? "cap" : r() < 0.5 ? "felt" : "none") : "none";
   const root = new THREE.Group(), turn = new THREE.Group(), body = new THREE.Group();
-  root.add(turn); turn.add(body);
+  root.add(turn); turn.add(body); root.add(contactShadow());
   const key = `v${seed}`;
   const sY = 1.33;
   const robe = part(key + "b", [-0.36, -0.01, 0.36, 1.44], P, (x, back) => {

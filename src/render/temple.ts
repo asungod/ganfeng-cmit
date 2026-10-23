@@ -209,7 +209,7 @@ export class TempleScene {
     for (let i = 0; i < 3; i++) {
       const f = makeFigure(robe[i], i + 8, 1.12, "performer");
       // v28: 老生 / 净 / 旦 spaced 1.9 apart; 净 set back so his 靠旗 never cross the 旦's 水袖
-      f.position.set(-0.2 + i * 1.75, 1.92, i === 0 ? 1.6 : i === 1 ? 0.15 : -0.9); // v31: 净 mid-depth (visible in side60), 旦 downstage; v29: 老生 upstage so side views clear the 靠旗
+      f.position.set(-0.2 + i * 1.75, 1.92, i === 0 ? 0.5 : i === 1 ? 1.7 : -0.9); // v33: depth-staggered so no one hides another in side60; // v31: 净 mid-depth (visible in side60), 旦 downstage; v29: 老生 upstage so side views clear the 靠旗
       f.rotation.y = Math.PI;
       f.name = "performer";
       stage.add(f);

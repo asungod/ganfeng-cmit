@@ -38,7 +38,9 @@ export class PavilionScene {
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
   private glow: THREE.Sprite;
-  private glowBase = 0.85;
+  private glowBase = 0.9;
+  private glowRefl!: THREE.Mesh;
+  private warm = true;
   private ray = new THREE.Raycaster();
   private occ: Record<string, boolean> = {};
   private occN = 0;
@@ -126,9 +128,13 @@ export class PavilionScene {
     );
     this.sun.position.copy(MARK.luoxia);
     this.scene.add(this.sun);
-    this.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: skyBand(), color: 0xff8a4a, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.NormalBlending, fog: false }));
-    this.glow.scale.set(110, 16, 1); // v29: larger + fainter so 落霞 reads as atmosphere, not a pasted disc
-    { const d = MARK.luoxia.clone().setY(0).normalize(); this.glow.position.set(-18, 6.5, -38); void d; this.glow.renderOrder = -1; } // v32: low on the horizon, just in front of the far hills
+    void skyBand;
+    this.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: luoxiaSky(), color: 0xffffff, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.NormalBlending, fog: false }));
+    this.glow.scale.set(150, 34, 1); // v33: 国画 painted evening sky (layered wash + under-lit cloud streaks), edges dissolve
+    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(30, 40), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.5, depthWrite: false, fog: false }));
+    this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-12, 0.1, -20); this.glowRefl.renderOrder = 2;
+    this.scene.add(this.glowRefl); // v29: larger + fainter so 落霞 reads as atmosphere, not a pasted disc
+    { const d = MARK.luoxia.clone().setY(0).normalize(); this.glow.position.set(-18, 10, -38); void d; this.glow.renderOrder = -1; } // v32: low on the horizon, just in front of the far hills
     this.scene.add(this.glow);
 
     const pool = new THREE.Mesh(
@@ -246,6 +252,7 @@ export class PavilionScene {
       if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.sunColor.value.setRGB(1, 0.85, 0.66).multiplyScalar(Math.max(0, 1 - el * 1.6)); // v30: no specular blowouts top-down
       this.mist.material.opacity = 0.07 * Math.max(0, 1 - el * 1.5);
       this.glow.material.opacity = this.glowBase * (1 - el * 0.85);
+      (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.75 : 0.3) * Math.max(0, 1 - el * 1.6);
     }
     this.post.render();
     this.emitProject();
@@ -294,7 +301,9 @@ export class PavilionScene {
       if (wmat.uniforms?.waterColor) wmat.uniforms.waterColor.value.set(pal.water).multiplyScalar(0.3);
       else wmat.color.set(pal.water);
     }
-    this.glow.material.color.set(pal.glow);
+    this.warm = pal.glow === 0xff7a3a;
+    if (this.warm) this.glow.material.color.set(0xffffff); else this.glow.material.color.set(pal.glow).lerp(new THREE.Color(0xffffff), 0.35);
+    (this.glowRefl.material as THREE.MeshBasicMaterial).color.copy(this.glow.material.color);
     this.look.copy(MARK[this.focus]);
     if (this.focus === "qiushui" || this.focus === "hantan") this.look.y = 0.4;
     if (this.focus === "changtian") this.look.set(2, 5.5, -8);
@@ -821,4 +830,58 @@ function makeRiverbank(): THREE.Group {
     g.add(r);
   }
   return g;
+}
+
+/** v33 落霞: painted like a 国画 evening wash — warm gold at the horizon through vermilion and rose to a mauve that dissolves
+ *  into the sky; long 横抹 cloud strokes lit orange/gold from below; a distant 孤鹜 brushed in. All edges feather out. */
+function luoxiaSky(): THREE.Texture {
+  const W = 1024, H = 320, c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d")!;
+  const v = x.createLinearGradient(0, H, 0, 0);
+  v.addColorStop(0, "rgba(255,196,110,0.95)"); v.addColorStop(0.18, "rgba(250,150,80,0.85)"); v.addColorStop(0.38, "rgba(226,104,82,0.6)");
+  v.addColorStop(0.6, "rgba(176,92,112,0.32)"); v.addColorStop(0.82, "rgba(110,80,120,0.1)"); v.addColorStop(1, "rgba(80,70,110,0)");
+  x.fillStyle = v; x.fillRect(0, 0, W, H);
+  // hotter core where the sun sets (left of centre)
+  const r = x.createRadialGradient(W * 0.42, H * 0.95, 10, W * 0.42, H * 0.95, W * 0.4);
+  r.addColorStop(0, "rgba(255,226,160,0.8)"); r.addColorStop(0.4, "rgba(255,160,90,0.35)"); r.addColorStop(1, "rgba(255,140,80,0)");
+  x.fillStyle = r; x.fillRect(0, 0, W, H);
+  let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  // cloud strokes: dusky rose body, bright under-lit lower edge
+  for (let i = 0; i < 20; i++) {
+    const cy = H * (0.32 + rnd() * 0.5), cx = W * (0.08 + rnd() * 0.84), len = W * (0.12 + rnd() * 0.28), th = 7 + rnd() * 11;
+    const near = 1 - Math.abs(cx / W - 0.42) * 1.4;
+    x.save(); x.filter = "blur(5px)";
+    x.fillStyle = `rgba(${120 + near * 40},${70 + near * 20},${100},${0.5 + rnd() * 0.25})`;
+    x.beginPath(); x.ellipse(cx, cy, len / 2, th, (rnd() - 0.5) * 0.03, 0, Math.PI * 2); x.fill();
+    x.filter = "blur(2.5px)";
+    x.fillStyle = `rgba(255,${150 + near * 70},${90 + near * 40},${0.65 + near * 0.35})`;
+    x.beginPath(); x.ellipse(cx + len * 0.04, cy + th * 0.7, len * 0.44, th * 0.42, 0, 0, Math.PI * 2); x.fill();
+    x.restore();
+  }
+  // a distant 孤鹜 brushed against the glow
+  x.save(); x.strokeStyle = "rgba(40,24,30,0.85)"; x.lineCap = "round"; x.lineWidth = 3;
+  const gx = W * 0.56, gy = H * 0.5; x.beginPath(); x.moveTo(gx - 16, gy - 6); x.quadraticCurveTo(gx - 6, gy - 9, gx, gy); x.quadraticCurveTo(gx + 7, gy - 10, gx + 18, gy - 8); x.stroke(); x.restore();
+  // feather all four edges
+  x.globalCompositeOperation = "destination-in";
+  const h = x.createLinearGradient(0, 0, W, 0); h.addColorStop(0, "rgba(0,0,0,0)"); h.addColorStop(0.2, "rgba(0,0,0,1)"); h.addColorStop(0.8, "rgba(0,0,0,1)"); h.addColorStop(1, "rgba(0,0,0,0)");
+  x.fillStyle = h; x.fillRect(0, 0, W, H);
+  const t = x.createLinearGradient(0, 0, 0, H); t.addColorStop(0, "rgba(0,0,0,0)"); t.addColorStop(0.3, "rgba(0,0,0,1)"); t.addColorStop(1, "rgba(0,0,0,1)");
+  x.fillStyle = t; x.fillRect(0, 0, W, H);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; return tex;
+}
+/** glow mirrored on the river: broken horizontal ripple dashes, brightest on the far side under the sunset */
+function luoxiaRefl(): THREE.Texture {
+  const W = 256, H = 512, c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d")!;
+  let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  for (let i = 0; i < 260; i++) {
+    const y = rnd() * H, far = 1 - y / H; // top of texture = far
+    const spread = W * (0.12 + (1 - far) * 0.3), cx = W / 2 + (rnd() - 0.5) * spread * 2;
+    const a = Math.pow(far, 1.3) * (0.35 + rnd() * 0.5) * (1 - Math.abs(cx - W / 2) / (spread * 1.2));
+    if (a <= 0) continue;
+    x.fillStyle = `rgba(255,${150 + rnd() * 70},${90 + rnd() * 40},${a})`;
+    x.fillRect(cx - (6 + rnd() * 26) / 2, y, 6 + rnd() * 26, 1.5 + rnd() * 2.5);
+  }
+  x.globalCompositeOperation = "destination-in";
+  const g = x.createLinearGradient(0, 0, W, 0); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(0.5, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)");
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; return tex;
 }
