@@ -206,7 +206,7 @@ export class TempleScene {
     const robe = [0xb8202a, 0x1e5aa0, 0xd8a820];
     for (let i = 0; i < 3; i++) {
       const f = makeFigure(robe[i], i + 8, 1.12, "performer");
-      f.position.set(0.7 + i * 1.5, 1.92, 0.2 - (i % 2) * 0.45); // v25: stage-right, clear of left UI
+      f.position.set((i === 0 ? 1.3 : 0.75 + i * 1.5), 1.92, 0.2 - (i % 2) * 0.45); // v25: stage-right, clear of left UI
       f.rotation.y = Math.PI;
       f.name = "performer";
       stage.add(f);
