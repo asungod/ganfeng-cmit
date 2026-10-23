@@ -39,6 +39,7 @@ export function mountHakka(root: HTMLElement): () => void {
   let firstVisit = true;
   let view: WeiwuScene | null = null;
   let firstView = !/#\/?kejia\/./.test(location.hash);
+  let keepView = false;
   let lockNote = "";
   let rejected: HourId | null = null;
   let pickRoom: RoomId = room;
@@ -394,6 +395,7 @@ export function mountHakka(root: HTMLElement): () => void {
       pathEl();
       view.setHour(hour);
       if (firstView) firstView = false;
+      else if (keepView) keepView = false; // v35: hour change keeps the current camera (incl. overview)
       else view.setRoom(id);
     }
     pipe.sys.set({
@@ -485,6 +487,7 @@ export function mountHakka(root: HTMLElement): () => void {
       hour = hr.dataset.hour as HourId;
       pickHour = hour;
       pickRoom = room;
+      keepView = true;
       void enter(room, false);
       return;
     }
@@ -500,6 +503,7 @@ export function mountHakka(root: HTMLElement): () => void {
     }
   });
 
+  // keepView declared above
   const roomCanvas = root.querySelector("canvas.room-view") as HTMLCanvasElement;
   const onResize = () => view?.resize();
   window.addEventListener("resize", onResize);
