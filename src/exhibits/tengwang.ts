@@ -403,6 +403,7 @@ export function mountTengwang(root: HTMLElement): () => void {
     if (toast) {
       toast.hidden = !lockNote;
       toast.textContent = lockNote;
+      if (lockNote) { clearTimeout((toast as unknown as { _t?: number })._t); (toast as unknown as { _t?: number })._t = window.setTimeout(() => (toast.hidden = true), 3500); } // v31: auto-dismiss
     }
     renderCitations(citesEl, citationForMotif(focus), "xu-public");
     if (painting) {

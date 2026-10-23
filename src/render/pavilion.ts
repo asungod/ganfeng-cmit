@@ -38,7 +38,7 @@ export class PavilionScene {
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
   private glow: THREE.Sprite;
-  private glowBase = 0.42;
+  private glowBase = 0.72;
   private ray = new THREE.Raycaster();
   private occ: Record<string, boolean> = {};
   private occN = 0;
@@ -127,7 +127,7 @@ export class PavilionScene {
     this.sun.position.copy(MARK.luoxia);
     this.scene.add(this.sun);
     this.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: skyBand(), color: 0xff8a4a, transparent: true, opacity: 0.42, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
-    this.glow.scale.set(90, 22, 1); // v29: larger + fainter so 落霞 reads as atmosphere, not a pasted disc
+    this.glow.scale.set(120, 30, 1); // v29: larger + fainter so 落霞 reads as atmosphere, not a pasted disc
     this.glow.position.copy(MARK.luoxia).multiplyScalar(2.2).setY(6);
     this.scene.add(this.glow);
 
@@ -213,7 +213,7 @@ export class PavilionScene {
     const glitter = this.water.getObjectByName("glitterPath") as THREE.Mesh | undefined;
     if (glitter) {
       const gm = glitter.material as THREE.MeshBasicMaterial;
-      gm.opacity = 0.42 + Math.sin(t * 0.6) * 0.12;
+      { const c = this.camera.position, tg = this.controls.target; const el = Math.max(0, Math.min(1, (c.y - tg.y) / c.distanceTo(tg))); gm.opacity = (0.42 + Math.sin(t * 0.6) * 0.12) * Math.max(0, 1 - el * 1.8); }
     }
     // wing flap on geese + lone duck
     const flap = (bird: THREE.Object3D, phase: number) => {
@@ -242,7 +242,9 @@ export class PavilionScene {
       const el = Math.max(0, Math.min(1, (this.camera.position.y - this.controls.target.y) / this.camera.position.distanceTo(this.controls.target)));
       const rw2 = this.water.userData.reflective as Water | undefined;
       if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.distortionScale.value = 1.2 * (1 - el * 0.8);
+      if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.reflK.value = Math.max(0.08, 1 - el * 1.4); // v31: weaker mirror at high angles (no silver streaks)
       if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.sunColor.value.setRGB(1, 0.85, 0.66).multiplyScalar(Math.max(0, 1 - el * 1.6)); // v30: no specular blowouts top-down
+      this.mist.material.opacity = 0.07 * Math.max(0, 1 - el * 1.5);
       this.glow.material.opacity = this.glowBase * (1 - el * 0.85);
     }
     this.post.render();
@@ -342,10 +344,12 @@ function makeWater(): THREE.Group {
     // guard against HDR inf/NaN from the reflected sun disc (would blacken the bloom chain)
     wm.fragmentShader = wm.fragmentShader
       .replace("vec3 reflectionSample = vec3( texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.w + distortion ) );",
-        "vec3 reflectionSample = vec3( texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.w + distortion ) ); reflectionSample = (any(isnan(reflectionSample)) || any(isinf(reflectionSample))) ? vec3(0.11, 0.2, 0.27) : min(reflectionSample, vec3(6.0)) * 0.62;")
+        "vec3 reflectionSample = vec3( texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.w + distortion ) ); reflectionSample = (any(isnan(reflectionSample)) || any(isinf(reflectionSample))) ? vec3(0.11, 0.2, 0.27) : min(reflectionSample, vec3(6.0 * reflK)) * 0.62 * reflK;")
       .replace("float rf0 = 0.3;", "float rf0 = 0.18;")
       .replace("vec3( 0.1 ) + reflectionSample * 0.9", "vec3( 0.02 ) + reflectionSample * 0.95")
       .replace("vec3 outgoingLight = albedo;", "vec3 outgoingLight = (any(isnan(albedo)) || any(isinf(albedo))) ? waterColor : min(albedo, vec3(8.0));");
+    wm.fragmentShader = "uniform float reflK;\n" + wm.fragmentShader;
+    wm.uniforms.reflK = { value: 1 };
     wm.fog = false;
     g.add(w);
     g.userData.reflective = w;

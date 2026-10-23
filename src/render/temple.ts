@@ -209,7 +209,7 @@ export class TempleScene {
     for (let i = 0; i < 3; i++) {
       const f = makeFigure(robe[i], i + 8, 1.12, "performer");
       // v28: 老生 / 净 / 旦 spaced 1.9 apart; 净 set back so his 靠旗 never cross the 旦's 水袖
-      f.position.set(-0.2 + i * 1.75, 1.92, i === 0 ? 1.6 : i === 1 ? -0.9 : 0.3); // v29: 老生 upstage so side views clear the 靠旗
+      f.position.set(-0.2 + i * 1.75, 1.92, i === 0 ? 1.6 : i === 1 ? 0.15 : -0.9); // v31: 净 mid-depth (visible in side60), 旦 downstage; v29: 老生 upstage so side views clear the 靠旗
       f.rotation.y = Math.PI;
       f.name = "performer";
       stage.add(f);
@@ -388,7 +388,14 @@ export class TempleScene {
         f.position.y = Math.abs(Math.sin(t * 3 + i)) * 0.04;
       });
     // v29: hide lanterns that pass right in front of the lens (camera flights, close orbits)
-    for (const l of this.lanterns) l.visible = l.position.distanceTo(this.camera.position) > 3.2;
+    { // v31: also hide near lanterns that sit between the lens and the 戏台 performers
+      const cp = this.camera.position, st = new THREE.Vector3(0, 3, 11.5).sub(cp).normalize();
+      for (const l of this.lanterns) {
+        const d = l.position.distanceTo(cp);
+        const toL = l.position.clone().sub(cp).normalize();
+        l.visible = d > 3.2 && !(d < 9 && toL.dot(st) > 0.985);
+      }
+    }
     setPaperCamera(this.camera);
     this.scene.traverse((o) => {
       const an = o.userData.anim as ((t: number) => void) | undefined;

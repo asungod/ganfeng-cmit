@@ -23,7 +23,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
 const HOURS: Record<HourId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; lamp: number }> = {
   dawn: { sun: [-30, 9, 18], col: 0xffc7a0, I: 2.2, hemi: 0.35, env: 0.6, exp: 0.95, fog: 0xb7b0b4, hdri: "qwantani_puresky", lamp: 0.2 },
   noon: { sun: [12, 40, 14], col: 0xfff2dc, I: 3.4, hemi: 0.45, env: 0.9, exp: 0.85, fog: 0xc8d2dc, hdri: "qwantani_puresky", lamp: 0 },
-  dusk: { sun: [34, 7, 10], col: 0xe8e4e0, I: 1.85, hemi: 0.48, env: 0.65, exp: 0.88, fog: 0xa8aeb4, hdri: "qwantani_sunset_puresky", lamp: 0.6 },
+  dusk: { sun: [34, 7, 10], col: 0xe8d4c0, I: 1.85, hemi: 0.42, env: 0.5, exp: 0.86, fog: 0x7a706a, hdri: "qwantani_sunset_puresky", lamp: 0.6 },
   night: { sun: [-14, 30, -10], col: 0x8aa4ff, I: 0.35, hemi: 0.12, env: 0.25, exp: 1.15, fog: 0x10131e, hdri: "qwantani_night_puresky", lamp: 2.6 },
 };
 
@@ -50,7 +50,7 @@ export class WeiwuScene {
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = makeRenderer(canvas, 1);
     (window as unknown as { __weiwu: unknown }).__weiwu = this;
-    this.scene.fog = new THREE.Fog(0xb8aca0, 70, 260);
+    this.scene.fog = new THREE.Fog(0xb8aca0, 120, 380);
     this.scene.background = new THREE.Color(0xc89878);
     this.camera.position.set(...POSES.overview.eye);
     this.controls = new OrbitControls(this.camera, canvas);
@@ -475,7 +475,7 @@ export class WeiwuScene {
       const sd = new THREE.Vector3(...c.sun).normalize();
       const k = Math.max(0, d.dot(sd)); const f = this.hourId === "night" ? 0 : k * k;
       this.renderer.toneMappingExposure = c.exp * (1 - 0.3 * f);
-      this.scene.backgroundIntensity = this.hourId === "night" ? 0.5 : 1 - 0.4 * f;
+      this.scene.backgroundIntensity = this.hourId === "night" ? 0.5 : (this.hourId === "dusk" ? 0.75 : 1) - 0.4 * f;
       this.post.bloom.strength = (this.hourId === "night" ? 0.75 : 0.28) * (1 - 0.7 * f);
     }
     this.post.render();

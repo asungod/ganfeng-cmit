@@ -878,13 +878,13 @@ function paintGlaze(
 function cobaltOf(era: EraId): Cobalt {
   switch (era) {
     case "yuan":
-      return { deep: "#161e32", mid: "#27365c", wash: "#3d4d72", iron: true };
+      return { deep: "#0f1528", mid: "#1b2850", wash: "#2c3c66", iron: true };
     case "ming":
-      return { deep: "#1A2238", mid: "#2B3A6D", wash: "#4a5a82", iron: false };
+      return { deep: "#111830", mid: "#1d2c62", wash: "#33457a", iron: false };
     case "qing":
-      return { deep: "#1c2848", mid: "#334878", wash: "#506494", iron: false };
+      return { deep: "#121d3c", mid: "#24386c", wash: "#3c5288", iron: false };
     case "song":
-      return { deep: "#1a2438", mid: "#2a3a58", wash: "#3e5068", iron: false };
+      return { deep: "#121a2c", mid: "#1f2e4c", wash: "#30425c", iron: false };
   }
 }
 
