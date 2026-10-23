@@ -440,3 +440,67 @@ export function makeFigure(color: number, seed = 1, scale = 1, role: "robed" | "
   // v24: painted 工笔/年画/皮影 cut-out figures
   return role === "performer" ? makeOperaActor(color, seed, scale) : makeVillager(color, seed, scale);
 }
+
+// v30: continuous incense wisps — soft vertical ribbons (not point sprites)
+export function wisps(n: number, origin: THREE.Vector3, height: number, color: number) {
+  const cv = document.createElement("canvas"); cv.width = 64; cv.height = 256;
+  const g = cv.getContext("2d")!;
+  for (let y = 0; y < 256; y++) {
+    const v = y / 255; // 0 top
+    const a = Math.min(1, (1 - v) * 4) * Math.pow(v, 0.8);
+    const gr = g.createLinearGradient(0, 0, 64, 0);
+    gr.addColorStop(0, "rgba(255,255,255,0)"); gr.addColorStop(0.5, `rgba(255,255,255,${a})`); gr.addColorStop(1, "rgba(255,255,255,0)");
+    g.fillStyle = gr; g.fillRect(0, y, 64, 1);
+  }
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+  const material = new THREE.MeshBasicMaterial({ map: tex, color, transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide });
+  const points = new THREE.Group();
+  const strips: { m: THREE.Mesh; base: Float32Array; ph: number; w: number }[] = [];
+  for (let i = 0; i < n; i++) {
+    const w = 0.18 + Math.random() * 0.22;
+    const geo = new THREE.PlaneGeometry(w, height, 1, 32);
+    geo.translate(0, height / 2, 0);
+    const m = new THREE.Mesh(geo, material);
+    m.position.copy(origin); m.renderOrder = 5;
+    points.add(m);
+    strips.push({ m, base: (geo.attributes.position.array as Float32Array).slice(), ph: Math.random() * 6.28, w });
+  }
+  return {
+    points, material,
+    update(t: number, cam?: THREE.Camera) {
+      for (const s of strips) {
+        const pos = s.m.geometry.attributes.position as THREE.BufferAttribute;
+        const a = pos.array as Float32Array;
+        for (let k = 0; k < a.length; k += 3) {
+          const y = s.base[k + 1], h = y / height;
+          const sway = h * h * 0.9;
+          a[k] = s.base[k] * (1 + h * 3) + Math.sin(y * 1.3 - t * 0.7 + s.ph) * sway;
+          a[k + 2] = Math.cos(y * 0.9 - t * 0.5 + s.ph * 1.7) * sway * 0.7;
+        }
+        pos.needsUpdate = true;
+        if (cam) s.m.rotation.y = Math.atan2(cam.position.x - s.m.position.x, cam.position.z - s.m.position.z);
+      }
+    },
+  };
+}
+
+// v30: soft sky band (horizontal gradient + cloud streaks) for 落霞
+export function skyBand(): THREE.CanvasTexture {
+  const cv = document.createElement("canvas"); cv.width = 512; cv.height = 128;
+  const g = cv.getContext("2d")!;
+  const rg = g.createRadialGradient(256, 64, 0, 256, 64, 256);
+  rg.addColorStop(0, "rgba(255,255,255,0.55)"); rg.addColorStop(0.4, "rgba(255,255,255,0.22)"); rg.addColorStop(1, "rgba(255,255,255,0)");
+  g.save(); g.scale(1, 0.5); g.translate(0, 64); g.fillStyle = rg; g.fillRect(0, -64, 512, 256); g.restore();
+  for (let i = 0; i < 14; i++) {
+    const y = 40 + Math.random() * 50, x = 60 + Math.random() * 300, w = 120 + Math.random() * 200;
+    const lg = g.createLinearGradient(x, 0, x + w, 0);
+    lg.addColorStop(0, "rgba(255,255,255,0)"); lg.addColorStop(0.5, `rgba(255,255,255,${0.08 + Math.random() * 0.1})`); lg.addColorStop(1, "rgba(255,255,255,0)");
+    g.fillStyle = lg; g.fillRect(x, y, w, 2 + Math.random() * 4);
+  }
+  // fade edges vertically so no rim is visible
+  g.globalCompositeOperation = "destination-in";
+  const vg = g.createLinearGradient(0, 0, 0, 128);
+  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(0.5, "rgba(0,0,0,1)"); vg.addColorStop(1, "rgba(0,0,0,0)");
+  g.fillStyle = vg; g.fillRect(0, 0, 512, 128);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
+}

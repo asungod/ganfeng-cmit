@@ -44,6 +44,7 @@ export class WeiwuScene {
   private raf = 0;
   private last = performance.now();
   private hdri = "";
+  private hourId: HourId = "dusk";
   private disposed = false;
 
   constructor(private canvas: HTMLCanvasElement) {
@@ -416,6 +417,7 @@ export class WeiwuScene {
 
   setHour(h: HourId): void {
     const c = HOURS[h];
+    this.hourId = h;
     this.sun.position.set(...c.sun);
     this.sun.color.set(c.col);
     this.sun.intensity = c.I;
@@ -467,6 +469,15 @@ export class WeiwuScene {
     this.fireflies.update(now / 1000);
     this.smoke.update(now / 1000);
     this.controls.update();
+    { // v30: dim exposure/sky when looking into the low dusk sun (backlit washout)
+      const c = HOURS[this.hourId];
+      const d = new THREE.Vector3(); this.camera.getWorldDirection(d);
+      const sd = new THREE.Vector3(...c.sun).normalize();
+      const k = Math.max(0, d.dot(sd)); const f = this.hourId === "night" ? 0 : k * k;
+      this.renderer.toneMappingExposure = c.exp * (1 - 0.3 * f);
+      this.scene.backgroundIntensity = this.hourId === "night" ? 0.5 : 1 - 0.4 * f;
+      this.post.bloom.strength = (this.hourId === "night" ? 0.75 : 0.28) * (1 - 0.7 * f);
+    }
     this.post.render();
   };
 

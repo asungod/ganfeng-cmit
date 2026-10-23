@@ -5,7 +5,7 @@ import type { ActId, SlotId } from "../data/wanshou";
 import { curvedRoof } from "./pavilion";
 import { setPaperCamera } from "./paperFigure";
 import { qingwaMat, xuandeLu } from "./guofeng";
-import { makeFigure, makeTree, shadowSize, Flight, disposeScene, lantern, loadHdri, makePost, makeRenderer, particles, phMat, wbox, type Post } from "./kit";
+import { makeFigure, makeTree, shadowSize, Flight, disposeScene, lantern, loadHdri, makePost, makeRenderer, particles, phMat, wbox, type Post , wisps } from "./kit";
 
 const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; bg: number; lamp: number }> = {
   chendan: { sun: [-30, 12, 20], col: 0xffc4a0, I: 2.6, hemi: 0.45, env: 0.8, exp: 1.0, fog: 0xa89aa4, hdri: "qwantani_puresky", bg: 0.8, lamp: 0.5 },
@@ -34,7 +34,7 @@ export class TempleScene {
   private lamps: THREE.PointLight[] = [];
   private lampMeshes: THREE.Mesh[] = [];
   private lanterns: THREE.Object3D[] = [];
-  private smoke: ReturnType<typeof particles>;
+  private smoke: ReturnType<typeof wisps>;
   private haze: ReturnType<typeof particles>;
   private procession = new THREE.Group();
   private audience = new THREE.Group();
@@ -66,7 +66,7 @@ export class TempleScene {
     this.sun.shadow.normalBias = 0.03;
     this.scene.add(this.sun, this.hemi);
     this.build();
-    this.smoke = particles(90, new THREE.Box3(new THREE.Vector3(-0.25, 1.6, -3.4), new THREE.Vector3(0.25, 6.2, -3.0)), 0xe8e0d8, 1.1, 0.12, "smoke");
+    this.smoke = wisps(5, new THREE.Vector3(0, 1.6, -3.2), 4.6, 0xe8e0d8);
     this.scene.add(this.smoke.points);
     this.haze = particles(160, new THREE.Box3(new THREE.Vector3(-16, 0.5, -14), new THREE.Vector3(16, 4, 16)), 0xf0e0d0, 2.4, 0.035, "mist");
     this.scene.add(this.haze.points);
@@ -209,7 +209,7 @@ export class TempleScene {
     for (let i = 0; i < 3; i++) {
       const f = makeFigure(robe[i], i + 8, 1.12, "performer");
       // v28: 老生 / 净 / 旦 spaced 1.9 apart; 净 set back so his 靠旗 never cross the 旦's 水袖
-      f.position.set(-0.2 + i * 1.75, 1.92, i === 0 ? 1.0 : i === 1 ? -0.5 : 0.3); // v29: 老生 upstage so side views clear the 靠旗
+      f.position.set(-0.2 + i * 1.75, 1.92, i === 0 ? 1.6 : i === 1 ? -0.9 : 0.3); // v29: 老生 upstage so side views clear the 靠旗
       f.rotation.y = Math.PI;
       f.name = "performer";
       stage.add(f);
@@ -337,7 +337,7 @@ export class TempleScene {
     this.post.bloom.strength = slot === "yewan" ? 0.55 : 0.25;
     this.procession.visible = act === "kaichao";
     this.audience.visible = act === "xiban";
-    this.smoke.material.opacity = act === "kaichao" ? 0.2 : 0.1;
+    this.smoke.material.opacity = act === "kaichao" ? 0.16 : 0.09;
     const night = slot === "yewan";
     this.haze.material.color.set(night ? 0x2a2a38 : 0xf0e0d0);
     this.smoke.material.color.set(night ? 0x8a7a70 : 0xe8e0d8);
@@ -380,7 +380,7 @@ export class TempleScene {
     this.last = now;
     const t = now / 1000;
     this.flight.step(dt);
-    this.smoke.update(t);
+    this.smoke.update(t, this.camera);
     this.haze.update(t);
     if (this.procession.visible)
       this.procession.children.forEach((f, i) => {

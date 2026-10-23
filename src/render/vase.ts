@@ -778,7 +778,7 @@ function makeGlazeMaps(
   const rng = mulberry32(hashSeed(shape, glaze, era));
   paintGlaze(ctx, glaze, shape, era, rng);
   if (glaze === "qinghua" && cobalt < 0.98) {
-    ctx.fillStyle = `rgba(247, 241, 228, ${Math.max(0, 1 - cobalt)})`;
+    ctx.fillStyle = `rgba(247, 241, 228, ${Math.max(0, 1 - cobalt) * 0.3})`; // v30: lighter wash keeps cobalt deep
     ctx.fillRect(0, 0, TEX, TEX);
   }
   const crackSeed = hashSeed(shape, glaze, era) ^ 0xc9e4d9f1;

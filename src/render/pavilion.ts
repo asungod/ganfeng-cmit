@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { inkGoose } from "./guofeng";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Water } from "three/examples/jsm/objects/Water.js";
-import { lowPower, shadowSize, Flight, loadHdri, makePost, particles, phMat, softDot, type Post } from "./kit";
+import { lowPower, shadowSize, Flight, loadHdri, makePost, particles, phMat, skyBand, type Post } from "./kit";
 import type { ImageId, MoodId } from "../data/tengwang";
 
 const MARK: Record<ImageId, THREE.Vector3> = {
@@ -76,7 +76,7 @@ export class PavilionScene {
     this.controls.minDistance = 5;
     this.controls.maxDistance = 30;
     this.controls.minPolarAngle = Math.PI * 0.32;
-    this.controls.maxPolarAngle = Math.PI * 0.56; // v29: allow a low 江面 eye (clamped above the water in loop)
+    this.controls.maxPolarAngle = Math.PI * 0.62; // v29: allow a low 江面 eye (clamped above the water in loop)
     this.controls.target.copy(this.look);
 
     this.hemi = new THREE.HemisphereLight(0xffc8a0, 0x1a1418, 0.85);
@@ -126,9 +126,9 @@ export class PavilionScene {
     );
     this.sun.position.copy(MARK.luoxia);
     this.scene.add(this.sun);
-    this.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softDot(), color: 0xff8a4a, transparent: true, opacity: 0.42, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
-    this.glow.scale.setScalar(24); // v29: larger + fainter so 落霞 reads as atmosphere, not a pasted disc
-    this.glow.position.copy(MARK.luoxia);
+    this.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: skyBand(), color: 0xff8a4a, transparent: true, opacity: 0.42, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+    this.glow.scale.set(90, 22, 1); // v29: larger + fainter so 落霞 reads as atmosphere, not a pasted disc
+    this.glow.position.copy(MARK.luoxia).multiplyScalar(2.2).setY(6);
     this.scene.add(this.glow);
 
     const pool = new THREE.Mesh(
@@ -231,12 +231,18 @@ export class PavilionScene {
     this.lastT = now;
     this.mist.update(t);
     this.controls.update();
-    if (this.camera.position.y < 0.7) this.camera.position.y = 0.7; // v29: never dip under the river
+    if (this.camera.position.y < 0.35) this.camera.position.y = 0.35; // v30: true 江面 eye, still above the river
+    { // v30: when the eye drops near the water, ease the target down so the view is genuinely river-level
+      const low = Math.max(0, Math.min(1, (2.4 - this.camera.position.y) / 2));
+      const ty = this.look.y + (Math.min(this.look.y, 1.3) - this.look.y) * low;
+      this.controls.target.y += (ty - this.controls.target.y) * 0.15;
+    }
     {
       // v29: top-down views — calm the reflection distortion and the 落霞 sprite so they don't tear / look pasted
       const el = Math.max(0, Math.min(1, (this.camera.position.y - this.controls.target.y) / this.camera.position.distanceTo(this.controls.target)));
       const rw2 = this.water.userData.reflective as Water | undefined;
       if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.distortionScale.value = 1.2 * (1 - el * 0.8);
+      if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.sunColor.value.setRGB(1, 0.85, 0.66).multiplyScalar(Math.max(0, 1 - el * 1.6)); // v30: no specular blowouts top-down
       this.glow.material.opacity = this.glowBase * (1 - el * 0.85);
     }
     this.post.render();
@@ -336,7 +342,7 @@ function makeWater(): THREE.Group {
     // guard against HDR inf/NaN from the reflected sun disc (would blacken the bloom chain)
     wm.fragmentShader = wm.fragmentShader
       .replace("vec3 reflectionSample = vec3( texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.w + distortion ) );",
-        "vec3 reflectionSample = vec3( texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.w + distortion ) ); reflectionSample = (any(isnan(reflectionSample)) || any(isinf(reflectionSample))) ? vec3(1.0) : min(reflectionSample, vec3(6.0)) * 0.62;")
+        "vec3 reflectionSample = vec3( texture2D( mirrorSampler, mirrorCoord.xy / mirrorCoord.w + distortion ) ); reflectionSample = (any(isnan(reflectionSample)) || any(isinf(reflectionSample))) ? vec3(0.11, 0.2, 0.27) : min(reflectionSample, vec3(6.0)) * 0.62;")
       .replace("float rf0 = 0.3;", "float rf0 = 0.18;")
       .replace("vec3( 0.1 ) + reflectionSample * 0.9", "vec3( 0.02 ) + reflectionSample * 0.95")
       .replace("vec3 outgoingLight = albedo;", "vec3 outgoingLight = (any(isnan(albedo)) || any(isinf(albedo))) ? waterColor : min(albedo, vec3(8.0));");
