@@ -38,7 +38,7 @@ export class PavilionScene {
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
   private glow: THREE.Mesh;
-  private glowBase = 0.5;
+  private glowBase = 0.28;
   private glowRefl!: THREE.Mesh;
   private warm = true;
   private ray = new THREE.Raycaster();
@@ -58,7 +58,7 @@ export class PavilionScene {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower() ? 1 : 1.5));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.68; // v36: lower base — warm 落霞 was washing orbits
+    this.renderer.toneMappingExposure = 0.58; // v36b: further calm — orbit-1 still washed at 0.68
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -130,8 +130,8 @@ export class PavilionScene {
     this.scene.add(this.sun);
     void skyBand;
     // v36: fixed Mesh plane (not Sprite) so side/back orbits no longer see a billboard washing the frame white
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(55, 18), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffffff, transparent: true, opacity: 0.7, depthWrite: false, side: THREE.DoubleSide, fog: false }));
-    this.glow.position.set(-18, 10, -38); this.glow.lookAt(0, 6, 0); this.glow.renderOrder = -1;
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(36, 12), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd0b0, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+    this.glow.position.set(-24, 11, -48); this.glow.lookAt(0, 6, 0); this.glow.renderOrder = -1;
     this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(22, 28), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.35, depthWrite: false, fog: false }));
     this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-12, 0.1, -20); this.glowRefl.renderOrder = 2;
     this.scene.add(this.glowRefl, this.glow);
@@ -153,7 +153,7 @@ export class PavilionScene {
     this.scene.add(this.mist.points);
     loadHdri(this.renderer, this.scene, "qwantani_dusk_2_puresky", true);
     this.scene.environmentIntensity = 0.55;
-    this.post = makePost(this.renderer, this.scene, this.camera, 0.4, 0.95);
+    this.post = makePost(this.renderer, this.scene, this.camera, 0.28, 0.97);
     this.flight = new Flight(this.camera, this.controls.target);
     this.resize();
     this.applyMood();
@@ -218,7 +218,7 @@ export class PavilionScene {
     const glitter = this.water.getObjectByName("glitterPath") as THREE.Mesh | undefined;
     if (glitter) {
       const gm = glitter.material as THREE.MeshBasicMaterial;
-      { const c = this.camera.position, tg = this.controls.target; const el = Math.max(0, Math.min(1, (c.y - tg.y) / c.distanceTo(tg))); gm.opacity = (0.42 + Math.sin(t * 0.6) * 0.12) * Math.max(0, 1 - el * 1.8); }
+      { const c = this.camera.position, tg = this.controls.target; const el = Math.max(0, Math.min(1, (c.y - tg.y) / c.distanceTo(tg))); gm.opacity = (0.22 + Math.sin(t * 0.6) * 0.08) * Math.max(0, 1 - el * 1.8); }
     }
     // wing flap on geese + lone duck
     const flap = (bird: THREE.Object3D, phase: number) => {
@@ -258,8 +258,8 @@ export class PavilionScene {
         const tg = this.controls.target, cp = this.camera.position;
         const ax = this.glow.position.x - tg.x, az = this.glow.position.z - tg.z, bx = tg.x - cp.x, bz = tg.z - cp.z;
         const f = Math.max(0, (ax * bx + az * bz) / (Math.hypot(ax, az) * Math.hypot(bx, bz) + 1e-6));
-        const gm = this.glow.material as THREE.MeshBasicMaterial; gm.opacity = this.glowBase * (1 - el * 0.85) * Math.pow(f, 3); this.glow.visible = gm.opacity > 0.04;
-        (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.35 : 0.15) * Math.max(0, 1 - el * 1.6) * Math.pow(f, 2);
+        const gm = this.glow.material as THREE.MeshBasicMaterial; const ff = Math.max(0, (f - 0.35) / 0.65); gm.opacity = this.glowBase * (1 - el * 0.9) * Math.pow(ff, 4); this.glow.visible = gm.opacity > 0.03;
+        (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.18 : 0.1) * Math.max(0, 1 - el * 1.6) * Math.pow(ff, 3);
       }
     }
     this.post.render();
@@ -311,7 +311,7 @@ export class PavilionScene {
     }
     this.warm = pal.glow === 0xff7a3a;
     const gm = this.glow.material as THREE.MeshBasicMaterial;
-    if (this.warm) gm.color.set(0xffffff); else gm.color.set(pal.glow).lerp(new THREE.Color(0xffffff), 0.35);
+    if (this.warm) gm.color.set(0xffd0b0); else gm.color.set(pal.glow).lerp(new THREE.Color(0xffffff), 0.25);
     (this.glowRefl.material as THREE.MeshBasicMaterial).color.copy(gm.color);
     this.look.copy(MARK[this.focus]);
     if (this.focus === "qiushui" || this.focus === "hantan") this.look.y = 0.4;
@@ -331,7 +331,7 @@ export class PavilionScene {
 }
 
 function palette(mood: MoodId, focus: ImageId) {
-  const dusk = { zenith: 0x1a1d38, haze: 0x9a6a5c, sky: 0.75, sun: 0xffc488, glow: 0xff7a3a, hill: 0x2a1a22, water: 0x6a7a88, key: 3.2 };
+  const dusk = { zenith: 0x1a1d38, haze: 0x7a5548, sky: 0.58, sun: 0xffc488, glow: 0xff7a3a, hill: 0x2a1a22, water: 0x6a7a88, key: 2.6 };
   if (mood === "sanyan") return { zenith: 0x2a3348, haze: 0x8a8a94, sky: 0.8, sun: 0xd8c0a0, glow: 0x88aacc, hill: 0x3d4450, water: 0x5a7080, key: 2.2 };
   if (mood === "yuzhou") return { zenith: 0x1c2438, haze: 0x8a5a52, sky: 0.65, sun: 0xe0905a, glow: 0xc06030, hill: 0x241818, water: 0x4a5a70, key: 2.4 };
   if (mood === "yanzhen") return { zenith: 0x14182a, haze: 0x4a4458, sky: 0.4, sun: 0xb86a55, glow: 0x884030, hill: 0x1a1216, water: 0x34405a, key: 1.6 };

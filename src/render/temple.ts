@@ -54,7 +54,7 @@ export class TempleScene {
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.maxPolarAngle = Math.PI * 0.49;
-    this.controls.minPolarAngle = Math.PI * 0.34; // v36: no roof-filled high frames
+    this.controls.minPolarAngle = Math.PI * 0.38; // v36: no roof-filled high frames
     this.controls.minDistance = 8; // v36: keep orbits out of foliage
     this.controls.maxDistance = 55;
     this.controls.target.set(...POSE.overview.look);

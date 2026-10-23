@@ -14,7 +14,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
   tianjing: { eye: [0.3, 1.3, 2.6], look: [0, 4.4, -0.8], fov: 66 }, // v34: from the 下厅 edge across the open 天井 to 祖堂, sky in frame
   zutang: { eye: [0, 1.7, 2.4], look: [0, 1.7, -4] },
-  zhengwu: { eye: [1.6, 1.7, -6.5], look: [-1.0, 1.05, -7.4], fov: 58 }, // v34: through the 祖堂 back door into 上堂
+  zhengwu: { eye: [0.95, 1.58, -5.2], look: [-0.15, 1.02, -7.55], fov: 56 }, // v36: inside 上堂 doorway → 八仙桌 + side benches, less wall
   hengwu: { eye: [-3.95, 1.7, 4.3], look: [-5.6, 1.3, -4.5], fov: 55 }, // v34: down the 横屋 row: doors, 木窗格, 灶台, 水缸, 簸箕, 农具
   xiangdao: { eye: [5.3, 1.8, 4.3], look: [4.6, 1.4, -5], fov: 55 }, // v34: east 巷道 (west lane belongs to 横屋 view)
   jiaolou: { eye: [21, 4.2, 19], look: [11, 5.2, 9] }, // v34: outside, front-right 炮楼 with 射击孔, bamboo behind camera line
@@ -342,7 +342,10 @@ export class WeiwuScene {
         const t = furn.baxian(); t.position.set(0, 0.25, -depth / 2 + 2.0); hg.add(t);
         for (const sx of [-1, 1]) { const c = furn.chair(); c.position.set(sx * 0.95, 0.25, -depth / 2 + 2.0); c.rotation.y = -sx * Math.PI / 2; hg.add(c); }
       } else for (const sx of [-1, 1]) { const b = furn.bench(1.8); b.position.set(sx * 2.85, 0.25, 0); b.rotation.y = Math.PI / 2; hg.add(b); }
-      if (name === "upper") { const t = furn.baxian(); t.position.set(0, 0.25, -depth / 2 + 1.1); hg.add(t); } // v35: 上堂 家宴桌
+      if (name === "upper") { // v36: 八仙桌 + 条凳 pair so 正屋 reads as a lived hall
+        const t = furn.baxian(); t.position.set(0, 0.25, -depth / 2 + 1.1); hg.add(t);
+        for (const sx of [-1, 1]) { const b = furn.bench(1.4); b.position.set(sx * 1.15, 0.25, -depth / 2 + 1.1); b.rotation.y = -sx * Math.PI / 2; hg.add(b); }
+      }
       hg.position.z = z;
       S.add(hg);
     };
