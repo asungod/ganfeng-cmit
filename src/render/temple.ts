@@ -15,10 +15,10 @@ const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: numb
 const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, number, number]; look: [number, number, number] }> = {
   overview: { eye: [11, 12, 15], look: [0, 3, -7] },
   kaichao: { eye: [5, 2.6, 9], look: [0, 3.2, -6] },
-  xiban: { eye: [2.2, 4.4, -1.5], look: [0, 2.6, 10.5] },
+  xiban: { eye: [2.6, 4.4, -1.5], look: [0.9, 2.6, 10.5] },
   // judge views: actors from the front row, crowd faces from the stage apron
   // v25: further back, aim stage-right so trio clears left ws-panel
-  kanxi: { eye: [2.8, 3.7, 5.8], look: [2.4, 2.95, 11.6] },
+  kanxi: { eye: [2.15, 3.5, 2.6], look: [2.15, 2.9, 11.6] },
   guanzhong: { eye: [0.8, 2.75, 9.2], look: [0, 1.25, 3.6] },
 };
 
@@ -206,7 +206,8 @@ export class TempleScene {
     const robe = [0xb8202a, 0x1e5aa0, 0xd8a820];
     for (let i = 0; i < 3; i++) {
       const f = makeFigure(robe[i], i + 8, 1.12, "performer");
-      f.position.set((i === 0 ? 1.3 : 0.75 + i * 1.5), 1.92, 0.2 - (i % 2) * 0.45); // v25: stage-right, clear of left UI
+      // v28: 老生 / 净 / 旦 spaced 1.9 apart; 净 set back so his 靠旗 never cross the 旦's 水袖
+      f.position.set(-0.2 + i * 1.75, 1.92, i === 1 ? -0.7 : 0.3);
       f.rotation.y = Math.PI;
       f.name = "performer";
       stage.add(f);
