@@ -33,7 +33,7 @@ export function mountWanshou(root: HTMLElement): () => void {
         </details>
         <p class="kicker">活动</p><div class="chips" data-acts></div>
         <p class="kicker">时段</p><div class="chips" data-slots></div>
-        <p class="kicker">看戏机位</p><div class="chips"><button type="button" class="chip" data-cam="kanxi">近看戏台</button><button type="button" class="chip" data-cam="guanzhong">台上望众</button></div>
+        <p class="kicker">${t("ws.camK")}</p><div class="chips"><button type="button" class="chip" data-cam="kanxi">${t("ws.camKanxi")}</button><button type="button" class="chip" data-cam="guanzhong">${t("ws.camCrowd")}</button></div>
         <p class="ws-pick" data-pick></p>
         <section class="matrix" data-matrix>
           <details class="matrix-fold" data-matrix-fold>

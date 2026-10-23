@@ -34,6 +34,10 @@ const ZH: Dict = {
   "sys.frame": "帧",
   "ask.kicker": "问展 · 本地讲解员",
   "ask.title": "就当前展柜提问",
+  "ask.send": "问讲解员",
+  "ws.camK": "看戏机位",
+  "ws.camKanxi": "近看戏台",
+  "ws.camCrowd": "台上望众",
   "ask.blurb": "点下方问句，或自己输入；讲解员只在本展内容包里回答，并钉出处。",
   "ask.blurbTech":
     "本地 BGE-small 嵌入 + 约束表路由：槽位余弦相似度 ≥0.40 写入约束；题库检索最高分 ≥0.55 才作答并钉出处，否则拒答。",
@@ -87,6 +91,10 @@ const ZH: Dict = {
 };
 
 const EN: Dict = {
+  "ask.send": "Ask",
+  "ws.camK": "Viewing spot",
+  "ws.camKanxi": "Close to stage",
+  "ws.camCrowd": "Stage view of crowd",
   "boot.k": "Opening",
   "boot.s": "A Conversational Digital Exhibition",
   "chrome.muteOff": "Sound off",

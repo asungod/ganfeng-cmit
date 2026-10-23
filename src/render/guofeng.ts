@@ -36,6 +36,7 @@ function crossed(map: THREE.Texture, w: number, h: number, n = 5, glow = 0.3): T
     const p = new THREE.Mesh(geo, m);
     const a = (i / n) * Math.PI + (i % 2 ? 0.08 : -0.05);
     p.rotation.y = a;
+    p.rotation.x = (i % 2 ? 0.16 : -0.12); // v26: lean cards so top-down views never see a pure edge
     // varied radial + vertical offset so cards don't stack into one silhouette
     const off = 0.18 + (i % 3) * 0.11 + (i % 2) * 0.06;
     p.position.set(Math.sin(a) * off, (i % 3) * 0.04 - 0.04, Math.cos(a) * off);
@@ -50,6 +51,9 @@ function crossed(map: THREE.Texture, w: number, h: number, n = 5, glow = 0.3): T
   fill.position.set(0.05, 0.05, 0.12);
   fill.customDepthMaterial = dm;
   g.add(fill);
+  const fill2 = new THREE.Mesh(fill.geometry, m); // v26: second crossing fill card
+  fill2.rotation.set(-0.95, -1.25, 0); fill2.position.set(-0.08, 0.1, -0.06); fill2.scale.set(0.85, 0.85, 1);
+  fill2.customDepthMaterial = dm; g.add(fill2);
   // soft outer silhouette sprites (two sizes) — fills gaps from steep angles
   const soft = document.createElement("canvas"); soft.width = soft.height = 64;
   const sx = soft.getContext("2d")!;
@@ -57,7 +61,7 @@ function crossed(map: THREE.Texture, w: number, h: number, n = 5, glow = 0.3): T
   gr.addColorStop(0, "rgba(36,55,32,0.62)"); gr.addColorStop(0.45, "rgba(28,44,26,0.32)"); gr.addColorStop(1, "rgba(18,28,16,0)");
   sx.fillStyle = gr; sx.fillRect(0, 0, 64, 64);
   const st = new THREE.CanvasTexture(soft); st.colorSpace = THREE.SRGBColorSpace;
-  const sm = new THREE.SpriteMaterial({ map: st, transparent: true, depthWrite: false, opacity: 0.62 });
+  const sm = new THREE.SpriteMaterial({ map: st, transparent: true, depthWrite: false, opacity: 0.72 });
   const sil = new THREE.Sprite(sm); sil.position.y = h * 0.6; sil.scale.set(w * 1.28, h * 0.92, 1); g.add(sil);
   const sil2 = new THREE.Sprite(sm.clone()); sil2.position.set(0.15, h * 0.48, -0.1); sil2.scale.set(w * 0.95, h * 0.7, 1); g.add(sil2);
   return g;

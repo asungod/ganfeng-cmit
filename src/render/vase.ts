@@ -90,8 +90,8 @@ export class PorcelainVitrine {
     const plinth = new THREE.Mesh(
       new THREE.CylinderGeometry(0.72, 0.8, 0.18, 64),
       new THREE.MeshStandardMaterial({
-        color: 0x1a1a1a,
-        roughness: 0.8,
+        color: 0x2a1610, // v26: 紫檀 dark rosewood base, not studio black
+        roughness: 0.62,
         metalness: 0,
       }),
     );
@@ -1967,8 +1967,8 @@ function addGlassCase(scene: THREE.Scene): void {
     mesh.receiveShadow = false;
     scene.add(mesh);
   }
-  const fmat = new THREE.MeshStandardMaterial({ color: 0x2c2926, roughness: 0.58, metalness: 0.32 });
-  const bar = 0.011;
+  const fmat = new THREE.MeshStandardMaterial({ color: 0x3a1c12, roughness: 0.5, metalness: 0.0 }); // v26: 红木 frame
+  const bar = 0.022;
   const yMid = y0 + H / 2;
   const hx = W / 2;
   const hz = D / 2;

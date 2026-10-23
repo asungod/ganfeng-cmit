@@ -186,7 +186,14 @@ export class WeiwuScene {
       leaf.position.set(sx * (gw / 4 + 0.32), 1.55, -0.35);
       gate.add(leaf);
     }
-    const plaque = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.55, 0.06), new THREE.MeshStandardMaterial({ color: 0x5a1a12, roughness: 0.4 }));
+    const plaque = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.55, 0.06), [
+      new THREE.MeshStandardMaterial({ color: 0x3a140e, roughness: 0.6 }),
+      new THREE.MeshStandardMaterial({ color: 0x3a140e, roughness: 0.6 }),
+      new THREE.MeshStandardMaterial({ color: 0x3a140e, roughness: 0.6 }),
+      new THREE.MeshStandardMaterial({ color: 0x3a140e, roughness: 0.6 }),
+      new THREE.MeshStandardMaterial({ map: plaqueTexture(), roughness: 0.72 }),
+      new THREE.MeshStandardMaterial({ color: 0x3a140e, roughness: 0.6 }),
+    ]);
     plaque.position.set(0, 4.1, 0.72);
     gate.add(plaque);
     const gr = gableRoof(gw + 2.2, 2.4, 0.9, tile, ridge);
@@ -400,7 +407,7 @@ export class WeiwuScene {
     parent.add(l);
     this.lampMeshes.push(l.children[0] as THREE.Mesh);
     if (this.lamps.length < 6) {
-      const pl = new THREE.PointLight(0xff8a4a, 1, 9, 2);
+      const pl = new THREE.PointLight(0xffa070, 1, 5.5, 2); // v26: shorter, softer spill on plaster
       pl.position.copy(p).add(new THREE.Vector3(0, -0.3, 0));
       parent.add(pl);
       this.lamps.push(pl);
@@ -422,7 +429,7 @@ export class WeiwuScene {
       if (h === "night") this.scene.background = new THREE.Color(0x0b0d16);
     }
     this.scene.backgroundIntensity = h === "night" ? 0.5 : 1;
-    for (const l of this.lamps) l.intensity = c.lamp * 2.2;
+    for (const l of this.lamps) l.intensity = c.lamp * (h === "night" ? 1.6 : 0.9);
     for (const m of this.lampMeshes) (m.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.4 + c.lamp * 1.4;
     this.fireflies.points.visible = h === "night" || h === "dusk";
     this.post.bloom.strength = h === "night" ? 0.75 : 0.28;
@@ -470,4 +477,34 @@ export class WeiwuScene {
     disposeScene(this.scene);
     this.renderer.dispose();
   }
+}
+
+/** v26 匠额: painted 门匾 with a generic 客家 hall name (泛称 — not any real 围屋's plaque). */
+function plaqueTexture(): THREE.CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = 1024; c.height = 312;
+  const g = c.getContext("2d")!;
+  const seeds = Array.from({ length: 160 }, () => [Math.random(), Math.random(), Math.random(), Math.random(), Math.random()]);
+  const paint = () => {
+    const grd = g.createLinearGradient(0, 0, 0, c.height);
+    grd.addColorStop(0, "#4a1810"); grd.addColorStop(0.5, "#5c2016"); grd.addColorStop(1, "#3e140c");
+    g.fillStyle = grd; g.fillRect(0, 0, c.width, c.height);
+    for (const [a, b, d, e, f] of seeds) { // 木纹 + 漆裂
+      g.strokeStyle = `rgba(20,6,2,${0.05 + a * 0.1})`; g.lineWidth = 1 + b * 2;
+      const y = d * c.height; g.beginPath(); g.moveTo(0, y);
+      g.bezierCurveTo(300, y + (e - 0.5) * 14, 700, y + (f - 0.5) * 14, 1024, y); g.stroke();
+    }
+    g.strokeStyle = "#b08a3e"; g.lineWidth = 10; g.strokeRect(18, 18, c.width - 36, c.height - 36);
+    g.strokeStyle = "rgba(176,138,62,0.55)"; g.lineWidth = 3; g.strokeRect(38, 38, c.width - 76, c.height - 76);
+    g.fillStyle = "#d8b45a"; g.textAlign = "center"; g.textBaseline = "middle";
+    g.font = '190px "Ma Shan Zheng", "KaiTi", serif';
+    g.shadowColor = "rgba(0,0,0,0.5)"; g.shadowOffsetY = 4; g.shadowBlur = 6;
+    g.fillText("世德堂", c.width / 2, c.height / 2 + 8);
+    g.shadowColor = "transparent"; g.shadowOffsetY = 0; g.shadowBlur = 0;
+    g.fillStyle = "#a8281c"; g.fillRect(c.width - 112, c.height - 112, 48, 48); // 小朱印
+  };
+  paint();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  document.fonts?.load('190px "Ma Shan Zheng"').then(() => { paint(); t.needsUpdate = true; }).catch(() => {});
+  return t;
 }

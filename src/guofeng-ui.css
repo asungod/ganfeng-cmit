@@ -24,3 +24,19 @@
 .ex-bar .stamp { color: #b0281c; border-color: #b0281c; }
 *:has(> header.ask-h) input, *:has(> header.ask-h) textarea, .ask-slips button { background: rgba(255,250,236,0.6) !important; color: #2a1d14 !important; border-color: rgba(120,60,30,0.4) !important; }
 .verse-card { background: rgba(255,250,236,0.55); }
+
+/* v26: 问讲解员 button — 朱砂印 style, readable on 宣纸 */
+.ask-form button { background: #8e2a1c !important; color: #f6ecd8 !important; border: 1px solid #5e1a10 !important;
+  font-family: var(--serif); letter-spacing: 0.2em; min-width: 5.2rem; white-space: nowrap; font-size: 0.86rem; }
+.ask-form button:hover { background: #a8321f !important; }
+/* v26: EN header — no wrapping back link, crumb ellipsis, stamp stays clear */
+.ex-bar .text-btn { white-space: nowrap; flex: none; }
+.ex-bar .ex-crumb { min-width: 0; flex: 1 1 auto; }
+html[lang="en"] .ex-bar .ex-crumb span { display: block; max-width: 30rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.8rem; }
+html[lang="en"] .ex-bar .stamp { flex: none; font-size: 0.68rem; }
+/* v26: EN layout at 1280x800 — 瓷语 panel fits, lock line wraps, ask header padded */
+html[lang="en"] .ciyu .chips .chip { font-size: 0.74rem; padding: 0.22rem 0.5rem; }
+html[lang="en"] .ciyu .field { margin-bottom: 0.35rem; }
+html[lang="en"] .ciyu .lock-card .lock-main { font-size: 0.98rem; white-space: normal; overflow-wrap: anywhere; }
+.ask-h { padding-inline: 0.5rem; }
+html[lang="en"] .ex-bar .ex-crumb span { max-width: 26rem; }

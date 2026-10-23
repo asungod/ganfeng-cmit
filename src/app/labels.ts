@@ -139,7 +139,7 @@ export function mountAsk(
     <form class="ask-form">
       <label class="sr">问讲解员</label>
       <input type="text" name="q" maxlength="80" placeholder="${esc(hintFor(line))}" />
-      <button type="submit">问讲解员</button>
+      <button type="submit">${t("ask.send")}</button>
     </form>
     <div class="ask-out" hidden></div>
     <div class="ask-compare" data-compare-out hidden></div>

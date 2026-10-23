@@ -667,10 +667,10 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
         if (thickArm) {
           // wide upper sleeve with soft shoulder gather
           const pts: P2[] = [[-0.1, 0.06], [0.1, 0.07], [0.12, -0.08], [0.11, -0.22], [0.04, -0.3], [-0.04, -0.3], [-0.11, -0.22], [-0.1, -0.08]];
-          shape(x, pts, hgrad(x, -0.11, 0.12, c), 0.005);
+          shape(x, pts, hgrad(x, -0.11, 0.12, c), 0.012);
           x.save(); path(x, pts); x.clip();
-          folds(x, [-0.06, -0.02, 0.03, 0.07], 0.05, -0.28, shade(c, -0.5));
-          folds(x, [-0.04, 0.02, 0.06], 0.02, -0.26, shade(c, 0.3));
+          folds(x, [-0.06, -0.02, 0.03, 0.07], 0.05, -0.28, shade(c, -0.72));
+          folds(x, [-0.04, 0.02, 0.06], 0.02, -0.26, shade(c, 0.5));
           const vg = x.createLinearGradient(-0.12, 0, 0.12, 0);
           vg.addColorStop(0, "rgba(0,0,0,0.2)"); vg.addColorStop(0.5, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.22)");
           x.fillStyle = vg; x.fillRect(-0.13, -0.32, 0.26, 0.4);
@@ -678,7 +678,7 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
         } else {
           const w = 0.055;
           const pts: P2[] = [[-w, 0.05], [w, 0.06], [w + 0.012, -0.12], [w + 0.008, -0.28], [-w - 0.002, -0.28], [-w - 0.006, -0.12]];
-          shape(x, pts, hgrad(x, -w - 0.01, w + 0.01, c), 0.005);
+          shape(x, pts, hgrad(x, -w - 0.01, w + 0.01, c), 0.009);
           line(x, [[0.01, -0.04], [0.025, -0.16], [0.015, -0.26]], 0.0035, shade(c, -0.45));
           line(x, [[-0.02, -0.06], [-0.03, -0.2]], 0.003, shade(c, 0.3));
         }
@@ -688,14 +688,14 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
         if (thickArm) {
           // hanging cuff: wider cloth bell with vertical fold lines (not a tube end)
           const sl: P2[] = [[-0.1, 0.05], [0.1, 0.05], [0.13, -0.06], [0.14, -0.2], [0.1, -0.32], [0.02, -0.36], [-0.02, -0.36], [-0.1, -0.32], [-0.14, -0.2], [-0.13, -0.06]];
-          shape(x, sl, hgrad(x, -0.14, 0.14, c), 0.005);
+          shape(x, sl, hgrad(x, -0.14, 0.14, c), 0.013);
           x.save(); path(x, sl); x.clip();
-          folds(x, [-0.08, -0.03, 0.03, 0.08], 0.04, -0.34, shade(c, -0.55));
-          folds(x, [-0.05, 0.0, 0.05], 0.02, -0.32, shade(c, 0.35));
+          folds(x, [-0.08, -0.03, 0.03, 0.08], 0.04, -0.34, shade(c, -0.75));
+          folds(x, [-0.05, 0.0, 0.05], 0.02, -0.32, shade(c, 0.5));
           // soft crease shadows near cuff hem
           line(x, [[-0.09, -0.28], [-0.04, -0.34], [0.04, -0.34], [0.09, -0.28]], 0.006, shade(c, -0.4));
           const vg = x.createLinearGradient(-0.14, 0, 0.14, 0);
-          vg.addColorStop(0, "rgba(0,0,0,0.28)"); vg.addColorStop(0.45, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.3)");
+          vg.addColorStop(0, "rgba(0,0,0,0.4)"); vg.addColorStop(0.45, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.42)");
           x.fillStyle = vg; x.fillRect(-0.15, -0.38, 0.3, 0.44);
           x.restore();
           if (type === "woman") line(x, [[-0.1, -0.33], [0.1, -0.33]], 0.016, trim);
@@ -703,8 +703,8 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
         } else {
           const flare = 0.015;
           const sl: P2[] = [[-0.06 - flare, 0.04], [0.06 + flare, 0.04], [0.075 + flare, -0.1], [0.08 + flare, -0.24], [0.04, -0.28], [-0.03, -0.28], [-0.075 - flare, -0.24], [-0.065 - flare, -0.1]];
-          shape(x, sl, hgrad(x, -0.08, 0.09, c), 0.005);
-          x.save(); path(x, sl); x.clip(); x.globalAlpha = 0.55;
+          shape(x, sl, hgrad(x, -0.08, 0.09, c), 0.009);
+          x.save(); path(x, sl); x.clip(); x.globalAlpha = 0.8;
           line(x, [[-0.035, -0.02], [-0.025, -0.12], [-0.04, -0.24]], 0.004, shade(c, -0.5));
           line(x, [[0.03, -0.05], [0.045, -0.2]], 0.004, shade(c, 0.35));
           const vg = x.createLinearGradient(-0.08, 0, 0.09, 0);
