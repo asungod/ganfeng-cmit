@@ -14,7 +14,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
   tianjing: { eye: [0.3, 1.3, 2.6], look: [0, 4.4, -0.8], fov: 66 }, // v34: from the 下厅 edge across the open 天井 to 祖堂, sky in frame
   zutang: { eye: [0, 1.7, 2.4], look: [0, 1.7, -4] },
-  zhengwu: { eye: [1.2, 1.7, -3.9], look: [-0.6, 1.5, -8.2], fov: 58 }, // v34: through the 祖堂 back door into 上堂
+  zhengwu: { eye: [2.5, 1.6, -7.7], look: [-0.6, 1.7, -3.2], fov: 60 }, // v34: through the 祖堂 back door into 上堂
   hengwu: { eye: [-3.95, 1.7, 4.3], look: [-5.6, 1.3, -4.5], fov: 55 }, // v34: down the 横屋 row: doors, 木窗格, 灶台, 水缸, 簸箕, 农具
   xiangdao: { eye: [5.3, 1.8, 4.3], look: [4.6, 1.4, -5], fov: 55 }, // v34: east 巷道 (west lane belongs to 横屋 view)
   jiaolou: { eye: [21, 4.2, 19], look: [11, 5.2, 9] }, // v34: outside, front-right 炮楼 with 射击孔, bamboo behind camera line

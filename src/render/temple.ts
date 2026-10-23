@@ -54,6 +54,7 @@ export class TempleScene {
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.maxPolarAngle = Math.PI * 0.49;
+    this.controls.minPolarAngle = Math.PI * 0.3; // v35: no straight-down roof-filled frames
     this.controls.minDistance = 3;
     this.controls.maxDistance = 70;
     this.controls.target.set(...POSE.overview.look);
@@ -284,7 +285,7 @@ export class TempleScene {
     }
     S.add(this.audience);
     // ancient camphor trees behind the hall + pines outside the walls
-    [[-14, -14, 1.5], [14, -14, 1.4], [-22, 6, 1.2], [22, 4, 1.3]].forEach(([x, z, k], i) => {
+    [[-19, -26, 1.5], [19, -26, 1.4], [-32, 8, 1.2], [32, 6, 1.3]] /* v35: side camphors outside orbit radius */.forEach(([x, z, k], i) => {
       const t = makeTree(i + 11, k);
       t.position.set(x, 0, z);
       S.add(t);

@@ -250,8 +250,13 @@ export class PavilionScene {
       if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.distortionScale.value = 1.2 * (1 - el * 0.8);
       if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.reflK.value = Math.max(0.08, 1 - el * 1.4); // v31: weaker mirror at high angles (no silver streaks)
       if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.sunColor.value.setRGB(1, 0.85, 0.66).multiplyScalar(Math.max(0, 1 - el * 1.6)); // v30: no specular blowouts top-down
-      this.mist.material.opacity = 0.07 * Math.max(0, 1 - el * 1.5);
-      this.glow.material.opacity = this.glowBase * (1 - el * 0.85);
+      this.mist.material.opacity = 0.07 * Math.max(0, 1 - el * 1.5) * Math.min(1, Math.max(0, (this.camera.position.z + 3) / 6)); // v35: camera orbiting into the 江雾 bank washed the frame white — fade it out
+      { // v35: only show the painted 落霞 sky when looking toward it — from side/back orbits the huge sprite washed the frame white
+        const tg = this.controls.target, cp = this.camera.position;
+        const ax = this.glow.position.x - tg.x, az = this.glow.position.z - tg.z, bx = tg.x - cp.x, bz = tg.z - cp.z;
+        const f = Math.max(0, (ax * bx + az * bz) / (Math.hypot(ax, az) * Math.hypot(bx, bz) + 1e-6));
+        this.glow.material.opacity = this.glowBase * (1 - el * 0.85) * Math.pow(f, 1.5);
+      }
       (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.75 : 0.3) * Math.max(0, 1 - el * 1.6);
     }
     this.post.render();
