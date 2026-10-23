@@ -37,8 +37,8 @@ export class PavilionScene {
   private waterMesh: THREE.Mesh;
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
-  private glow: THREE.Sprite;
-  private glowBase = 0.9;
+  private glow: THREE.Mesh;
+  private glowBase = 0.5;
   private glowRefl!: THREE.Mesh;
   private warm = true;
   private ray = new THREE.Raycaster();
@@ -58,7 +58,7 @@ export class PavilionScene {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower() ? 1 : 1.5));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.78;
+    this.renderer.toneMappingExposure = 0.68; // v36: lower base — warm 落霞 was washing orbits
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -129,13 +129,12 @@ export class PavilionScene {
     this.sun.position.copy(MARK.luoxia);
     this.scene.add(this.sun);
     void skyBand;
-    this.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: luoxiaSky(), color: 0xffffff, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.NormalBlending, fog: false }));
-    this.glow.scale.set(150, 34, 1); // v33: 国画 painted evening sky (layered wash + under-lit cloud streaks), edges dissolve
-    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(30, 40), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.5, depthWrite: false, fog: false }));
+    // v36: fixed Mesh plane (not Sprite) so side/back orbits no longer see a billboard washing the frame white
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(55, 18), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffffff, transparent: true, opacity: 0.7, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+    this.glow.position.set(-18, 10, -38); this.glow.lookAt(0, 6, 0); this.glow.renderOrder = -1;
+    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(22, 28), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.35, depthWrite: false, fog: false }));
     this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-12, 0.1, -20); this.glowRefl.renderOrder = 2;
-    this.scene.add(this.glowRefl); // v29: larger + fainter so 落霞 reads as atmosphere, not a pasted disc
-    { const d = MARK.luoxia.clone().setY(0).normalize(); this.glow.position.set(-18, 10, -38); void d; this.glow.renderOrder = -1; } // v32: low on the horizon, just in front of the far hills
-    this.scene.add(this.glow);
+    this.scene.add(this.glowRefl, this.glow);
 
     const pool = new THREE.Mesh(
       new THREE.CircleGeometry(1.8, 32),
@@ -250,14 +249,18 @@ export class PavilionScene {
       if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.distortionScale.value = 1.2 * (1 - el * 0.8);
       if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.reflK.value = Math.max(0.08, 1 - el * 1.4); // v31: weaker mirror at high angles (no silver streaks)
       if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.sunColor.value.setRGB(1, 0.85, 0.66).multiplyScalar(Math.max(0, 1 - el * 1.6)); // v30: no specular blowouts top-down
-      this.mist.material.opacity = 0.07 * Math.max(0, 1 - el * 1.5) * Math.min(1, Math.max(0, (this.camera.position.z + 3) / 6)); // v35: camera orbiting into the 江雾 bank washed the frame white — fade it out
-      { // v35: only show the painted 落霞 sky when looking toward it — from side/back orbits the huge sprite washed the frame white
+      { // v36: 江雾 only when camera stays on the near bank — past the pavilion it washed orbits white
+        const zGate = Math.min(1, Math.max(0, (this.camera.position.z + 2) / 8));
+        this.mist.material.opacity = 0.04 * Math.max(0, 1 - el * 1.5) * zGate;
+        this.mist.points.visible = zGate > 0.05;
+      }
+      { // v35/v36: only show painted 落霞 + water reflection when looking toward it
         const tg = this.controls.target, cp = this.camera.position;
         const ax = this.glow.position.x - tg.x, az = this.glow.position.z - tg.z, bx = tg.x - cp.x, bz = tg.z - cp.z;
         const f = Math.max(0, (ax * bx + az * bz) / (Math.hypot(ax, az) * Math.hypot(bx, bz) + 1e-6));
-        this.glow.material.opacity = this.glowBase * (1 - el * 0.85) * Math.pow(f, 1.5);
+        const gm = this.glow.material as THREE.MeshBasicMaterial; gm.opacity = this.glowBase * (1 - el * 0.85) * Math.pow(f, 3); this.glow.visible = gm.opacity > 0.04;
+        (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.35 : 0.15) * Math.max(0, 1 - el * 1.6) * Math.pow(f, 2);
       }
-      (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.75 : 0.3) * Math.max(0, 1 - el * 1.6);
     }
     this.post.render();
     this.emitProject();
@@ -307,8 +310,9 @@ export class PavilionScene {
       else wmat.color.set(pal.water);
     }
     this.warm = pal.glow === 0xff7a3a;
-    if (this.warm) this.glow.material.color.set(0xffffff); else this.glow.material.color.set(pal.glow).lerp(new THREE.Color(0xffffff), 0.35);
-    (this.glowRefl.material as THREE.MeshBasicMaterial).color.copy(this.glow.material.color);
+    const gm = this.glow.material as THREE.MeshBasicMaterial;
+    if (this.warm) gm.color.set(0xffffff); else gm.color.set(pal.glow).lerp(new THREE.Color(0xffffff), 0.35);
+    (this.glowRefl.material as THREE.MeshBasicMaterial).color.copy(gm.color);
     this.look.copy(MARK[this.focus]);
     if (this.focus === "qiushui" || this.focus === "hantan") this.look.y = 0.4;
     if (this.focus === "changtian") this.look.set(2, 5.5, -8);

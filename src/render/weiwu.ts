@@ -14,7 +14,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
   tianjing: { eye: [0.3, 1.3, 2.6], look: [0, 4.4, -0.8], fov: 66 }, // v34: from the 下厅 edge across the open 天井 to 祖堂, sky in frame
   zutang: { eye: [0, 1.7, 2.4], look: [0, 1.7, -4] },
-  zhengwu: { eye: [2.5, 1.6, -7.7], look: [-0.6, 1.7, -3.2], fov: 60 }, // v34: through the 祖堂 back door into 上堂
+  zhengwu: { eye: [1.6, 1.7, -6.5], look: [-1.0, 1.05, -7.4], fov: 58 }, // v34: through the 祖堂 back door into 上堂
   hengwu: { eye: [-3.95, 1.7, 4.3], look: [-5.6, 1.3, -4.5], fov: 55 }, // v34: down the 横屋 row: doors, 木窗格, 灶台, 水缸, 簸箕, 农具
   xiangdao: { eye: [5.3, 1.8, 4.3], look: [4.6, 1.4, -5], fov: 55 }, // v34: east 巷道 (west lane belongs to 横屋 view)
   jiaolou: { eye: [21, 4.2, 19], look: [11, 5.2, 9] }, // v34: outside, front-right 炮楼 with 射击孔, bamboo behind camera line
@@ -23,7 +23,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
 const HOURS: Record<HourId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; lamp: number }> = {
   dawn: { sun: [-30, 9, 18], col: 0xffc7a0, I: 2.2, hemi: 0.35, env: 0.6, exp: 0.95, fog: 0xb7b0b4, hdri: "qwantani_puresky", lamp: 0.2 },
   noon: { sun: [12, 40, 14], col: 0xfff2dc, I: 3.4, hemi: 0.45, env: 0.9, exp: 0.85, fog: 0xc8d2dc, hdri: "qwantani_puresky", lamp: 0 },
-  dusk: { sun: [34, 7, 10], col: 0xe8d4c0, I: 2.2, hemi: 0.78, env: 0.82, exp: 1.04, fog: 0x7a706a, hdri: "qwantani_sunset_puresky", lamp: 0.6 },
+  dusk: { sun: [34, 9, 10], col: 0xf0dcc8, I: 2.55, hemi: 0.95, env: 1.0, exp: 1.12, fog: 0x8a8078, hdri: "qwantani_sunset_puresky", lamp: 0.55 },
   night: { sun: [-14, 30, -10], col: 0x8aa4ff, I: 0.35, hemi: 0.12, env: 0.25, exp: 1.15, fog: 0x10131e, hdri: "qwantani_night_puresky", lamp: 2.6 },
 };
 
@@ -81,7 +81,7 @@ export class WeiwuScene {
     this.addHaze();
     this.scene.updateMatrixWorld(true);
     this.boxes = this.solids.map((m) => new THREE.Box3().setFromObject(m).expandByScalar(0.35));
-    this.fireflies = particles(140, new THREE.Box3(new THREE.Vector3(-22, 0.3, -20), new THREE.Vector3(22, 3, 26)), 0xffe08a, 0.22, 0.9, "fly");
+    this.fireflies = particles(90, new THREE.Box3(new THREE.Vector3(-22, 1.4, -20), new THREE.Vector3(22, 4.2, 26)), 0xffe08a, 0.12, 0.7, "fly"); // v36: higher + smaller — low additive dots bloomed into peach floor blobs
     this.scene.add(this.fireflies.points);
     this.post = makePost(this.renderer, this.scene, this.camera, 0.35);
     this.setHour("dusk");
@@ -382,14 +382,14 @@ export class WeiwuScene {
       S.add(wing);
     }
     // v34: 横屋 lane life — 灶台, 水缸, 簸箕, 农具, 条凳 (west lane), and a few in the east 巷道
-    for (const [sx, list] of [[-1, ["zao", "gang", "boji", "nong", "bench"]], [1, ["gang", "boji", "bench"]]] as [number, string[]][]) {
+    for (const [sx, list] of [[-1, ["zao", "gang", "nong", "bench"]], [1, ["gang", "bench"]]] /* v36: dropped 簸箕 — peach disc under fill+bloom */ as [number, string[]][]) {
       const xw = sx * 6.3;
       list.forEach((k, i) => {
         const o = k === "zao" ? furn.zao() : k === "gang" ? furn.gang() : k === "boji" ? furn.boji() : k === "nong" ? furn.nong() : furn.bench(1.4);
         o.position.set(xw, 0, 2.6 - i * 2.2); if (k === "bench") o.rotation.y = Math.PI / 2; if (k === "boji" || k === "nong") o.rotation.y = sx > 0 ? -Math.PI / 2 : Math.PI / 2;
         S.add(o);
       });
-      const lf = new THREE.PointLight(0xffc080, 1, 9, 1.5); lf.position.set(sx * 5.1, 3.0, -0.5); S.add(lf); this.fills.push({ l: lf, k: 0.9 });
+      const lf = new THREE.PointLight(0xffc080, 1, 9, 1.5); lf.position.set(sx * 5.1, 3.0, -0.5); S.add(lf); this.fills.push({ l: lf, k: 0.55 }); // v36: softer lane fill — was blooming 簸箕 into a peach blob
     }
     // v34: outer-wall detail on back and sides — 射击孔 rows, 瓦檐 coping, 水渠 drain, so no flat wall-only views
     for (const [ax, az, ry, len] of [[0, -D / 2 - T / 2 - 0.01, 0, W], [-W / 2 - T / 2 - 0.01, 0, Math.PI / 2, D], [W / 2 + T / 2 + 0.01, 0, Math.PI / 2, D]] as [number, number, number, number][]) {
@@ -506,7 +506,7 @@ export class WeiwuScene {
     this.scene.backgroundIntensity = h === "night" ? 0.5 : 1;
     for (const l of this.lamps) l.intensity = c.lamp * (h === "night" ? 1.6 : 0.9);
     for (const m of this.lampMeshes) (m.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.4 + c.lamp * 1.4;
-    this.fireflies.points.visible = h === "night" || h === "dusk";
+    this.fireflies.points.visible = h === "night"; // v36: dusk no longer shows fireflies (peach blobs on 横屋 floor)
     const hz = { dawn: 0xa8a0a4, noon: 0xb8c4d0, dusk: 0x5e5458, night: 0x0c0f18 }[h];
     (this.haze.material as THREE.MeshBasicMaterial).color.set(hz);
     const fk = { dawn: 1.2, noon: 0.8, dusk: 2.2, night: 3.2 }[h];
@@ -636,7 +636,7 @@ function makeFurniture(wood: THREE.Material, lac: THREE.Material) {
   const brick = new THREE.MeshStandardMaterial({ color: 0x8a6a58, roughness: 0.95 });
   const iron = new THREE.MeshStandardMaterial({ color: 0x1e1c1a, roughness: 0.5, metalness: 0.6 });
   const pot = new THREE.MeshStandardMaterial({ color: 0x4a3426, roughness: 0.35 });
-  const straw = new THREE.MeshStandardMaterial({ color: 0xb89a5e, roughness: 1 });
+  // straw moved into boji() as straw2 (v36)
   return {
     baxian(): THREE.Group { const g = new THREE.Group(); g.add(box(1.0, 0.06, 1.0, lac, 0, 0.8, 0)); g.add(box(0.92, 0.1, 0.92, lac, 0, 0.72, 0));
       for (const [x, z] of [[-0.44, -0.44], [0.44, -0.44], [-0.44, 0.44], [0.44, 0.44]]) g.add(box(0.07, 0.78, 0.07, lac, x, 0.39, z)); return g; },
@@ -650,7 +650,19 @@ function makeFurniture(wood: THREE.Material, lac: THREE.Material) {
       g.add(box(0.32, 2.4, 0.32, brick, -0.3, 2.0, 0.55)); const mouth = box(0.3, 0.25, 0.02, iron, 0.51, 0.3, 0); mouth.rotation.y = Math.PI / 2; g.add(mouth); return g; },
     gang(): THREE.Group { const g = new THREE.Group(); const j = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.28, 0.75, 20), pot); j.position.y = 0.38; g.add(j);
       const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.04, 20), wood); lid.position.y = 0.77; g.add(lid); return g; },
-    boji(): THREE.Group { const g = new THREE.Group(); for (let k = 0; k < 3; k++) { const d = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.06, 24), straw); d.rotation.z = Math.PI / 2 - 0.25; d.position.set(-0.05 - k * 0.07, 0.45, k * 0.25 - 0.25); g.add(d); } return g; },
+    boji(): THREE.Group { // v36: dark woven 簸箕 leaning on the wall — was flat peach discs under warm fill+bloom
+      const g = new THREE.Group();
+      const c = document.createElement("canvas"); c.width = c.height = 128; const x = c.getContext("2d")!;
+      x.fillStyle = "#4a3a22"; x.fillRect(0, 0, 128, 128);
+      x.strokeStyle = "#6a5634"; x.lineWidth = 2;
+      for (let i = 0; i < 128; i += 6) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i, 128); x.stroke(); x.beginPath(); x.moveTo(0, i); x.lineTo(128, i); x.stroke(); }
+      x.strokeStyle = "#2a1e10"; x.lineWidth = 5; x.beginPath(); x.arc(64, 64, 58, 0, Math.PI * 2); x.stroke();
+      const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+      const mat = new THREE.MeshStandardMaterial({ map: tex, color: 0xffffff, roughness: 1, metalness: 0 });
+      const d = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.36, 0.08, 24), mat);
+      d.rotation.x = Math.PI / 2.4; d.position.set(0, 0.35, 0); g.add(d);
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.025, 6, 24), new THREE.MeshStandardMaterial({ color: 0x3a2a14, roughness: 1 }));
+      rim.rotation.copy(d.rotation); rim.position.copy(d.position); g.add(rim); return g; },
     nong(): THREE.Group { const g = new THREE.Group(); for (let k = 0; k < 3; k++) { const h = box(0.04, 1.5, 0.04, wood, -0.12, 0.75, -0.3 + k * 0.3); h.rotation.z = 0.18; g.add(h);
         const bl = box(0.04, 0.22, 0.2, iron, -0.02, 0.12, -0.3 + k * 0.3); g.add(bl); } return g; },
   };

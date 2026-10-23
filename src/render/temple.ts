@@ -13,7 +13,7 @@ const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: numb
   yewan: { sun: [-10, 30, -14], col: 0x7a90ff, I: 0.45, hemi: 0.14, env: 0.3, exp: 0.95, fog: 0x0e1018, hdri: "qwantani_night_puresky", bg: 0.45, lamp: 2.8 },
 };
 const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, number, number]; look: [number, number, number] }> = {
-  overview: { eye: [11, 12, 15], look: [0, 3, -7] },
+  overview: { eye: [16, 14, 18], look: [0, 3, -4] }, // v36: farther so orbits stay clear of walls/trees
   kaichao: { eye: [5, 2.6, 9], look: [0, 3.2, -6] },
   xiban: { eye: [2.6, 4.4, -1.5], look: [0.9, 2.6, 10.5] },
   // judge views: actors from the front row, crowd faces from the stage apron
@@ -54,9 +54,9 @@ export class TempleScene {
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.maxPolarAngle = Math.PI * 0.49;
-    this.controls.minPolarAngle = Math.PI * 0.3; // v35: no straight-down roof-filled frames
-    this.controls.minDistance = 3;
-    this.controls.maxDistance = 70;
+    this.controls.minPolarAngle = Math.PI * 0.34; // v36: no roof-filled high frames
+    this.controls.minDistance = 8; // v36: keep orbits out of foliage
+    this.controls.maxDistance = 55;
     this.controls.target.set(...POSE.overview.look);
     this.flight = new Flight(this.camera, this.controls.target);
     this.sun.castShadow = true;
@@ -285,12 +285,12 @@ export class TempleScene {
     }
     S.add(this.audience);
     // ancient camphor trees behind the hall + pines outside the walls
-    [[-19, -26, 1.5], [19, -26, 1.4], [-32, 8, 1.2], [32, 6, 1.3]] /* v35: side camphors outside orbit radius */.forEach(([x, z, k], i) => {
+    [[-22, -30, 1.5], [22, -30, 1.4], [-36, 10, 1.2], [36, 8, 1.3]] /* v35: side camphors outside orbit radius */.forEach(([x, z, k], i) => {
       const t = makeTree(i + 11, k);
       t.position.set(x, 0, z);
       S.add(t);
     });
-    [[-20, -22], [20, -24], [-26, -10], [26, -12]].forEach(([x, z], i) => {
+    [[-24, -28], [24, -30], [-34, -14], [34, -16]].forEach(([x, z], i) => {
       const t = makeTree(i + 31, 1.4, "pine");
       t.position.set(x, 0, z);
       S.add(t);
