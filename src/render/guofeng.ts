@@ -22,31 +22,44 @@ function paint(key: string, wM: number, hM: number, ppm: number, draw: (x: Ctx) 
 function cardMat(map: THREE.Texture, glow = 0.3): THREE.MeshStandardMaterial {
   return new THREE.MeshStandardMaterial({ map, alphaTest: 0.35, side: THREE.DoubleSide, roughness: 0.95, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: glow });
 }
-/** crossed painted cards (国画 billboard volume) — v24: extra offset layers so the canopy reads as a volume */
+/** crossed painted cards (国画 billboard volume) — v25: Z-offset variety + soft blob fill + softer alpha edge */
 function crossed(map: THREE.Texture, w: number, h: number, n = 5, glow = 0.3): THREE.Group {
   const g = new THREE.Group();
-  const m = cardMat(map, glow);
-  const dm = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map, alphaTest: 0.35 });
+  // softer cut so steep angles don't read as hard card edges
+  const m = new THREE.MeshStandardMaterial({
+    map, alphaTest: 0.22, transparent: true, opacity: 0.98, side: THREE.DoubleSide,
+    roughness: 0.95, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: glow, depthWrite: true,
+  });
+  const dm = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map, alphaTest: 0.28 });
   for (let i = 0; i < n; i++) {
     const geo = new THREE.PlaneGeometry(w, h); geo.translate(0, h / 2, 0);
     const p = new THREE.Mesh(geo, m);
-    const a = (i / n) * Math.PI;
+    const a = (i / n) * Math.PI + (i % 2 ? 0.08 : -0.05);
     p.rotation.y = a;
-    // slight radial offset so cards don't occupy one plane (less paper-thin)
-    const off = 0.12 + (i % 2) * 0.08;
-    p.position.set(Math.sin(a) * off, 0, Math.cos(a) * off);
+    // varied radial + vertical offset so cards don't stack into one silhouette
+    const off = 0.18 + (i % 3) * 0.11 + (i % 2) * 0.06;
+    p.position.set(Math.sin(a) * off, (i % 3) * 0.04 - 0.04, Math.cos(a) * off);
+    p.scale.set(1 + (i % 2) * 0.04, 1 + (i % 3) * 0.03, 1);
     p.customDepthMaterial = dm;
     g.add(p);
   }
-  // soft outer silhouette (extra wide, low-alpha) — fills gaps between cards
+  // soft blob fill card (horizontal-ish) — cheap volume between vertical cards
+  const fill = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.92, h * 0.55), m);
+  fill.geometry.translate(0, h * 0.58, 0);
+  fill.rotation.x = -0.55; fill.rotation.y = 0.35;
+  fill.position.set(0.05, 0.05, 0.12);
+  fill.customDepthMaterial = dm;
+  g.add(fill);
+  // soft outer silhouette sprites (two sizes) — fills gaps from steep angles
   const soft = document.createElement("canvas"); soft.width = soft.height = 64;
   const sx = soft.getContext("2d")!;
-  const gr = sx.createRadialGradient(32, 28, 4, 32, 28, 30);
-  gr.addColorStop(0, "rgba(40,60,36,0.55)"); gr.addColorStop(0.55, "rgba(30,48,28,0.28)"); gr.addColorStop(1, "rgba(20,30,18,0)");
+  const gr = sx.createRadialGradient(32, 30, 2, 32, 28, 31);
+  gr.addColorStop(0, "rgba(36,55,32,0.62)"); gr.addColorStop(0.45, "rgba(28,44,26,0.32)"); gr.addColorStop(1, "rgba(18,28,16,0)");
   sx.fillStyle = gr; sx.fillRect(0, 0, 64, 64);
   const st = new THREE.CanvasTexture(soft); st.colorSpace = THREE.SRGBColorSpace;
-  const sm = new THREE.SpriteMaterial({ map: st, transparent: true, depthWrite: false, opacity: 0.55 });
-  const sil = new THREE.Sprite(sm); sil.position.y = h * 0.62; sil.scale.set(w * 1.15, h * 0.85, 1); g.add(sil);
+  const sm = new THREE.SpriteMaterial({ map: st, transparent: true, depthWrite: false, opacity: 0.62 });
+  const sil = new THREE.Sprite(sm); sil.position.y = h * 0.6; sil.scale.set(w * 1.28, h * 0.92, 1); g.add(sil);
+  const sil2 = new THREE.Sprite(sm.clone()); sil2.position.set(0.15, h * 0.48, -0.1); sil2.scale.set(w * 0.95, h * 0.7, 1); g.add(sil2);
   return g;
 }
 
@@ -99,6 +112,14 @@ export function paintedTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "cam
       // second leaf layer: larger, softer dabs for canopy thickness
       x.globalAlpha = 0.55;
       for (let i = 0; i < (low() ? 200 : 500); i++) { const [tx, ty] = tips[Math.floor(r() * tips.length)]; const a = r() * Math.PI * 2, rr = 0.4 + r() * 1.1; x.fillStyle = cols[Math.floor(r() * cols.length)]; x.beginPath(); x.ellipse(tx + Math.cos(a) * rr, ty + Math.sin(a) * rr * 0.55 + 0.35, 0.11 + r() * 0.08, 0.06 + r() * 0.04, r() * 2, 0, 7); x.fill(); }
+      // v25: soft silhouette fill + edge dither (breaks hard card rim at steep angles)
+      x.globalAlpha = 0.28;
+      for (let i = 0; i < (low() ? 80 : 180); i++) {
+        const [tx, ty] = tips[Math.floor(r() * tips.length)];
+        const a = r() * Math.PI * 2, rr = 0.9 + r() * 1.6;
+        x.fillStyle = cols[Math.floor(r() * cols.length)];
+        x.beginPath(); x.ellipse(tx + Math.cos(a) * rr, ty + Math.sin(a) * rr * 0.5 + 0.2, 0.18 + r() * 0.14, 0.1 + r() * 0.08, r() * 2, 0, 7); x.fill();
+      }
       x.globalAlpha = 1;
     } else {
       // 松: crooked scaly trunk, flat needle clouds
@@ -121,7 +142,7 @@ export function paintedTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "cam
       for (let c = 0; c < 3; c++) for (let k = 0; k < 30; k++) { const a = (k / 29) * Math.PI; x.strokeStyle = "#1e3222"; x.lineWidth = 0.025; x.beginPath(); x.moveTo(tx + (c - 1) * 0.5, ty - 0.3); x.lineTo(tx + (c - 1) * 0.5 + Math.cos(a) * 0.55, ty - 0.3 + Math.sin(a) * 0.3); x.stroke(); }
     }
   });
-  const g = crossed(tex, W, H, low() ? 4 : 5, 0.28);
+  const g = crossed(tex, W, H, low() ? 5 : 6, 0.26);
   g.scale.setScalar(scale);
   g.rotation.y = r() * Math.PI;
   return g;

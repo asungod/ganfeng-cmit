@@ -117,6 +117,7 @@ export function mountWanshou(root: HTMLElement): () => void {
   }
 
   function choose(a: ActId, s: SlotId): void {
+    root.querySelector(".exhibit")?.classList.remove("is-kanxi");
     const c = lookup(slotByAct, a, s);
     note = "";
     act = a;
@@ -158,6 +159,7 @@ export function mountWanshou(root: HTMLElement): () => void {
     if (cam) {
       if (act !== "xiban") choose("xiban" as ActId, slot);
       const name = cam.dataset.cam as "kanxi" | "guanzhong";
+      root.querySelector(".exhibit")?.classList.toggle("is-kanxi", name === "kanxi");
       window.setTimeout(() => scene?.view(name), act === "xiban" ? 0 : 2100);
       return;
     }

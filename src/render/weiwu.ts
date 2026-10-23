@@ -23,7 +23,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
 const HOURS: Record<HourId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; lamp: number }> = {
   dawn: { sun: [-30, 9, 18], col: 0xffc7a0, I: 2.2, hemi: 0.35, env: 0.6, exp: 0.95, fog: 0xb7b0b4, hdri: "qwantani_puresky", lamp: 0.2 },
   noon: { sun: [12, 40, 14], col: 0xfff2dc, I: 3.4, hemi: 0.45, env: 0.9, exp: 0.85, fog: 0xc8d2dc, hdri: "qwantani_puresky", lamp: 0 },
-  dusk: { sun: [34, 7, 10], col: 0xf2e6da, I: 2.0, hemi: 0.42, env: 0.75, exp: 0.9, fog: 0xb8aca0, hdri: "qwantani_sunset_puresky", lamp: 0.6 },
+  dusk: { sun: [34, 7, 10], col: 0xe8e4e0, I: 1.85, hemi: 0.48, env: 0.65, exp: 0.88, fog: 0xa8aeb4, hdri: "qwantani_sunset_puresky", lamp: 0.6 },
   night: { sun: [-14, 30, -10], col: 0x8aa4ff, I: 0.35, hemi: 0.12, env: 0.25, exp: 1.15, fog: 0x10131e, hdri: "qwantani_night_puresky", lamp: 2.6 },
 };
 
@@ -82,8 +82,9 @@ export class WeiwuScene {
 
   private build(): void {
     const S = this.scene;
-    const earth = phMat("earth_grey", [0.5, 0.5], { color: 0x9e9c98 });
-    const earthAlt = phMat("plaster_grey", [1, 1], { color: 0xa2a09c });
+    // v25: cool plaster outer walls (less warm pebble under dusk HDRI)
+    const earth = phMat("plaster_grey", [0.6, 0.6], { color: 0x68747c });
+    const earthAlt = phMat("plaster_grey", [1, 1], { color: 0x747e86 });
     const earthIn = phMat("clay_plaster", [1, 1], { color: 0xeee6d6 });
     const tile = qingwaMat([3, 2]); // v23: 小青瓦
     const ridge = new THREE.MeshStandardMaterial({ color: 0x3e3e44, roughness: 0.7 });
@@ -97,7 +98,7 @@ export class WeiwuScene {
     g.receiveShadow = true;
     S.add(g);
     // 禾坪 threshing yard (packed earth/stone) + 半月塘 pond
-    const yard = wbox(26, 0.08, 9, phMat("stone_tiles", [1, 1], { color: 0xa8a090 }), 0.5);
+    const yard = wbox(26, 0.08, 9, phMat("stone_tiles", [1, 1], { color: 0x9a9890 }), 0.5);
     yard.position.set(0, 0.04, 13);
     // v18: dark slab removed (yard no longer added)
     const pond = new THREE.Mesh(
@@ -371,12 +372,11 @@ export class WeiwuScene {
       t.position.set(x, 0, z);
       S.add(t);
     }
-    // approach path (menlou eye z≈16.5 → gate z≈9): bamboo just off-path left/right
+    // v25: midground 墨竹 only — frames approach, keeps 门楼 face clear (no cam-foreground clumps)
     for (const [x, z, n, sc] of [
-      [-3.4, 14.0, 14, 1.0], [3.6, 13.8, 13, 1.0],
-      [-4.6, 11.2, 12, 0.95], [4.8, 11.0, 12, 0.95],
-      [-2.8, 15.5, 10, 0.8], [3.0, 15.3, 10, 0.8],
-      [-9.5, 4.5, 10, 0.85], [9.2, 4.8, 11, 0.85],
+      [-4.5, 12.2, 5, 0.82], [7.6, 12.0, 5, 0.82],
+      [-5.5, 10.2, 4, 0.75], [8.2, 10.0, 4, 0.75],
+      [-9.8, 4.5, 5, 0.72], [9.5, 4.8, 5, 0.72],
     ] as [number, number, number, number][]) {
       const b = makeBamboo(Math.abs(x * 5 + z) | 0, n);
       b.position.set(x, 0, z);

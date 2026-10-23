@@ -737,8 +737,9 @@ function makeGeese(): THREE.Group {
 /** Terraced riverbank with irregular waterline — replaces flat embankment box. */
 function makeRiverbank(): THREE.Group {
   const g = new THREE.Group();
-  const mud = phMat("brown_mud_dry", [6, 3], { color: 0x7a6a58 });
-  const stone = phMat("stone_tiles", [8, 2], { color: 0x7a7468 });
+  // v25: cool 青石/灰岸 instead of warm Western brown_mud_dry
+  const mud = phMat("earth_grey", [6, 3], { color: 0x6a7068 });
+  const stone = phMat("stone_tiles", [8, 2], { color: 0x6e746c });
   // main terrace under pavilion
   const top = new THREE.Mesh(new THREE.BoxGeometry(16, 0.55, 7.5), mud);
   top.position.set(4.0, 0.35, -14.0);

@@ -2774,6 +2774,10 @@ html[lang="en"] .kicker { letter-spacing: 0.1em; }
   position: absolute; left: 1rem; top: 4.4rem; width: 20rem; max-height: calc(100% - 5.4rem); overflow: auto;
   margin: 0; z-index: 4; padding: 1rem 1.1rem;
 }
+/* v25: narrow left panel in 近看戏台 so 老生 sleeve clears */
+.wanshou.is-immersive.is-kanxi .ws-panel.ws-card { width: 13.5rem; }
+.wanshou.is-immersive.is-kanxi .ws-panel .matrix, .wanshou.is-immersive.is-kanxi .ws-panel .wall-hint { display: none; }
+
 .wanshou.is-immersive .ws-panel .chip { font-size: 0.8rem; }
 .about-credits { font-size: 0.74rem; line-height: 1.6; color: var(--paper-dim); max-height: 12rem; overflow: auto; padding-left: 1rem; } .about-credits-h { font-size: 0.9rem; margin: 0.8rem 0 0.3rem; color: var(--gold); }
 /* r22 tidy right panels: clear hierarchy, quiet secondary sections */

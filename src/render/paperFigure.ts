@@ -658,34 +658,63 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
 
   const arms: Rig["arms"] = [];
   const mode = Math.floor(seed / 3) % 6; // 0 idle 1 clap 2 fan 3 拱手 4 point 5 chat/nod
-  // v24: puffier sleeves for 拱手/clap volume; larger 团扇
+  // v25: cloth-like 拱手/clap sleeves — wide hanging folds, not tube-to-tube
   const thickArm = mode === 1 || mode === 3;
   for (const s of [-1, 1]) {
     const a = armPart(key + "a", s, P, 0.26, mode === 2 && s === 1 ? 0.55 : 0.34,
       (x) => {
         const c = type === "jacket" ? sec : main;
-        const w = thickArm ? 0.072 : 0.055;
-        const pts: P2[] = [[-w, 0.05], [w, 0.06], [w + 0.012, -0.12], [w + 0.008, -0.28], [-w - 0.002, -0.28], [-w - 0.006, -0.12]];
-        shape(x, pts, hgrad(x, -w - 0.01, w + 0.01, c), 0.005);
-        line(x, [[0.01, -0.04], [0.025, -0.16], [0.015, -0.26]], 0.0035, shade(c, -0.45));
-        line(x, [[-0.02, -0.06], [-0.03, -0.2]], 0.003, shade(c, 0.3));
+        if (thickArm) {
+          // wide upper sleeve with soft shoulder gather
+          const pts: P2[] = [[-0.1, 0.06], [0.1, 0.07], [0.12, -0.08], [0.11, -0.22], [0.04, -0.3], [-0.04, -0.3], [-0.11, -0.22], [-0.1, -0.08]];
+          shape(x, pts, hgrad(x, -0.11, 0.12, c), 0.005);
+          x.save(); path(x, pts); x.clip();
+          folds(x, [-0.06, -0.02, 0.03, 0.07], 0.05, -0.28, shade(c, -0.5));
+          folds(x, [-0.04, 0.02, 0.06], 0.02, -0.26, shade(c, 0.3));
+          const vg = x.createLinearGradient(-0.12, 0, 0.12, 0);
+          vg.addColorStop(0, "rgba(0,0,0,0.2)"); vg.addColorStop(0.5, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.22)");
+          x.fillStyle = vg; x.fillRect(-0.13, -0.32, 0.26, 0.4);
+          x.restore();
+        } else {
+          const w = 0.055;
+          const pts: P2[] = [[-w, 0.05], [w, 0.06], [w + 0.012, -0.12], [w + 0.008, -0.28], [-w - 0.002, -0.28], [-w - 0.006, -0.12]];
+          shape(x, pts, hgrad(x, -w - 0.01, w + 0.01, c), 0.005);
+          line(x, [[0.01, -0.04], [0.025, -0.16], [0.015, -0.26]], 0.0035, shade(c, -0.45));
+          line(x, [[-0.02, -0.06], [-0.03, -0.2]], 0.003, shade(c, 0.3));
+        }
       },
       (x) => {
         const c = type === "jacket" ? main : main;
-        const flare = thickArm ? 0.03 : 0.015;
-        const sl: P2[] = [[-0.06 - flare, 0.04], [0.06 + flare, 0.04], [0.075 + flare, -0.1], [0.08 + flare, -0.24], [0.04, -0.28], [-0.03, -0.28], [-0.075 - flare, -0.24], [-0.065 - flare, -0.1]];
-        shape(x, sl, hgrad(x, -0.08, 0.09, c), 0.005);
-        x.save(); path(x, sl); x.clip(); x.globalAlpha = 0.55;
-        line(x, [[-0.035, -0.02], [-0.025, -0.12], [-0.04, -0.24]], 0.004, shade(c, -0.5));
-        line(x, [[0.03, -0.05], [0.045, -0.2]], 0.004, shade(c, 0.35));
-        // soft volume shade across the cuff
-        const vg = x.createLinearGradient(-0.08, 0, 0.09, 0);
-        vg.addColorStop(0, "rgba(0,0,0,0.22)"); vg.addColorStop(0.45, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.25)");
-        x.fillStyle = vg; x.fillRect(-0.1, -0.3, 0.22, 0.34);
-        x.restore();
-        if (type === "woman") line(x, [[-0.07, -0.26], [0.08, -0.26]], 0.018, trim);
-        if (type === "farmer") hand(x, 0, -0.3, s, skin, "open", 1.0);
-        else hand(x, 0, -0.3, s, skin, mode === 4 && s === 1 ? "fist" : "open", 0.95);
+        if (thickArm) {
+          // hanging cuff: wider cloth bell with vertical fold lines (not a tube end)
+          const sl: P2[] = [[-0.1, 0.05], [0.1, 0.05], [0.13, -0.06], [0.14, -0.2], [0.1, -0.32], [0.02, -0.36], [-0.02, -0.36], [-0.1, -0.32], [-0.14, -0.2], [-0.13, -0.06]];
+          shape(x, sl, hgrad(x, -0.14, 0.14, c), 0.005);
+          x.save(); path(x, sl); x.clip();
+          folds(x, [-0.08, -0.03, 0.03, 0.08], 0.04, -0.34, shade(c, -0.55));
+          folds(x, [-0.05, 0.0, 0.05], 0.02, -0.32, shade(c, 0.35));
+          // soft crease shadows near cuff hem
+          line(x, [[-0.09, -0.28], [-0.04, -0.34], [0.04, -0.34], [0.09, -0.28]], 0.006, shade(c, -0.4));
+          const vg = x.createLinearGradient(-0.14, 0, 0.14, 0);
+          vg.addColorStop(0, "rgba(0,0,0,0.28)"); vg.addColorStop(0.45, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.3)");
+          x.fillStyle = vg; x.fillRect(-0.15, -0.38, 0.3, 0.44);
+          x.restore();
+          if (type === "woman") line(x, [[-0.1, -0.33], [0.1, -0.33]], 0.016, trim);
+          hand(x, 0, -0.34, s, skin, "open", 0.9);
+        } else {
+          const flare = 0.015;
+          const sl: P2[] = [[-0.06 - flare, 0.04], [0.06 + flare, 0.04], [0.075 + flare, -0.1], [0.08 + flare, -0.24], [0.04, -0.28], [-0.03, -0.28], [-0.075 - flare, -0.24], [-0.065 - flare, -0.1]];
+          shape(x, sl, hgrad(x, -0.08, 0.09, c), 0.005);
+          x.save(); path(x, sl); x.clip(); x.globalAlpha = 0.55;
+          line(x, [[-0.035, -0.02], [-0.025, -0.12], [-0.04, -0.24]], 0.004, shade(c, -0.5));
+          line(x, [[0.03, -0.05], [0.045, -0.2]], 0.004, shade(c, 0.35));
+          const vg = x.createLinearGradient(-0.08, 0, 0.09, 0);
+          vg.addColorStop(0, "rgba(0,0,0,0.22)"); vg.addColorStop(0.45, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.25)");
+          x.fillStyle = vg; x.fillRect(-0.1, -0.3, 0.22, 0.34);
+          x.restore();
+          if (type === "woman") line(x, [[-0.07, -0.26], [0.08, -0.26]], 0.018, trim);
+          if (type === "farmer") hand(x, 0, -0.3, s, skin, "open", 1.0);
+          else hand(x, 0, -0.3, s, skin, mode === 4 && s === 1 ? "fist" : "open", 0.95);
+        }
         if (mode === 2 && s === 1) { // 团扇 — larger, readable 梅
           x.fillStyle = "#8a5a2a"; x.fillRect(-0.006, -0.34, 0.012, 0.1);
           ell(x, 0, -0.48, 0.13, 0.14, "#f4ecd8", 0.005, "#8a5a2a");
@@ -696,7 +725,7 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
             for (let p = 0; p < 5; p++) { const an = (p / 5) * Math.PI * 2; ell(x, px + Math.cos(an) * 0.01, py + Math.sin(an) * 0.01, 0.008, 0.008, "#d84a5a"); }
           ell(x, 0.0, -0.5, 0.006, 0.006, "#f0d060");
         }
-      }, thickArm ? 0.12 : 0.1, mode === 2 ? 0.16 : (thickArm ? 0.13 : 0.1));
+      }, thickArm ? 0.15 : 0.1, mode === 2 ? 0.16 : (thickArm ? 0.16 : 0.1));
     a.up.position.set(s * 0.16, sY, 0.03); a.up.scale.x = s;
     body.add(a.up); arms.push({ s, up: a.up, lo: a.lo });
   }
