@@ -38,7 +38,7 @@ export class PavilionScene {
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
   private glow: THREE.Sprite;
-  private glowBase = 0.72;
+  private glowBase = 0.85;
   private ray = new THREE.Raycaster();
   private occ: Record<string, boolean> = {};
   private occN = 0;
@@ -126,9 +126,9 @@ export class PavilionScene {
     );
     this.sun.position.copy(MARK.luoxia);
     this.scene.add(this.sun);
-    this.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: skyBand(), color: 0xff8a4a, transparent: true, opacity: 0.42, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
-    this.glow.scale.set(120, 30, 1); // v29: larger + fainter so 落霞 reads as atmosphere, not a pasted disc
-    this.glow.position.copy(MARK.luoxia).multiplyScalar(2.2).setY(6);
+    this.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: skyBand(), color: 0xff8a4a, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.NormalBlending, fog: false }));
+    this.glow.scale.set(110, 16, 1); // v29: larger + fainter so 落霞 reads as atmosphere, not a pasted disc
+    { const d = MARK.luoxia.clone().setY(0).normalize(); this.glow.position.set(-18, 6.5, -38); void d; this.glow.renderOrder = -1; } // v32: low on the horizon, just in front of the far hills
     this.scene.add(this.glow);
 
     const pool = new THREE.Mesh(

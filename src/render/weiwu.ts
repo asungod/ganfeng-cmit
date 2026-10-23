@@ -475,7 +475,7 @@ export class WeiwuScene {
       const sd = new THREE.Vector3(...c.sun).normalize();
       const k = Math.max(0, d.dot(sd)); const f = this.hourId === "night" ? 0 : k * k;
       this.renderer.toneMappingExposure = c.exp * (1 - 0.3 * f);
-      this.scene.backgroundIntensity = this.hourId === "night" ? 0.5 : (this.hourId === "dusk" ? 0.75 : 1) - 0.4 * f;
+      this.scene.backgroundIntensity = this.hourId === "night" ? 0.5 : (this.hourId === "dusk" ? 0.45 : 1) - 0.4 * f;
       this.post.bloom.strength = (this.hourId === "night" ? 0.75 : 0.28) * (1 - 0.7 * f);
     }
     this.post.render();

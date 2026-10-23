@@ -1134,8 +1134,8 @@ function ruyiScroll(ctx: CanvasRenderingContext2D, t0: number, t1: number, C: Co
   ctx.lineJoin = "round";
   ctx.filter = "blur(4px)";
   ctx.strokeStyle = C.wash;
-  ctx.globalAlpha = 0.4;
-  ctx.lineWidth = 16;
+  ctx.globalAlpha = 0.6;
+  ctx.lineWidth = 36;
   ctx.beginPath();
   for (let x = 0; x <= TEX; x += 4) {
     const y = vineY(x, mid, amp, waves);
@@ -1144,10 +1144,13 @@ function ruyiScroll(ctx: CanvasRenderingContext2D, t0: number, t1: number, C: Co
   }
   ctx.stroke();
   ctx.filter = "none";
-  ctx.strokeStyle = C.mid;
-  ctx.globalAlpha = 0.92;
-  ctx.lineWidth = 3.6;
+  ctx.strokeStyle = C.deep;
+  ctx.globalAlpha = 0.95;
+  ctx.lineWidth = 12;
   ctx.stroke();
+  ctx.strokeStyle = C.mid;
+  ctx.lineWidth = 5;
+  ctx.stroke(); // v32: thicker, deeper 缠枝 vine
   ctx.restore();
   const n = 8;
   for (let i = 0; i < n; i++) {
@@ -1173,12 +1176,12 @@ function ruyi(ctx: CanvasRenderingContext2D, x: number, y: number, s: number, C:
   ctx.fill();
   ctx.restore();
   ctx.fillStyle = C.mid;
-  ctx.globalAlpha = 0.28;
+  ctx.globalAlpha = 0.5;
   ctx.fill();
   ctx.globalAlpha = 0.94;
   ctx.strokeStyle = C.deep;
   ctx.lineJoin = "round";
-  ctx.lineWidth = 2.25;
+  ctx.lineWidth = 6;
   ctx.stroke();
   ctx.beginPath();
   ctx.ellipse(x, y - s * 0.06, s * 0.16, s * 0.12, 0, 0, Math.PI * 2);
@@ -1212,17 +1215,17 @@ function lotusVine(
   }
   ctx.filter = "blur(5px)";
   ctx.strokeStyle = C.wash;
-  ctx.globalAlpha = 0.38;
-  ctx.lineWidth = 20;
+  ctx.globalAlpha = 0.55;
+  ctx.lineWidth = 34;
   ctx.stroke();
   ctx.filter = "none";
   ctx.strokeStyle = C.mid;
   ctx.globalAlpha = 0.88;
-  ctx.lineWidth = 7.2;
+  ctx.lineWidth = 13;
   ctx.stroke();
   ctx.strokeStyle = C.deep;
   ctx.globalAlpha = 0.94;
-  ctx.lineWidth = 3.1;
+  ctx.lineWidth = 6;
   ctx.stroke();
   ctx.restore();
 

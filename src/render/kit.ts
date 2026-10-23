@@ -489,7 +489,7 @@ export function skyBand(): THREE.CanvasTexture {
   const cv = document.createElement("canvas"); cv.width = 512; cv.height = 128;
   const g = cv.getContext("2d")!;
   const rg = g.createRadialGradient(256, 64, 0, 256, 64, 256);
-  rg.addColorStop(0, "rgba(255,255,255,0.55)"); rg.addColorStop(0.4, "rgba(255,255,255,0.22)"); rg.addColorStop(1, "rgba(255,255,255,0)");
+  rg.addColorStop(0, "rgba(255,255,255,1)"); rg.addColorStop(0.45, "rgba(255,255,255,0.55)"); rg.addColorStop(1, "rgba(255,255,255,0)");
   g.save(); g.scale(1, 0.5); g.translate(0, 64); g.fillStyle = rg; g.fillRect(0, -64, 512, 256); g.restore();
   for (let i = 0; i < 14; i++) {
     const y = 40 + Math.random() * 50, x = 60 + Math.random() * 300, w = 120 + Math.random() * 200;

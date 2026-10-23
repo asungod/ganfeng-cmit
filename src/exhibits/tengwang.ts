@@ -111,6 +111,9 @@ export function mountTengwang(root: HTMLElement): () => void {
   const verseEl = root.querySelector("[data-verse]") as HTMLElement;
   const citesEl = root.querySelector("[data-cites]") as HTMLElement;
   const canvas = root.querySelector("canvas.dusk") as HTMLCanvasElement;
+  // v32: the lock toast never sits over a camera move
+  const hideToast = () => { const t = root.querySelector("[data-toast]") as HTMLElement | null; if (t) t.hidden = true; };
+  for (const ev of ["pointerdown", "wheel", "touchstart"]) canvas.addEventListener(ev, hideToast, { passive: true });
   const pipe = mountPipeline(root.querySelector("[data-pipe]") as HTMLElement, routeName("gexu"));
   bindDemoDetailToggle(root);
   mountAsk(

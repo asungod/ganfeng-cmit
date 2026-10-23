@@ -242,7 +242,8 @@ export class TempleScene {
     // lantern strings across the courtyard
     for (let r = 0; r < 3; r++) {
       const z = -4 + r * 6;
-      for (let i = -3; i <= 3; i++) this.addLantern(new THREE.Vector3(i * 2.6, 5.2 - Math.cos((i / 3) * 1.2) * 0.6, z));
+      for (let i = -3; i <= 3; i++) if (Math.abs(i) > 1 || r === 2) this.addLantern( // v32: front row keeps the 戏台 sightline clear
+        new THREE.Vector3(i * 2.6, 5.2 - Math.cos((i / 3) * 1.2) * 0.6, z));
     }
     // banners — muted cloth, not harsh yellow plastic
     const bannerMat = new THREE.MeshStandardMaterial({
