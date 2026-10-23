@@ -20,7 +20,7 @@ export class PavilionScene {
   readonly canvas: HTMLCanvasElement;
   mood: MoodId = "luoxia";
   focus: ImageId = "luoxia";
-  onProject: ((pts: Record<ImageId, { x: number; y: number }>) => void) | null = null;
+  onProject: ((pts: Record<ImageId, { x: number; y: number; vis?: boolean }>) => void) | null = null;
 
   private renderer: THREE.WebGLRenderer;
   private scene: THREE.Scene;
@@ -38,6 +38,10 @@ export class PavilionScene {
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
   private glow: THREE.Sprite;
+  private glowBase = 0.42;
+  private ray = new THREE.Raycaster();
+  private occ: Record<string, boolean> = {};
+  private occN = 0;
   private markers = new Map<ImageId, THREE.Object3D>();
   private look = new THREE.Vector3(2.6, 3.2, -12.5);
   private post!: Post;
@@ -72,7 +76,7 @@ export class PavilionScene {
     this.controls.minDistance = 5;
     this.controls.maxDistance = 30;
     this.controls.minPolarAngle = Math.PI * 0.32;
-    this.controls.maxPolarAngle = Math.PI * 0.5;
+    this.controls.maxPolarAngle = Math.PI * 0.56; // v29: allow a low 江面 eye (clamped above the water in loop)
     this.controls.target.copy(this.look);
 
     this.hemi = new THREE.HemisphereLight(0xffc8a0, 0x1a1418, 0.85);
@@ -122,8 +126,8 @@ export class PavilionScene {
     );
     this.sun.position.copy(MARK.luoxia);
     this.scene.add(this.sun);
-    this.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softDot(), color: 0xff8a4a, transparent: true, opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
-    this.glow.scale.setScalar(16);
+    this.glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: softDot(), color: 0xff8a4a, transparent: true, opacity: 0.42, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+    this.glow.scale.setScalar(24); // v29: larger + fainter so 落霞 reads as atmosphere, not a pasted disc
     this.glow.position.copy(MARK.luoxia);
     this.scene.add(this.glow);
 
@@ -227,20 +231,44 @@ export class PavilionScene {
     this.lastT = now;
     this.mist.update(t);
     this.controls.update();
+    if (this.camera.position.y < 0.7) this.camera.position.y = 0.7; // v29: never dip under the river
+    {
+      // v29: top-down views — calm the reflection distortion and the 落霞 sprite so they don't tear / look pasted
+      const el = Math.max(0, Math.min(1, (this.camera.position.y - this.controls.target.y) / this.camera.position.distanceTo(this.controls.target)));
+      const rw2 = this.water.userData.reflective as Water | undefined;
+      if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.distortionScale.value = 1.2 * (1 - el * 0.8);
+      this.glow.material.opacity = this.glowBase * (1 - el * 0.85);
+    }
     this.post.render();
     this.emitProject();
   };
 
+  private isMarker(o: THREE.Object3D, m?: THREE.Object3D): boolean {
+    for (let p: THREE.Object3D | null = o; p; p = p.parent) if (p === m || p === this.water) return true;
+    return false;
+  }
+
   private emitProject(): void {
     if (!this.onProject) return;
-    const pts = {} as Record<ImageId, { x: number; y: number }>;
+    const pts = {} as Record<ImageId, { x: number; y: number; vis?: boolean }>;
+    const doOcc = (this.occN++ % 6) === 0;
     (Object.keys(MARK) as ImageId[]).forEach((id) => {
       const obj = this.markers.get(id);
       const world = obj ? new THREE.Vector3() : MARK[id].clone();
       if (obj) obj.getWorldPosition(world);
       else world.copy(MARK[id]);
+      if (doOcc) {
+        // v29: label hidden when its subject is behind the pavilion from this angle
+        const d = world.distanceTo(this.camera.position);
+        this.ray.set(this.camera.position, world.clone().sub(this.camera.position).normalize());
+        this.ray.far = d - 0.8;
+        this.ray.camera = this.camera;
+        const hit = this.ray.intersectObjects(this.scene.children, true).find((h) => (h.object as THREE.Mesh).isMesh && h.object.name !== "waterMain" && h.object.visible && !(h.object as THREE.Mesh & { isSprite?: boolean }).isSprite && !this.isMarker(h.object, obj));
+        this.occ[id] = !!hit;
+      }
       const v = world.project(this.camera);
-      pts[id] = { x: (v.x * 0.5 + 0.5) * 100, y: (-v.y * 0.5 + 0.5) * 100 };
+      const on = v.z < 1 && Math.abs(v.x) < 1.05 && Math.abs(v.y) < 1.05;
+      pts[id] = { x: (v.x * 0.5 + 0.5) * 100, y: (-v.y * 0.5 + 0.5) * 100, vis: on && !this.occ[id] };
     });
     this.onProject(pts);
   }
@@ -588,6 +616,7 @@ export function curvedRoof(w: number, d: number, rise: number, tile: THREE.Mater
   const N = 36;
   const lift = top ? 0.5 : 0.42;
   const pos: number[] = [];
+  const uvs: number[] = [];
   const idx: number[] = [];
   const P = (u: number, v: number): [number, number, number] => {
     const x = u * hw;
@@ -602,7 +631,11 @@ export function curvedRoof(w: number, d: number, rise: number, tile: THREE.Mater
   };
   for (let j = 0; j <= N; j++) {
     for (let i = 0; i <= N; i++) {
-      pos.push(...P(-1 + (2 * i) / N, -1 + (2 * j) / N));
+      const u = -1 + (2 * i) / N, v = -1 + (2 * j) / N;
+      pos.push(...P(u, v));
+      // v29: UVs so tile textures run in rows parallel to each eave (metres / 3)
+      if (hd - Math.abs(v) * hd <= hw - Math.abs(u) * hw) uvs.push((u * hw) / 3, ((1 - Math.abs(v)) * hd) / 3);
+      else uvs.push((v * hd) / 3, ((1 - Math.abs(u)) * hw) / 3);
     }
   }
   for (let j = 0; j < N; j++) {
@@ -616,6 +649,7 @@ export function curvedRoof(w: number, d: number, rise: number, tile: THREE.Mater
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  geo.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
   geo.setIndex(idx);
   geo.computeVertexNormals();
   const roof = new THREE.Mesh(geo, tile);

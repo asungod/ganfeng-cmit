@@ -509,6 +509,7 @@ export function mountHakka(root: HTMLElement): () => void {
       view = new WeiwuScene(roomCanvas);
       view.setHour(hour);
       view.setRoom(room);
+      firstView = false; // v29: initial pose already applied — next plan click must fly the camera
       onResize();
     } catch (err) {
       console.warn("kejia weiwu: WebGL unavailable", err);

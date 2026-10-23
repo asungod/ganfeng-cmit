@@ -229,9 +229,11 @@ export function particles(count: number, box: THREE.Box3, color: number, size: n
       const s = seed[i];
       if (mode === "smoke") {
         const life = ((t * 0.18 + s * 0.01) % 1);
-        pos[i * 3] = base[i * 3] + Math.sin(t * 0.6 + s) * 0.25 * life;
-        pos[i * 3 + 1] = box.min.y + life * H;
-        pos[i * 3 + 2] = base[i * 3 + 2] + Math.cos(t * 0.5 + s) * 0.25 * life;
+        // v29: wisps — spread and curl grow with height so the column frays instead of a pillar
+        const y = life * H, sp = 0.25 + life * life * 1.6;
+        pos[i * 3] = base[i * 3] + Math.sin(t * 0.6 + s + y * 1.4) * sp * life + (s % 7 - 3.5) * 0.12 * life * life;
+        pos[i * 3 + 1] = box.min.y + y;
+        pos[i * 3 + 2] = base[i * 3 + 2] + Math.cos(t * 0.5 + s + y * 1.1) * sp * life * 0.8;
       } else if (mode === "mist") {
         pos[i * 3] = base[i * 3] + Math.sin(t * 0.05 + s) * 2.5;
         pos[i * 3 + 2] = base[i * 3 + 2] + Math.cos(t * 0.04 + s) * 1.5;

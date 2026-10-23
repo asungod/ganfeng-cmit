@@ -68,7 +68,7 @@ export function mountHall(root: HTMLElement): () => void {
             <span class="door-index">04</span>
             <span class="door-en">${L("Wanshou", "Wanshou Fair")}</span>
           </span>
-          <span data-no-tr class="door-v" aria-label="${routeName("wanshou")}"><span>万</span><span>寿</span></span>
+          <span data-no-tr class="door-v" aria-label="${routeName("wanshou")}"><span>万</span><span>寿</span><span>宫</span></span>
           <span class="door-rule" aria-hidden="true"></span>
           <span class="door-desc">${L("扩展线：庙会活动与时段。", "Extension: temple-fair events by time of day.")}</span>
         </button>

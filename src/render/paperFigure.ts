@@ -225,18 +225,22 @@ function paintFace(x: Ctx, kind: Face, skin: string, cy: number, seed: number): 
   }
   // villagers — 年画 folk faces, each slightly different
   const sk = skin;
-  faceBase(x, sk, cy, 0.074, 0.092);
+  // v29: per-seed face shape / eye spacing / age marks so the crowd isn't one face
+  const fw = 0.068 + r() * 0.014, fh = 0.086 + r() * 0.014;
+  faceBase(x, sk, cy, fw, fh);
   const blush = x.createRadialGradient(0, 0, 0, 0, 0, 0.026);
   blush.addColorStop(0, "rgba(220,90,80,0.55)"); blush.addColorStop(1, "rgba(220,90,80,0)");
   for (const s of [-1, 1]) { x.save(); x.translate(s * 0.042, cy - 0.03); x.fillStyle = blush; x.beginPath(); x.arc(0, 0, 0.026, 0, Math.PI * 2); x.fill(); x.restore(); }
-  const smile = r() < 0.5, ey = cy + 0.008;
+  const smile = r() < 0.4, ey = cy + 0.002 + r() * 0.014, es = 0.026 + r() * 0.01, ez = 0.8 + r() * 0.5;
   for (const s of [-1, 1]) {
-    if (smile) line(x, [[s * 0.044, ey], [s * 0.031, ey + 0.008], [s * 0.017, ey]], 0.0045, INK);
-    else { ell(x, s * 0.031, ey, 0.009, 0.0055, "#fbf6ee", 0.0025); ell(x, s * 0.031, ey, 0.0042, 0.0045, "#140a06"); }
+    if (smile) line(x, [[s * (es + 0.013), ey], [s * es, ey + 0.008], [s * (es - 0.014), ey]], 0.0045, INK);
+    else { ell(x, s * es, ey, 0.009 * ez, 0.0055 * ez, "#fbf6ee", 0.0025); ell(x, s * es, ey, 0.0042 * ez, 0.0045 * ez, "#140a06"); }
     const bt = (r() - 0.5) * 0.01;
     line(x, [[s * 0.016, ey + 0.022], [s * 0.03, ey + 0.03 + bt], [s * 0.05, ey + 0.026]], kind === "elder" ? 0.006 : 0.005, kind === "elder" ? "#e8e4da" : INK);
   }
   line(x, [[-0.004, cy - 0.022], [0.004, cy - 0.028], [0.009, cy - 0.022]], 0.003, shade(sk, -0.4));
+  if (kind === "elder" || r() < 0.3) for (const s of [-1, 1]) line(x, [[s * 0.022, cy - 0.03], [s * 0.032, cy - 0.05]], 0.0025, shade(sk, -0.3)); // 法令纹
+  if (r() < 0.25) ell(x, (r() - 0.5) * 0.08, cy - 0.01 - r() * 0.03, 0.004, 0.004, shade(sk, -0.5)); // 痣
   if (r() < 0.6 || kind === "child") shape(x, [[-0.014, cy - 0.048], [0, cy - 0.044], [0.014, cy - 0.048], [0, cy - 0.06]], "#b23a30", 0.002);
   else line(x, [[-0.016, cy - 0.05], [0, cy - 0.054], [0.016, cy - 0.05]], 0.004, "#7a3020");
   if (kind === "elder") { // white beard + moustache
@@ -609,6 +613,15 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
     }
     if (type === "farmer") { x.fillStyle = "#e8e0d0"; x.fillRect(-0.2, 0.78, 0.4, 0.04); }
     x.restore();
+    if (back) { // v29: back detail — centre seam, collar band, shoulder yoke, sash knot, worn patch
+      x.save(); path(x, top); x.clip();
+      line(x, [[0, 1.4], [0, type === "gown" || type === "elder" ? 0.08 : 0.62]], 0.004, shade(main, -0.55));
+      line(x, [[-0.06, 1.38], [0, 1.35], [0.06, 1.38]], 0.012, shade(main, -0.35));
+      line(x, [[-0.18, 1.2], [-0.06, 1.24], [0.06, 1.24], [0.18, 1.2]], 0.004, shade(main, -0.45));
+      if (type !== "woman") { x.fillStyle = shade(sec, -0.2); x.fillRect(-0.2, 0.82, 0.4, 0.045); line(x, [[0.05, 0.84], [0.08, 0.7], [0.06, 0.6]], 0.012, shade(sec, -0.2)); }
+      if (seed % 3 === 0) { x.fillStyle = shade(main, 0.18); x.fillRect(-0.12, 0.95, 0.08, 0.1); x.strokeStyle = shade(main, -0.5); x.lineWidth = 0.002; x.strokeRect(-0.12, 0.95, 0.08, 0.1); }
+      x.restore();
+    }
     path(x, top); x.lineWidth = 0.006; x.strokeStyle = INK; x.stroke();
     if (!back && type !== "woman") shape(x, [[-0.05, 1.41], [0, 1.36], [0.05, 1.41]], "#f0ebe0", 0.003);
   });

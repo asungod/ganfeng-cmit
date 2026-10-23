@@ -446,6 +446,11 @@ export function mountTengwang(root: HTMLElement): () => void {
           const p = pos[id] ?? spotPos(id, 50, 50);
           btn.style.left = `${p.x}%`;
           btn.style.top = `${p.y}%`;
+          // v29: fade a label when its subject is hidden behind the pavilion / off-frame
+          const vis = (pts[id as keyof typeof pts] as { vis?: boolean }).vis !== false || id === focus;
+          btn.style.opacity = vis ? "1" : "0";
+          btn.style.pointerEvents = vis ? "" : "none";
+          btn.style.transition = "opacity .35s";
         }
       };
       painting.resize();

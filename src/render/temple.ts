@@ -4,7 +4,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { ActId, SlotId } from "../data/wanshou";
 import { curvedRoof } from "./pavilion";
 import { setPaperCamera } from "./paperFigure";
-import { xuandeLu } from "./guofeng";
+import { qingwaMat, xuandeLu } from "./guofeng";
 import { makeFigure, makeTree, shadowSize, Flight, disposeScene, lantern, loadHdri, makePost, makeRenderer, particles, phMat, wbox, type Post } from "./kit";
 
 const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; bg: number; lamp: number }> = {
@@ -33,6 +33,7 @@ export class TempleScene {
   private hemi = new THREE.HemisphereLight(0xdfe8ff, 0x5a3a2a, 0.4);
   private lamps: THREE.PointLight[] = [];
   private lampMeshes: THREE.Mesh[] = [];
+  private lanterns: THREE.Object3D[] = [];
   private smoke: ReturnType<typeof particles>;
   private haze: ReturnType<typeof particles>;
   private procession = new THREE.Group();
@@ -65,7 +66,7 @@ export class TempleScene {
     this.sun.shadow.normalBias = 0.03;
     this.scene.add(this.sun, this.hemi);
     this.build();
-    this.smoke = particles(160, new THREE.Box3(new THREE.Vector3(-0.3, 1.8, -3.5), new THREE.Vector3(0.3, 7.5, -2.9)), 0xe8e0d8, 0.9, 0.22, "smoke");
+    this.smoke = particles(90, new THREE.Box3(new THREE.Vector3(-0.25, 1.6, -3.4), new THREE.Vector3(0.25, 6.2, -3.0)), 0xe8e0d8, 1.1, 0.12, "smoke");
     this.scene.add(this.smoke.points);
     this.haze = particles(160, new THREE.Box3(new THREE.Vector3(-16, 0.5, -14), new THREE.Vector3(16, 4, 16)), 0xf0e0d0, 2.4, 0.035, "mist");
     this.scene.add(this.haze.points);
@@ -83,6 +84,7 @@ export class TempleScene {
     const lac = phMat("lacquered_cherry_wood", [1, 2], { color: 0xb02a1e });
     const wood = phMat("dark_wooden_planks", [1, 1], { color: 0x7a4a34 });
     const tile = new THREE.MeshStandardMaterial({ color: 0x2e3a36, roughness: 0.5, metalness: 0.2, side: THREE.DoubleSide });
+    const roofTile = qingwaMat([1, 1]); roofTile.side = THREE.DoubleSide; roofTile.color.set(0x9aa8a4); // v29: 筒瓦 texture on roofs (was flat grey)
     const gold = new THREE.MeshStandardMaterial({ color: 0xd6a548, metalness: 0.85, roughness: 0.3 });
 
     const ground = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), paving);
@@ -161,7 +163,7 @@ export class TempleScene {
       let y = platform + h + 0.55;
       for (let r = 0; r < roofs; r++) {
         const top = r === roofs - 1;
-        const roof = curvedRoof(w + 3.2 - r * 2.2, d + 3 - r * 1.6, top ? 2.4 : 1.2, tile, gold, top);
+        const roof = curvedRoof(w + 3.2 - r * 2.2, d + 3 - r * 1.6, top ? 2.4 : 1.2, roofTile, gold, top);
         roof.position.y = y;
         g.add(roof);
         if (!top) {
@@ -199,7 +201,7 @@ export class TempleScene {
       c.castShadow = true;
       stage.add(c);
     }
-    const sroof = curvedRoof(11, 8, 2.0, tile, gold, true);
+    const sroof = curvedRoof(11, 8, 2.0, roofTile, gold, true);
     sroof.position.y = 6;
     stage.add(sroof);
     // performers (simple robed figures) — visible during the opera
@@ -207,11 +209,15 @@ export class TempleScene {
     for (let i = 0; i < 3; i++) {
       const f = makeFigure(robe[i], i + 8, 1.12, "performer");
       // v28: 老生 / 净 / 旦 spaced 1.9 apart; 净 set back so his 靠旗 never cross the 旦's 水袖
-      f.position.set(-0.2 + i * 1.75, 1.92, i === 1 ? -0.7 : 0.3);
+      f.position.set(-0.2 + i * 1.75, 1.92, i === 0 ? 1.0 : i === 1 ? -0.5 : 0.3); // v29: 老生 upstage so side views clear the 靠旗
       f.rotation.y = Math.PI;
       f.name = "performer";
       stage.add(f);
     }
+    // v29: warm fill inside the 戏台 so side / oblique views aren't a black box
+    const stFill = new THREE.PointLight(0xffd2a0, 7, 10, 1.4); stFill.position.set(0, 5.2, 0.6); stage.add(stFill);
+    const stFill2 = new THREE.PointLight(0xffc890, 3, 7, 1.6); stFill2.position.set(3.6, 3.6, -1.6); stage.add(stFill2);
+    const stFill3 = new THREE.PointLight(0xffc890, 3, 7, 1.6); stFill3.position.set(-3.6, 3.6, -1.6); stage.add(stFill3);
     stage.position.set(0, 0, 11.5);
     S.add(stage);
     this.stageLight.position.set(0, 9, 4);
@@ -302,6 +308,7 @@ export class TempleScene {
     l.position.copy(p);
     this.scene.add(l);
     this.lampMeshes.push(l.children[0] as THREE.Mesh);
+    this.lanterns.push(l);
     if (this.lamps.length < 7 && Math.abs(p.x) < 4) {
       const pl = new THREE.PointLight(0xff7a3a, 1, 12, 2);
       pl.position.copy(p).add(new THREE.Vector3(0, -0.4, 0));
@@ -330,7 +337,7 @@ export class TempleScene {
     this.post.bloom.strength = slot === "yewan" ? 0.55 : 0.25;
     this.procession.visible = act === "kaichao";
     this.audience.visible = act === "xiban";
-    this.smoke.material.opacity = act === "kaichao" ? 0.32 : 0.14;
+    this.smoke.material.opacity = act === "kaichao" ? 0.2 : 0.1;
     const night = slot === "yewan";
     this.haze.material.color.set(night ? 0x2a2a38 : 0xf0e0d0);
     this.smoke.material.color.set(night ? 0x8a7a70 : 0xe8e0d8);
@@ -380,6 +387,8 @@ export class TempleScene {
         f.position.z = 15 - ((t * 0.6 + i * 1.1) % 20);
         f.position.y = Math.abs(Math.sin(t * 3 + i)) * 0.04;
       });
+    // v29: hide lanterns that pass right in front of the lens (camera flights, close orbits)
+    for (const l of this.lanterns) l.visible = l.position.distanceTo(this.camera.position) > 3.2;
     setPaperCamera(this.camera);
     this.scene.traverse((o) => {
       const an = o.userData.anim as ((t: number) => void) | undefined;

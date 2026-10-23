@@ -23,8 +23,17 @@ function cardMat(map: THREE.Texture, glow = 0.3): THREE.MeshStandardMaterial {
   return new THREE.MeshStandardMaterial({ map, alphaTest: 0.35, side: THREE.DoubleSide, roughness: 0.95, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: glow });
 }
 /** crossed painted cards (国画 billboard volume) — v25: Z-offset variety + soft blob fill + softer alpha edge */
-function crossed(map: THREE.Texture, w: number, h: number, n = 5, glow = 0.3): THREE.Group {
+function crossed(map: THREE.Texture, w: number, h: number, n = 5, glow = 0.3, top?: { map: THREE.Texture; y: number; r: number }): THREE.Group {
   const g = new THREE.Group();
+  if (top) { // v29: top-facing canopy cards so 俯瞰 reads as a crown, not crossed planes
+    const tm = new THREE.MeshStandardMaterial({ map: top.map, alphaTest: 0.3, side: THREE.DoubleSide, roughness: 0.95, emissive: 0xffffff, emissiveMap: top.map, emissiveIntensity: glow });
+    for (let k = 0; k < 3; k++) {
+      const c = new THREE.Mesh(new THREE.PlaneGeometry(top.r * 2 * (1 - k * 0.18), top.r * 2 * (1 - k * 0.18)), tm);
+      c.rotation.set(-Math.PI / 2, 0, k * 1.1);
+      c.position.set((k - 1) * 0.15, top.y - 0.9 + k * 0.7, (k % 2) * 0.12);
+      g.add(c);
+    }
+  }
   // softer cut so steep angles don't read as hard card edges
   const m = new THREE.MeshStandardMaterial({
     map, alphaTest: 0.22, transparent: true, opacity: 0.98, side: THREE.DoubleSide,
@@ -142,11 +151,28 @@ export function paintedTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "cam
             x.strokeStyle = k % 3 ? "#203424" : "#2e4a34"; x.lineWidth = 0.025; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + Math.cos(a) * l * 1.3, cy + Math.sin(a) * l * 0.5 + 0.2); x.stroke(); }
         }
       }
+      // v29: soft 石绿 needle masses behind the fans so pines read alive (were thin, brown-dominant)
+      x.globalAlpha = 0.6;
+      for (let b = 0; b < 6; b++) {
+        const base = trunk[2 + b], side = b % 2 ? 1 : -1;
+        for (let k = 0; k < 40; k++) { x.fillStyle = ["#2e4a34", "#3e5e42", "#4a6a48"][k % 3]; x.beginPath(); x.ellipse(base[0] + side * (0.6 + r() * 1.4), base[1] + 0.3 + r() * 0.5, 0.25 + r() * 0.2, 0.1 + r() * 0.08, 0, 0, 7); x.fill(); }
+      }
+      x.globalAlpha = 1;
       const [tx, ty] = trunk[trunk.length - 1];
       for (let c = 0; c < 3; c++) for (let k = 0; k < 30; k++) { const a = (k / 29) * Math.PI; x.strokeStyle = "#1e3222"; x.lineWidth = 0.025; x.beginPath(); x.moveTo(tx + (c - 1) * 0.5, ty - 0.3); x.lineTo(tx + (c - 1) * 0.5 + Math.cos(a) * 0.55, ty - 0.3 + Math.sin(a) * 0.3); x.stroke(); }
     }
   });
-  const g = crossed(tex, W, H, low() ? 5 : 6, 0.26);
+  const R = kind === "pine" ? 2.4 : 3.0;
+  const topTex = paint(`treetop-${kind}-${seed % 4}`, R * 2, R * 2, low() ? 30 : 60, (x) => {
+    const cols = kind === "pine" ? ["#1e3222", "#2e4a34", "#3e5e42"] : ["#3e5a3a", "#4f6e46", "#5f7f52", "#355038", "#6f8c5c"];
+    for (let i = 0; i < (low() ? 500 : 1400); i++) {
+      const a = r() * Math.PI * 2, rr = Math.sqrt(r()) * (R - 0.3);
+      x.fillStyle = cols[Math.floor(r() * cols.length)]; x.globalAlpha = 0.8;
+      x.beginPath(); x.ellipse(Math.cos(a) * rr, R + Math.sin(a) * rr, 0.12 + r() * 0.12, 0.07 + r() * 0.06, r() * 3, 0, 7); x.fill();
+    }
+    x.globalAlpha = 1;
+  });
+  const g = crossed(tex, W, H, low() ? 5 : 6, 0.26, { map: topTex, y: kind === "pine" ? 6.6 : 5.0, r: R });
   g.scale.setScalar(scale);
   g.rotation.y = r() * Math.PI;
   return g;

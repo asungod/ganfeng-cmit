@@ -350,7 +350,7 @@ a { color: var(--gold); }
   position: absolute;
   left: 0.8rem;
   right: 0.8rem;
-  top: 0.8rem;
+  top: 3.4rem; /* v29: clear the exhibit title bar */
   z-index: 4;
   padding: 0.7rem 0.85rem;
   border: 1px solid var(--cinnabar);
@@ -888,7 +888,7 @@ a { color: var(--gold); }
   position: absolute;
   left: 0.8rem;
   right: 0.8rem;
-  top: 0.8rem;
+  top: 3.4rem;
   z-index: 5;
   padding: 0.7rem 0.85rem;
   border: 1px solid var(--gold);
@@ -899,7 +899,7 @@ a { color: var(--gold); }
   white-space: pre-line;
 }
 .rewrite-toast:not([hidden]) ~ .talk-toast {
-  top: 5.4rem;
+  top: 8rem;
 }
 
 .sysbar {
@@ -1176,9 +1176,9 @@ a { color: var(--gold); }
   letter-spacing: 0.04em;
 }
 .parse-strip[hidden] { display: none !important; }
-.talk-toast:not([hidden]) ~ .parse-strip { top: 5.55rem; }
-.rewrite-toast:not([hidden]) ~ .parse-strip { top: 5.4rem; }
-.rewrite-toast:not([hidden]) ~ .talk-toast:not([hidden]) ~ .parse-strip { top: 9.9rem; }
+.talk-toast:not([hidden]) ~ .parse-strip { top: 8.15rem; }
+.rewrite-toast:not([hidden]) ~ .parse-strip { top: 8rem; }
+.rewrite-toast:not([hidden]) ~ .talk-toast:not([hidden]) ~ .parse-strip { top: 12.5rem; }
 .parse-line { margin: 0 0 0.12rem; }
 .parse-line b {
   font-weight: 400;
@@ -1883,7 +1883,7 @@ a { color: var(--gold); }
   position: absolute;
   left: 0.8rem;
   right: 0.8rem;
-  top: 0.8rem;
+  top: 3.4rem;
   z-index: 5;
   padding: 0.35rem 0.55rem;
   background: rgba(163, 59, 50, 0.88);

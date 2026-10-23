@@ -3,7 +3,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { EraId, GlazeId, ShapeId } from "../data/porcelain";
 
-const TEX = 2048;
+const TEX = typeof navigator !== "undefined" && (navigator.hardwareConcurrency ?? 4) >= 6 ? 4096 : 2048; // v29: sharper 青花 up close
 const LATHE_SEGS = 160;
 const PROFILE_SAMPLES = 128;
 
@@ -80,6 +80,8 @@ export class PorcelainVitrine {
     this.controls.enableDamping = true;
     this.controls.autoRotate = true;
     this.controls.autoRotateSpeed = 0.32;
+    this.controls.rotateSpeed = 1.4; // v29: drag turns the view decisively
+    this.controls.addEventListener("start", () => { this.controls.autoRotate = false; });
     this.controls.enablePan = false;
     this.controls.minDistance = 1.7;
     this.controls.maxDistance = 5.6;
@@ -268,7 +270,6 @@ export class PorcelainVitrine {
     const height = outerPts[outerPts.length - 1]!.y;
     const lip = outerPts[outerPts.length - 1]!;
     const innerLip = innerPts[0];
-    const silhouette = outerPts.map((p) => p.clone());
     if (innerLip) {
       outerPts.push(
         new THREE.Vector2(lip.x * 0.35 + innerLip.x * 0.65, lip.y + 0.003),
@@ -310,7 +311,7 @@ export class PorcelainVitrine {
       outer.castShadow = !this.wantWire;
       outer.receiveShadow = true;
       this.outerMesh = outer;
-      this.piece.add(outer, latheProfileLine(silhouette));
+      this.piece.add(outer); // v29: gold profile guide line removed (read as a stray yellow line)
       this.emitStats();
       this.finishLathe(gen, innerPts);
       return;
@@ -324,7 +325,7 @@ export class PorcelainVitrine {
     outer.castShadow = false;
     outer.receiveShadow = true;
     this.outerMesh = outer;
-    this.piece.add(outer, latheProfileLine(silhouette));
+    this.piece.add(outer); // v29: gold profile guide line removed (read as a stray yellow line)
     this.emitStats();
     const stepMs = 480;
     for (let i = 1; i < segs.length; i++) {
@@ -781,31 +782,19 @@ function makeGlazeMaps(
     ctx.fillRect(0, 0, TEX, TEX);
   }
   const crackSeed = hashSeed(shape, glaze, era) ^ 0xc9e4d9f1;
-  paintCraquelure(c, crack, mulberry32(crackSeed), "albedo");
+  if (glaze !== "qinghua") paintCraquelure(c, crack, mulberry32(crackSeed), "albedo"); // v29: 青花 has no 开片 — removes the stray grey lines
   const map = new THREE.CanvasTexture(c);
   map.colorSpace = THREE.SRGBColorSpace;
-  map.anisotropy = 8;
+  map.anisotropy = 16;
   map.wrapS = THREE.RepeatWrapping;
   const peel = orangePeelMaps(rng);
   const normalMap = glaze === "qinghua" ? peel.normal : normalFrom(c);
   const roughnessMap = glaze === "qinghua" ? peel.rough : roughnessFrom(c, rng);
-  paintCraquelure(roughnessMap.image as HTMLCanvasElement, crack, mulberry32(crackSeed), "rough");
+  if (glaze !== "qinghua") paintCraquelure(roughnessMap.image as HTMLCanvasElement, crack, mulberry32(crackSeed), "rough");
   roughnessMap.needsUpdate = true;
   return { map, normalMap, roughnessMap };
 }
 
-function latheProfileLine(outerPts: THREE.Vector2[]): THREE.Line {
-  const maxR = outerPts.reduce((m, p) => Math.max(m, p.x), 0);
-  const x = maxR + 0.22;
-  const pts = outerPts.map((p) => new THREE.Vector3(x, p.y, 0));
-  const geo = new THREE.BufferGeometry().setFromPoints(pts);
-  const mat = new THREE.LineBasicMaterial({
-    color: 0xc6a15b,
-    transparent: true,
-    opacity: 0.72,
-  });
-  return new THREE.Line(geo, mat);
-}
 
 function paintCraquelure(
   canvas: HTMLCanvasElement,

@@ -1,4 +1,4 @@
-// 客家围龙屋 — procedural architecture + CC0 Poly Haven materials/sky.
+// 赣南围屋 (v29: square, 四角炮楼) — procedural architecture + CC0 Poly Haven materials/sky.
 // Art direction: weathered rammed-earth grey-brown, grey tile, soft low sun; night = lantern glow + fireflies.
 import * as THREE from "three";
 import { qingwaMat } from "./guofeng";
@@ -12,7 +12,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
   overview: { eye: [46, 32, 10], look: [0, 0, -8] },
   heping: { eye: [9, 4.2, 22], look: [0, 2.2, 6] },
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
-  tianjing: { eye: [0.4, 1.6, 3.0], look: [0, 3.4, 0.2] },
+  tianjing: { eye: [0.4, 1.6, 4.6], look: [0, 3.9, -1.0] },
   zutang: { eye: [0, 1.7, 2.4], look: [0, 1.7, -4] },
   zhengwu: { eye: [0, 1.7, -4.1], look: [0, 1.6, -8] },
   hengwu: { eye: [-2.9, 1.7, 3.9], look: [-5.6, 1.5, -2.5] },
@@ -49,7 +49,7 @@ export class WeiwuScene {
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = makeRenderer(canvas, 1);
     (window as unknown as { __weiwu: unknown }).__weiwu = this;
-    this.scene.fog = new THREE.Fog(0xb8aca0, 40, 170);
+    this.scene.fog = new THREE.Fog(0xb8aca0, 70, 260);
     this.scene.background = new THREE.Color(0xc89878);
     this.camera.position.set(...POSES.overview.eye);
     this.controls = new OrbitControls(this.camera, canvas);
@@ -263,10 +263,16 @@ export class WeiwuScene {
         shrine.position.set(0, 2.05, -depth / 2 + 0.5);
         hg.add(shrine);
         const gold = new THREE.MeshStandardMaterial({ color: 0xd8a64a, metalness: 0.8, roughness: 0.3 });
-        for (let i = -2; i <= 2; i++) {
-          const tab = wbox(0.13, 0.46, 0.04, gold);
-          tab.position.set(i * 0.3, 2.0 + (Math.abs(i) === 2 ? -0.05 : 0), -depth / 2 + 0.81);
-          hg.add(tab);
+        // v29: painted 神主牌 (generic 历代祖先 wording — no real lineage)
+        const tabTex = tabletTexture();
+        const tabM = [0, 0, 0, 0, 1, 0].map((f) => (f ? new THREE.MeshStandardMaterial({ map: tabTex, roughness: 0.55 }) : new THREE.MeshStandardMaterial({ color: 0x5a1a10, roughness: 0.5 })));
+        const big = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.0, 0.06), tabM);
+        big.position.set(0, 2.15, -depth / 2 + 0.83);
+        hg.add(big);
+        for (const sx of [-1, 1]) {
+          const sm = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.62, 0.05), new THREE.MeshStandardMaterial({ color: 0x6a2014, roughness: 0.5 }));
+          sm.position.set(sx * 0.55, 2.0, -depth / 2 + 0.82);
+          hg.add(sm);
         }
         const plaque = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.7, 0.08), new THREE.MeshStandardMaterial({ color: 0x1a1210, roughness: 0.5 }));
         plaque.position.set(0, 3.45, -depth / 2 + 0.25);
@@ -279,9 +285,6 @@ export class WeiwuScene {
           const cp = new THREE.Mesh(new THREE.BoxGeometry(0.35, 2.2, 0.05), new THREE.MeshStandardMaterial({ color: 0xa81e18, roughness: 0.6 }));
           cp.position.set(sx * 1.8, 2.3, -depth / 2 + 0.22);
           hg.add(cp);
-          const incense = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.18, 0.22, 12), gold);
-          incense.position.set(sx * 0.9, 1.36, -depth / 2 + 0.85);
-          hg.add(incense);
           const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.3, 8), new THREE.MeshStandardMaterial({ color: 0xc8201a, emissive: 0xff6a20, emissiveIntensity: 0.6 }));
           candle.position.set(sx * 1.3, 1.4, -depth / 2 + 0.95);
           hg.add(candle);
@@ -290,6 +293,29 @@ export class WeiwuScene {
           flame.position.set(sx * 1.3, 1.6, -depth / 2 + 0.95);
           hg.add(flame);
         }
+        // v29: 三足香炉 centred on the altar (bowl + rim + legs + ears) with three sticks
+        const bronze = new THREE.MeshStandardMaterial({ color: 0x6a4a28, metalness: 0.7, roughness: 0.45 });
+        const lu = new THREE.Group();
+        const bowl = new THREE.Mesh(new THREE.SphereGeometry(0.2, 20, 10, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), bronze);
+        bowl.scale.y = 0.75; bowl.position.y = 0.2; lu.add(bowl);
+        const rim = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.02, 6, 24), bronze);
+        rim.rotation.x = Math.PI / 2; rim.position.y = 0.2; lu.add(rim);
+        for (let k = 0; k < 3; k++) {
+          const a = (k / 3) * Math.PI * 2;
+          const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.018, 0.12, 6), bronze);
+          leg.position.set(Math.cos(a) * 0.13, 0.06, Math.sin(a) * 0.13); lu.add(leg);
+        }
+        for (const ex of [-1, 1]) {
+          const ear = new THREE.Mesh(new THREE.TorusGeometry(0.05, 0.012, 4, 10, Math.PI), bronze);
+          ear.position.set(ex * 0.15, 0.24, 0); ear.rotation.y = Math.PI / 2; lu.add(ear);
+        }
+        const stickM = new THREE.MeshStandardMaterial({ color: 0x8a3a1a, emissive: 0xff5010, emissiveIntensity: 0.25 });
+        for (let k = -1; k <= 1; k++) {
+          const st = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.3, 4), stickM);
+          st.position.set(k * 0.05, 0.36, 0); lu.add(st);
+        }
+        lu.position.set(0, 1.25, -depth / 2 + 1.0);
+        hg.add(lu);
         for (const sx of [-1.7, 1.7]) this.addLantern(hg, new THREE.Vector3(sx, 3.3, depth / 2 - 0.9));
       }
       hg.position.z = z;
@@ -342,34 +368,8 @@ export class WeiwuScene {
       tw.position.set(x, 0, z);
       S.add(tw);
     }
-    // 围龙 semicircular rear ring (围龙屋 signature)
-    const R = 13, segs = 13;
-    for (let i = 0; i < segs; i++) {
-      const a0 = Math.PI + (i / segs) * Math.PI;
-      const a1 = Math.PI + ((i + 1) / segs) * Math.PI;
-      const am = (a0 + a1) / 2;
-      const len = 2 * R * Math.sin((a1 - a0) / 2) + 0.12;
-      const seg = new THREE.Group();
-      const outer = wbox(len, 4.2, 0.55, earth);
-      outer.position.set(0, 2.1, -1.6);
-      seg.add(outer);
-      const inner = wbox(len * 0.85, 3.2, 0.3, earthIn);
-      inner.position.set(0, 1.6, 1.4);
-      seg.add(inner);
-      const rf = gableRoof(len, 3.4, 1.0, tile, ridge);
-      rf.position.y = 3.8;
-      seg.add(rf);
-      seg.position.set(Math.cos(am) * R, 0, -D / 2 + Math.sin(am) * R * 0.75);
-      seg.rotation.y = -am - Math.PI / 2;
-      S.add(seg);
-    }
-    // 化胎 mound inside the ring
-    const mound = new THREE.Mesh(new THREE.SphereGeometry(9, 32, 12, 0, Math.PI * 2, 0, Math.PI / 2), ground);
-    mound.scale.set(1, 0.08, 0.55);
-    mound.position.set(0, 0, -D / 2 - 2.5);
-    mound.receiveShadow = true;
-    S.add(mound);
-    this.smoke = particles(60, new THREE.Box3(new THREE.Vector3(-1, 1.5, -3.8), new THREE.Vector3(1, 3.8, -3.6)), 0xd8d0c8, 0.35, 0.18, "smoke");
+    // v29: 围龙 half-ring + 化胎 removed — 赣南围屋 reads as a closed square (四角炮楼) per the panel text
+    this.smoke = particles(16, new THREE.Box3(new THREE.Vector3(-0.7, 1.5, -3.75), new THREE.Vector3(0.7, 3.0, -3.6)), 0xd8d0c8, 0.22, 0.12, "smoke");
     S.add(this.smoke.points);
     // facade lanterns at the gate
     for (const sx of [-1.4, 1.4]) this.addLantern(S, new THREE.Vector3(sx, 3.6, D / 2 + 1.1));
@@ -506,5 +506,23 @@ function plaqueTexture(): THREE.CanvasTexture {
   paint();
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
   document.fonts?.load('190px "Ma Shan Zheng"').then(() => { paint(); t.needsUpdate = true; }).catch(() => {});
+  return t;
+}
+
+/** v29 神主牌: generic 历代祖先 tablet face (泛称, no real 姓氏/lineage). */
+function tabletTexture(): THREE.CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = 256; c.height = 512;
+  const g = c.getContext("2d")!;
+  const paint = () => {
+    g.fillStyle = "#5a1a10"; g.fillRect(0, 0, 256, 512);
+    g.strokeStyle = "#c89a48"; g.lineWidth = 10; g.strokeRect(12, 12, 232, 488);
+    g.fillStyle = "#e0b860"; g.textAlign = "center"; g.textBaseline = "middle";
+    g.font = '64px "Ma Shan Zheng", "KaiTi", serif';
+    "历代祖先之位".split("").forEach((ch, i) => g.fillText(ch, 128, 62 + i * 78));
+  };
+  paint();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  document.fonts?.load('64px "Ma Shan Zheng"').then(() => { paint(); t.needsUpdate = true; }).catch(() => {});
   return t;
 }
