@@ -13,7 +13,7 @@ const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: numb
   yewan: { sun: [-10, 30, -14], col: 0x7a90ff, I: 0.45, hemi: 0.14, env: 0.3, exp: 0.95, fog: 0x0e1018, hdri: "qwantani_night_puresky", bg: 0.45, lamp: 2.8 },
 };
 const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, number, number]; look: [number, number, number] }> = {
-  overview: { eye: [14, 11, 16], look: [0, 1.6, 3] }, // v39: mid-high — figures read as 工笔, not nadir slabs
+  overview: { eye: [13, 9.2, 15], look: [0, 1.8, 3] }, // v40: slightly lower — 工笔 faces, less board-top
   kaichao: { eye: [5, 2.6, 9], look: [0, 3.2, -6] },
   xiban: { eye: [2.6, 4.4, -1.5], look: [0.9, 2.6, 10.5] },
   // judge views: actors from the front row, crowd faces from the stage apron
@@ -54,7 +54,7 @@ export class TempleScene {
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.maxPolarAngle = Math.PI * 0.49;
-    this.controls.minPolarAngle = Math.PI * 0.30; // v39: block near-nadir (white-slab failure mode)
+    this.controls.minPolarAngle = Math.PI * 0.32; // v40: keep mid-high floor
     this.controls.minDistance = 8; // v36: keep orbits out of foliage
     this.controls.maxDistance = 55;
     this.controls.target.set(...POSE.overview.look);
@@ -240,16 +240,15 @@ export class TempleScene {
     S.add(pedestal);
     S.add(ding);
 
-    // v39: fewer hanging lanterns — keep incense axis clear, less nadir clutter
-    for (let r = 0; r < 2; r++) {
-      const z = -2 + r * 8;
-      for (const i of [-3, -2, 2, 3]) this.addLantern(
-        new THREE.Vector3(i * 2.5, 5.0 - Math.cos((i / 3) * 1.2) * 0.5, z));
+    // v40: sparse hanging lanterns — incense axis clear, no ground clutter
+    for (const z of [-2, 6]) {
+      for (const i of [-3, 3]) this.addLantern(
+        new THREE.Vector3(i * 2.6, 5.1 - Math.cos((i / 3) * 1.2) * 0.4, z));
     }
     // banners — muted cloth, not harsh yellow plastic
     const bannerMat = new THREE.MeshStandardMaterial({
-      color: 0x6e1e1a, roughness: 0.95, metalness: 0, side: THREE.DoubleSide,
-      transparent: true, opacity: 0.88,
+      color: 0x5a1a16, roughness: 0.96, metalness: 0, side: THREE.DoubleSide,
+      transparent: true, opacity: 0.78,
     });
     const bannerEdge = new THREE.MeshStandardMaterial({ color: 0x3a1210, roughness: 0.9 });
     for (const x of [-10, 10]) for (const z of [-5, 5]) {

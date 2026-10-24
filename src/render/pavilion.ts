@@ -38,7 +38,7 @@ export class PavilionScene {
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
   private glow: THREE.Mesh;
-  private glowBase = 0.28;
+  private glowBase = 0.42; // v40: stronger 落霞 wash on hero
   private glowRefl!: THREE.Mesh;
   private warm = true;
   private ray = new THREE.Raycaster();
@@ -58,7 +58,7 @@ export class PavilionScene {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower() ? 1 : 1.5));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.52; // v39: calmer 落霞 wash on orbit
+    this.renderer.toneMappingExposure = 0.58; // v40: richer 落霞 without orbit blowout
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -130,9 +130,9 @@ export class PavilionScene {
     this.scene.add(this.sun);
     void skyBand;
     // v36: fixed Mesh plane (not Sprite) so side/back orbits no longer see a billboard washing the frame white
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(36, 12), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd0b0, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(36, 12), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffc8a0, transparent: true, opacity: 0.62, depthWrite: false, side: THREE.DoubleSide, fog: false }));
     this.glow.position.set(-24, 11, -48); this.glow.lookAt(0, 6, 0); this.glow.renderOrder = -1;
-    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(22, 28), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.35, depthWrite: false, fog: false }));
+    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(22, 28), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.22, depthWrite: false, fog: false }));
     this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-12, 0.1, -20); this.glowRefl.renderOrder = 2;
     this.scene.add(this.glowRefl, this.glow);
 
@@ -149,7 +149,7 @@ export class PavilionScene {
     this.markers.set("qiushui", this.water);
     this.markers.set("changtian", this.glow);
 
-    this.mist = particles(220, new THREE.Box3(new THREE.Vector3(-34, 0.2, -30), new THREE.Vector3(30, 1.6, -9)), 0xf0d8c8, 2.6, 0.07, "mist");
+    this.mist = particles(260, new THREE.Box3(new THREE.Vector3(-34, 0.15, -30), new THREE.Vector3(30, 1.4, -9)), 0xe8d0b8, 2.4, 0.055, "mist");
     this.scene.add(this.mist.points);
     loadHdri(this.renderer, this.scene, "qwantani_dusk_2_puresky", true);
     this.scene.environmentIntensity = 0.55;
@@ -158,8 +158,8 @@ export class PavilionScene {
     this.resize();
     this.applyMood();
     // hero composition: pavilion right, setting sun left over the river
-    this.camera.position.set(-9.0, 1.5, 5.5);
-    this.controls.target.set(1.6, 1.3, -12.5);
+    this.camera.position.set(-10.2, 1.65, 4.8);
+    this.controls.target.set(1.2, 1.5, -12.5); // v40: more 落霞 in frame
     this.started = true;
     this.loop();
   }
@@ -218,7 +218,7 @@ export class PavilionScene {
     const glitter = this.water.getObjectByName("glitterPath") as THREE.Mesh | undefined;
     if (glitter) {
       const gm = glitter.material as THREE.MeshBasicMaterial;
-      { const c = this.camera.position, tg = this.controls.target; const el = Math.max(0, Math.min(1, (c.y - tg.y) / c.distanceTo(tg))); gm.opacity = (0.22 + Math.sin(t * 0.6) * 0.08) * Math.max(0, 1 - el * 1.8); }
+      { const c = this.camera.position, tg = this.controls.target; const el = Math.max(0, Math.min(1, (c.y - tg.y) / c.distanceTo(tg))); gm.opacity = (0.12 + Math.sin(t * 0.6) * 0.04) * Math.max(0, 1 - el * 2.0); }
     }
     // wing flap on geese + lone duck
     const flap = (bird: THREE.Object3D, phase: number) => {
@@ -259,7 +259,7 @@ export class PavilionScene {
         const ax = this.glow.position.x - tg.x, az = this.glow.position.z - tg.z, bx = tg.x - cp.x, bz = tg.z - cp.z;
         const f = Math.max(0, (ax * bx + az * bz) / (Math.hypot(ax, az) * Math.hypot(bx, bz) + 1e-6));
         const gm = this.glow.material as THREE.MeshBasicMaterial; const ff = Math.max(0, (f - 0.35) / 0.65); gm.opacity = this.glowBase * (1 - el * 0.9) * Math.pow(ff, 4); this.glow.visible = gm.opacity > 0.03;
-        (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.18 : 0.1) * Math.max(0, 1 - el * 1.6) * Math.pow(ff, 3);
+        (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.14 : 0.08) * Math.max(0, 1 - el * 1.8) * Math.pow(ff, 3);
       }
     }
     this.post.render();
@@ -398,7 +398,7 @@ function makeWater(): THREE.Group {
   g.add(deep);
   const path = new THREE.Mesh(
     new THREE.PlaneGeometry(4.2, 28),
-    new THREE.MeshBasicMaterial({ color: 0xffd8a8, transparent: true, opacity: 0.55, depthWrite: false, alphaMap: glitterAlpha() }),
+    new THREE.MeshBasicMaterial({ color: 0xffd0a0, transparent: true, opacity: 0.28, depthWrite: false, alphaMap: glitterAlpha() }),
   );
   path.rotation.x = -Math.PI / 2;
   path.position.set(-6.4, 0.08, -4.2);

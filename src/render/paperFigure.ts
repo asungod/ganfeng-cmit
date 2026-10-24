@@ -134,19 +134,15 @@ function paintTex(key: string, b: [number, number, number, number], ppm: number,
   texCache.set(key, t); return t;
 }
 function paperMat(map: THREE.Texture, side: THREE.Side): THREE.MeshStandardMaterial {
-  return new THREE.MeshStandardMaterial({ map, alphaTest: 0.45, side, roughness: 0.92, metalness: 0, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: 0.32 });
+  // v40: higher alphaTest cuts soft fringe; slight emissive keep 年画 glow
+  return new THREE.MeshStandardMaterial({ map, alphaTest: 0.58, side, roughness: 0.92, metalness: 0, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: 0.28,
+    polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 });
 }
 const rimCache = new Map<THREE.Texture, THREE.MeshBasicMaterial>();
 function rimMat(m: THREE.MeshStandardMaterial): THREE.MeshBasicMaterial {
   const map = m.map!; let r = rimCache.get(map);
-  if (!r) { r = new THREE.MeshBasicMaterial({ map, color: 0x1a100c, alphaTest: 0.5, side: THREE.DoubleSide }); rimCache.set(map, r); }
+  if (!r) { r = new THREE.MeshBasicMaterial({ map, color: 0x1a100c, alphaTest: 0.72, side: THREE.DoubleSide }); rimCache.set(map, r); }
   return r;
-}
-/** solid ink end-grain — no map RGB (avoids pale robe bleed on board tops at side/close) */
-let END_GRAIN: THREE.MeshBasicMaterial | null = null;
-function endGrainMat(): THREE.MeshBasicMaterial {
-  if (!END_GRAIN) END_GRAIN = new THREE.MeshBasicMaterial({ color: 0x1a100c, side: THREE.DoubleSide });
-  return END_GRAIN;
 }
 let shadowTex: THREE.Texture | null = null;
 /** soft painted contact shadow under the feet */
@@ -161,7 +157,7 @@ export function contactShadow(w = 0.75, d = 0.42): THREE.Mesh {
   return m;
 }
 /** Cardboard thickness — side/close read an edge; high elev must NOT show pale slab tops. */
-const BOARD = 0.16;
+const BOARD = 0.14;
 function part(key: string, b: [number, number, number, number], ppm: number, draw: Draw, opts: { back?: boolean; seg?: [number, number]; z?: number } = {}): Part {
   const [x0, y0, x1, y1] = b;
   const seg = opts.seg ?? [1, 1];
@@ -178,46 +174,25 @@ function part(key: string, b: [number, number, number, number], ppm: number, dra
     g.add(back);
   }
   const rim = rimMat(front.material as THREE.MeshStandardMaterial);
-  // v39: fewer rim layers + slight inset — avoid z-fight / jagged black fringe
-  const layers = 3;
+  // v40: thickness fill ONLY — no oversized outline (was harsh black alpha fringe)
+  const layers = 2;
   for (let i = 0; i < layers; i++) {
     const m = new THREE.Mesh(geo, rim);
     m.position.z = z0 - BOARD / 2 + (i + 0.5) * (BOARD / layers);
-    m.scale.set(1.012, 1.008, 1);
+    m.scale.set(1.0, 1.0, 1);
     m.renderOrder = -1;
     m.userData.paperEdge = true;
     g.add(m);
   }
-  const outline = new THREE.Mesh(geo, rim);
-  outline.position.z = z0 - BOARD / 2 - 0.004;
-  outline.scale.set(1.025, 1.015, 1);
-  outline.renderOrder = -2;
-  outline.userData.paperEdge = true;
-  g.add(outline);
-  // solid dark end-grain caps (cardboard edge at side/close; hidden at high elev)
-  const eg = endGrainMat();
-  const tw = Math.max(0.04, x1 - x0) * 1.02;
-  const top = new THREE.Mesh(new THREE.PlaneGeometry(tw, BOARD), eg);
-  top.rotation.x = -Math.PI / 2;
-  top.position.set((x0 + x1) / 2, y1 + 0.002, z0);
-  top.renderOrder = -1;
-  top.userData.paperEdge = true;
-  g.add(top);
-  for (const sx of [-1, 1]) {
-    const edge = new THREE.Mesh(new THREE.PlaneGeometry(BOARD, Math.max(0.04, y1 - y0) * 1.01), eg);
-    edge.rotation.y = sx * Math.PI / 2;
-    edge.position.set(sx > 0 ? x1 + 0.001 : x0 - 0.001, (y0 + y1) / 2, z0);
-    edge.renderOrder = -1;
-    edge.userData.paperEdge = true;
-    g.add(edge);
-  }
+  // v40b: no solid bbox end-grain caps — they read as black bars/frames at mid-high.
+  // Cardboard thickness = silhouette-matched rim sandwich only (alphaTest).
   return { g, geo, base: Float32Array.from(geo.attributes.position.array as Float32Array) };
 }
 function paperTexMesh(key: string, b: [number, number, number, number], ppm: number, draw: (x: Ctx) => void, geo: THREE.BufferGeometry, side: THREE.Side): THREE.Mesh {
   const map = paintTex(key, b, ppm, draw);
   const m = new THREE.Mesh(geo, paperMat(map, side));
   m.castShadow = true;
-  m.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map, alphaTest: 0.45, side: THREE.DoubleSide });
+  m.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map, alphaTest: 0.58, side: THREE.DoubleSide });
   return m;
 }
 /** flowing cloth: displace vertices by distance from pivot */
@@ -555,7 +530,7 @@ function faceCam(rig: { root: THREE.Group; turn: THREE.Group }, maxYaw: number):
   // v39b: NEVER tip flat (elev*0.92→1.15 laid figures on the ground = beige slabs).
   // Hide board tops only near nadir (birdseye); mid-high/side keep dark cardboard edge.
   // Soft lean ≤0.34 so 工笔 faces stay readable without tipping flat.
-  const hi = elev > 0.72;
+  const hi = elev > 0.48; // v40b: hide rim fill sooner — mid-high reads 工笔 face
   if ((rig as { _edgeHide?: boolean })._edgeHide !== hi) {
     (rig as { _edgeHide?: boolean })._edgeHide = hi;
     rig.root.traverse((o) => { if (o.userData?.paperEdge) o.visible = !hi; });

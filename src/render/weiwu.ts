@@ -10,14 +10,14 @@ import { makeBamboo, makeFigure, makeTree, shadowSize, Flight, disposeScene, gab
 type Pose = { eye: [number, number, number]; look: [number, number, number]; fov?: number };
 /** Overview + per-room camera poses (metres; front of the house faces +z). */
 const POSES: Record<RoomId | "overview", Pose> = {
-  overview: { eye: [8, 48, 4], look: [0, 0, -0.5] }, // v38c: near-nadir plan — open 天井 readable
+  overview: { eye: [15, 22, 13], look: [0, 1.0, -0.5] }, // v40: high oblique — roofs + folk readable (not stick-nadir)
   heping: { eye: [9, 4.2, 22], look: [0, 2.2, 6] },
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
   tianjing: { eye: [0.3, 1.3, 3.2], look: [0, 4.4, -0.5], fov: 66 },
-  zutang: { eye: [0, 1.7, 3.0], look: [0, 1.7, -1.5] },
-  zhengwu: { eye: [0.95, 1.58, -5.0], look: [-0.15, 1.02, -7.5], fov: 56 },
+  zutang: { eye: [0.15, 1.65, 3.4], look: [0, 1.85, -1.6] }, // v40: altar framed
+  zhengwu: { eye: [1.05, 1.55, -4.6], look: [-0.1, 1.15, -7.6], fov: 54 }, // v40: slight lift, less floor wash
   hengwu: { eye: [-5.2, 1.7, 3.5], look: [-7.5, 1.3, -2.0], fov: 55 }, // v38: follow wing out to x±9.4
-  xiangdao: { eye: [6.6, 4.2, 4.8], look: [6.8, 2.4, -1.2], fov: 46 }, // v38c: mid-巷道, both eaves + sky gap
+  xiangdao: { eye: [5.2, 3.4, 7.0], look: [7.6, 1.9, -1.8], fov: 50 }, // v40: from courtyard into 巷道 — depth + both eaves
   jiaolou: { eye: [21, 4.2, 19], look: [11, 5.2, 9] }, // v34: outside, front-right 炮楼 with 射击孔, bamboo behind camera line
 };
 
@@ -63,7 +63,8 @@ export class WeiwuScene {
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.maxPolarAngle = Math.PI * 0.495;
-    this.controls.minDistance = 0.6;
+    this.controls.minPolarAngle = Math.PI * 0.22; // v40: match overview — no pure nadir
+    this.controls.minDistance = 22;
     this.controls.maxDistance = 70;
     this.controls.target.set(...POSES.overview.look);
     this.controls.autoRotate = true;
@@ -354,13 +355,15 @@ export class WeiwuScene {
     // v37: a few courtyard villagers in open 天井 (never under roofs) — for oblique paper-board read
     {
       const cols = [0x3f5f86, 0x7a4a38, 0xc85a6a, 0x4a6a56, 0x8a6a42, 0x5a4830];
+      // v40: courtyard + 巷道 figures (lane cam needs someone in frame)
       const spots: [number, number, number][] = [
         [-1.4, 0, 2.0], [1.2, 0, 1.8], [0.1, 0, 2.4],
         [-1.5, 0, -4.1], [1.3, 0, -4.4], [0.0, 0, -3.9],
         [-1.8, 0, 3.6], [1.7, 0, 3.3],
+        [6.9, 0, 2.2], [7.2, 0, -0.8], [-6.9, 0, 1.5],
       ];
       spots.forEach(([x, y, z], i) => {
-        const f = makeFigure(cols[i % cols.length], 40 + i * 5, 0.95, "crowd");
+        const f = makeFigure(cols[i % cols.length], 40 + i * 5, 1.08, "crowd");
         f.position.set(x, y, z);
         f.rotation.y = (i % 2 ? 0.2 : -0.15) + (i * 0.4);
         this.folk.add(f);
@@ -544,9 +547,9 @@ export class WeiwuScene {
       this.controls.target.copy(look);
     } else this.flight.go(eye, look, r === "overview" ? 2.2 : 1.8);
     this.camera.fov = p.fov ?? 42; this.camera.updateProjectionMatrix();
-    this.controls.minDistance = r === "overview" ? 35 : 0.05;
+    this.controls.minDistance = r === "overview" ? 22 : 0.05;
     this.controls.maxPolarAngle = r === "overview" ? Math.PI * 0.495 : Math.PI * 0.92;
-    this.controls.minPolarAngle = r === "overview" ? 0 : Math.PI * 0.2;
+    this.controls.minPolarAngle = r === "overview" ? Math.PI * 0.22 : Math.PI * 0.2; // v40: block pure nadir sticks
   }
 
   resize(): void {
@@ -669,7 +672,7 @@ function makeFurniture(wood: THREE.Material, lac: THREE.Material) {
       for (const x of [-0.26, 0.26]) g.add(box(0.04, 0.22, 0.48, lac, x, 0.62, 0)); return g; },
     bench(len: number): THREE.Group { const g = new THREE.Group(); g.add(box(len, 0.06, 0.26, wood, 0, 0.45, 0));
       for (const x of [-len / 2 + 0.12, len / 2 - 0.12]) for (const z of [-0.08, 0.08]) g.add(box(0.05, 0.44, 0.05, wood, x, 0.22, z)); return g; },
-    zao(): THREE.Group { const g = new THREE.Group(); g.add(box(1.0, 0.8, 1.4, brick, 0, 0.4, 0)); g.add(box(1.04, 0.05, 1.44, new THREE.MeshStandardMaterial({ color: 0xd8d0c0, roughness: 0.8 }), 0, 0.82, 0));
+    zao(): THREE.Group { const g = new THREE.Group(); g.add(box(1.0, 0.8, 1.4, brick, 0, 0.4, 0)); g.add(box(1.04, 0.05, 1.44, new THREE.MeshStandardMaterial({ color: 0x6a5a48, roughness: 0.9 }), 0, 0.82, 0)); // v40: no white slab from birdseye
       for (const z of [-0.33, 0.33]) { const w = new THREE.Mesh(new THREE.SphereGeometry(0.26, 16, 6, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), iron); w.position.set(0, 0.9, z); w.rotation.x = Math.PI; g.add(w); }
       g.add(box(0.32, 2.4, 0.32, brick, -0.3, 2.0, 0.55)); const mouth = box(0.3, 0.25, 0.02, iron, 0.51, 0.3, 0); mouth.rotation.y = Math.PI / 2; g.add(mouth); return g; },
     gang(): THREE.Group { const g = new THREE.Group(); const j = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.28, 0.75, 20), pot); j.position.y = 0.38; g.add(j);
