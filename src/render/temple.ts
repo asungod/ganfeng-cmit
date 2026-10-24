@@ -13,7 +13,7 @@ const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: numb
   yewan: { sun: [-10, 30, -14], col: 0x7a90ff, I: 0.45, hemi: 0.14, env: 0.3, exp: 0.95, fog: 0x0e1018, hdri: "qwantani_night_puresky", bg: 0.45, lamp: 2.8 },
 };
 const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, number, number]; look: [number, number, number] }> = {
-  overview: { eye: [16, 20, 16], look: [0, 2.0, 4] }, // v38: higher — board top faces readable
+  overview: { eye: [14, 11, 16], look: [0, 1.6, 3] }, // v39: mid-high — figures read as 工笔, not nadir slabs
   kaichao: { eye: [5, 2.6, 9], look: [0, 3.2, -6] },
   xiban: { eye: [2.6, 4.4, -1.5], look: [0.9, 2.6, 10.5] },
   // judge views: actors from the front row, crowd faces from the stage apron
@@ -54,7 +54,7 @@ export class TempleScene {
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.maxPolarAngle = Math.PI * 0.49;
-    this.controls.minPolarAngle = Math.PI * 0.18; // v38: allow steeper overview for board top faces
+    this.controls.minPolarAngle = Math.PI * 0.30; // v39: block near-nadir (white-slab failure mode)
     this.controls.minDistance = 8; // v36: keep orbits out of foliage
     this.controls.maxDistance = 55;
     this.controls.target.set(...POSE.overview.look);
@@ -240,11 +240,11 @@ export class TempleScene {
     S.add(pedestal);
     S.add(ding);
 
-    // lantern strings across the courtyard
-    for (let r = 0; r < 3; r++) {
-      const z = -4 + r * 6;
-      for (let i = -3; i <= 3; i++) if (Math.abs(i) > 1 || r === 2) this.addLantern( // v32: front row keeps the 戏台 sightline clear
-        new THREE.Vector3(i * 2.6, 5.2 - Math.cos((i / 3) * 1.2) * 0.6, z));
+    // v39: fewer hanging lanterns — keep incense axis clear, less nadir clutter
+    for (let r = 0; r < 2; r++) {
+      const z = -2 + r * 8;
+      for (const i of [-3, -2, 2, 3]) this.addLantern(
+        new THREE.Vector3(i * 2.5, 5.0 - Math.cos((i / 3) * 1.2) * 0.5, z));
     }
     // banners — muted cloth, not harsh yellow plastic
     const bannerMat = new THREE.MeshStandardMaterial({
@@ -267,11 +267,11 @@ export class TempleScene {
       S.add(trim);
     }
     // procession: worshippers on the open courtyard axis only (v37: never under 戏台/殿 roofs)
+    // v39: fewer pilgrims, slightly larger, looser spacing — readable cluster not slab grid
     const pilgrimColors = [0x8a5a3a, 0x6a4a2a, 0xa07040, 0x5a4830, 0x9a6840];
-    for (let i = 0; i < 14; i++) {
-      const f = makeFigure(pilgrimColors[i % pilgrimColors.length], i + 7, 1, "robed");
-      // open court ≈ z 6.5 → -1.5 (stage apron ~7.5, hall platform ~-6)
-      f.position.set((i % 2 ? 0.85 : -0.85), 0, 6.2 - i * 0.55);
+    for (let i = 0; i < 8; i++) {
+      const f = makeFigure(pilgrimColors[i % pilgrimColors.length], i + 7, 1.08, "robed");
+      f.position.set((i % 2 ? 1.05 : -1.05) + (i % 4 - 1.5) * 0.08, 0, 5.6 - i * 0.85);
       this.procession.add(f);
     }
     S.add(this.procession);

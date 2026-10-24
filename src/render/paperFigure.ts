@@ -139,8 +139,14 @@ function paperMat(map: THREE.Texture, side: THREE.Side): THREE.MeshStandardMater
 const rimCache = new Map<THREE.Texture, THREE.MeshBasicMaterial>();
 function rimMat(m: THREE.MeshStandardMaterial): THREE.MeshBasicMaterial {
   const map = m.map!; let r = rimCache.get(map);
-  if (!r) { r = new THREE.MeshBasicMaterial({ map, color: 0x2a1810, alphaTest: 0.45, side: THREE.DoubleSide }); rimCache.set(map, r); }
+  if (!r) { r = new THREE.MeshBasicMaterial({ map, color: 0x1a100c, alphaTest: 0.5, side: THREE.DoubleSide }); rimCache.set(map, r); }
   return r;
+}
+/** solid ink end-grain — no map RGB (avoids pale robe bleed on board tops at side/close) */
+let END_GRAIN: THREE.MeshBasicMaterial | null = null;
+function endGrainMat(): THREE.MeshBasicMaterial {
+  if (!END_GRAIN) END_GRAIN = new THREE.MeshBasicMaterial({ color: 0x1a100c, side: THREE.DoubleSide });
+  return END_GRAIN;
 }
 let shadowTex: THREE.Texture | null = null;
 /** soft painted contact shadow under the feet */
@@ -154,24 +160,8 @@ export function contactShadow(w = 0.75, d = 0.42): THREE.Mesh {
   m.rotation.x = -Math.PI / 2; m.position.y = 0.012; m.renderOrder = 1;
   return m;
 }
-/** Cardboard thickness — high overview must show a painted top face, not a black hairline. */
-const BOARD = 0.38;
-let topFaceMat: THREE.MeshBasicMaterial | null = null;
-function topMat(): THREE.MeshBasicMaterial {
-  if (topFaceMat) return topFaceMat;
-  // kraft / 宣纸 top grain so birdseye reads a board face
-  const c = document.createElement("canvas"); c.width = c.height = 64;
-  const x = c.getContext("2d")!;
-  // v38b: warmer 年画 board-top so high overview reads paint, not a pale hairline
-  x.fillStyle = "#e8c9a0"; x.fillRect(0, 0, 64, 64);
-  x.fillStyle = "#d4a574"; for (let i = 0; i < 50; i++) x.fillRect((i * 17) % 64, (i * 29) % 64, 4, 2);
-  x.fillStyle = "#c45a3a"; x.fillRect(8, 8, 48, 10); // vermillion band
-  x.fillStyle = "#2a6a4a"; x.fillRect(8, 40, 48, 8);
-  x.strokeStyle = "#1a1008"; x.lineWidth = 4; x.strokeRect(2, 2, 60, 60);
-  const map = new THREE.CanvasTexture(c); map.colorSpace = THREE.SRGBColorSpace;
-  topFaceMat = new THREE.MeshBasicMaterial({ map, side: THREE.DoubleSide });
-  return topFaceMat;
-}
+/** Cardboard thickness — side/close read an edge; high elev must NOT show pale slab tops. */
+const BOARD = 0.16;
 function part(key: string, b: [number, number, number, number], ppm: number, draw: Draw, opts: { back?: boolean; seg?: [number, number]; z?: number } = {}): Part {
   const [x0, y0, x1, y1] = b;
   const seg = opts.seg ?? [1, 1];
@@ -188,37 +178,37 @@ function part(key: string, b: [number, number, number, number], ppm: number, dra
     g.add(back);
   }
   const rim = rimMat(front.material as THREE.MeshStandardMaterial);
-  const layers = 5;
+  // v39: fewer rim layers + slight inset — avoid z-fight / jagged black fringe
+  const layers = 3;
   for (let i = 0; i < layers; i++) {
     const m = new THREE.Mesh(geo, rim);
     m.position.z = z0 - BOARD / 2 + (i + 0.5) * (BOARD / layers);
-    m.scale.set(1.04, 1.025, 1);
+    m.scale.set(1.012, 1.008, 1);
     m.renderOrder = -1;
+    m.userData.paperEdge = true;
     g.add(m);
   }
   const outline = new THREE.Mesh(geo, rim);
-  outline.position.z = z0 - BOARD / 2 - 0.008;
-  outline.scale.set(1.07, 1.045, 1);
+  outline.position.z = z0 - BOARD / 2 - 0.004;
+  outline.scale.set(1.025, 1.015, 1);
   outline.renderOrder = -2;
+  outline.userData.paperEdge = true;
   g.add(outline);
-  // painted top face (宣纸) — the key high-angle read
-  const tw = Math.max(0.05, x1 - x0) * 1.06;
-  const top = new THREE.Mesh(new THREE.PlaneGeometry(tw, BOARD * 1.02), topMat());
+  // solid dark end-grain caps (cardboard edge at side/close; hidden at high elev)
+  const eg = endGrainMat();
+  const tw = Math.max(0.04, x1 - x0) * 1.02;
+  const top = new THREE.Mesh(new THREE.PlaneGeometry(tw, BOARD), eg);
   top.rotation.x = -Math.PI / 2;
-  top.position.set((x0 + x1) / 2, y1 + 0.004, z0);
-  top.renderOrder = 0;
+  top.position.set((x0 + x1) / 2, y1 + 0.002, z0);
+  top.renderOrder = -1;
+  top.userData.paperEdge = true;
   g.add(top);
-  // ink rim around top face
-  const topInk = new THREE.Mesh(new THREE.PlaneGeometry(tw * 1.06, BOARD * 1.08), rim);
-  topInk.rotation.x = -Math.PI / 2;
-  topInk.position.set((x0 + x1) / 2, y1 + 0.002, z0);
-  topInk.renderOrder = -1;
-  g.add(topInk);
   for (const sx of [-1, 1]) {
-    const edge = new THREE.Mesh(new THREE.PlaneGeometry(BOARD, Math.max(0.05, y1 - y0) * 1.03), rim);
+    const edge = new THREE.Mesh(new THREE.PlaneGeometry(BOARD, Math.max(0.04, y1 - y0) * 1.01), eg);
     edge.rotation.y = sx * Math.PI / 2;
-    edge.position.set(sx > 0 ? x1 + 0.002 : x0 - 0.002, (y0 + y1) / 2, z0);
+    edge.position.set(sx > 0 ? x1 + 0.001 : x0 - 0.001, (y0 + y1) / 2, z0);
     edge.renderOrder = -1;
+    edge.userData.paperEdge = true;
     g.add(edge);
   }
   return { g, geo, base: Float32Array.from(geo.attributes.position.array as Float32Array) };
@@ -558,14 +548,21 @@ function faceCam(rig: { root: THREE.Group; turn: THREE.Group }, maxYaw: number):
   if (Math.abs(yaw) > Math.PI * 0.75) yaw = yaw - Math.sign(yaw) * Math.PI;
   void maxYaw;
   let d = yaw - rig.turn.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
-  rig.turn.rotation.y += d * 0.12;
-  // v38: soft pitch lean when camera is high — tip painted face toward lens so overview isn't a hairline
+  rig.turn.rotation.y += d * 0.14;
   const rootW = rig.root.getWorldPosition(new THREE.Vector3());
   const dx = camW.x - rootW.x, dy = camW.y - rootW.y, dz = camW.z - rootW.z;
-  const elev = Math.atan2(dy, Math.hypot(dx, dz)); // 0 horizon … ~1.2 overhead
-  // v38b: lean hard when polar is high so 工笔 face (not just kraft top) faces the lens
-  const lean = Math.min(1.05, Math.max(0, (elev - 0.12) * 1.3));
-  rig.turn.rotation.x += (lean - rig.turn.rotation.x) * 0.35;
+  const elev = Math.atan2(dy, Math.hypot(dx, dz)); // 0 horizon … ~1.4 nadir
+  // v39b: NEVER tip flat (elev*0.92→1.15 laid figures on the ground = beige slabs).
+  // Hide board tops only near nadir (birdseye); mid-high/side keep dark cardboard edge.
+  // Soft lean ≤0.34 so 工笔 faces stay readable without tipping flat.
+  const hi = elev > 0.72;
+  if ((rig as { _edgeHide?: boolean })._edgeHide !== hi) {
+    (rig as { _edgeHide?: boolean })._edgeHide = hi;
+    rig.root.traverse((o) => { if (o.userData?.paperEdge) o.visible = !hi; });
+  }
+  // soft lean only — hard cap so birdseye/nadir stays upright billboards
+  const lean = Math.min(0.34, Math.max(0, (elev - 0.18) * 0.48));
+  rig.turn.rotation.x += (lean - rig.turn.rotation.x) * 0.22;
 }
 
 const sm = (a: number, b: number, v: number) => { const k = Math.min(1, Math.max(0, (v - a) / (b - a))); return k * k * (3 - 2 * k); };
