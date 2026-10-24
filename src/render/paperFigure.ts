@@ -154,8 +154,24 @@ export function contactShadow(w = 0.75, d = 0.42): THREE.Mesh {
   m.rotation.x = -Math.PI / 2; m.position.y = 0.012; m.renderOrder = 1;
   return m;
 }
-/** Cardboard thickness in metres — high/side angles must read a carved 皮影 board, not a zero-width sheet. */
-const BOARD = 0.24;
+/** Cardboard thickness — high overview must show a painted top face, not a black hairline. */
+const BOARD = 0.38;
+let topFaceMat: THREE.MeshBasicMaterial | null = null;
+function topMat(): THREE.MeshBasicMaterial {
+  if (topFaceMat) return topFaceMat;
+  // kraft / 宣纸 top grain so birdseye reads a board face
+  const c = document.createElement("canvas"); c.width = c.height = 64;
+  const x = c.getContext("2d")!;
+  // v38b: warmer 年画 board-top so high overview reads paint, not a pale hairline
+  x.fillStyle = "#e8c9a0"; x.fillRect(0, 0, 64, 64);
+  x.fillStyle = "#d4a574"; for (let i = 0; i < 50; i++) x.fillRect((i * 17) % 64, (i * 29) % 64, 4, 2);
+  x.fillStyle = "#c45a3a"; x.fillRect(8, 8, 48, 10); // vermillion band
+  x.fillStyle = "#2a6a4a"; x.fillRect(8, 40, 48, 8);
+  x.strokeStyle = "#1a1008"; x.lineWidth = 4; x.strokeRect(2, 2, 60, 60);
+  const map = new THREE.CanvasTexture(c); map.colorSpace = THREE.SRGBColorSpace;
+  topFaceMat = new THREE.MeshBasicMaterial({ map, side: THREE.DoubleSide });
+  return topFaceMat;
+}
 function part(key: string, b: [number, number, number, number], ppm: number, draw: Draw, opts: { back?: boolean; seg?: [number, number]; z?: number } = {}): Part {
   const [x0, y0, x1, y1] = b;
   const seg = opts.seg ?? [1, 1];
@@ -171,32 +187,37 @@ function part(key: string, b: [number, number, number, number], ppm: number, dra
     back.position.z = z0 - BOARD / 2;
     g.add(back);
   }
-  // v37b: inked rim stack + side/top edge strips so overhead/side views show board thickness
   const rim = rimMat(front.material as THREE.MeshStandardMaterial);
-  const layers = 4;
+  const layers = 5;
   for (let i = 0; i < layers; i++) {
     const m = new THREE.Mesh(geo, rim);
     m.position.z = z0 - BOARD / 2 + (i + 0.5) * (BOARD / layers);
-    m.scale.set(1.034, 1.022, 1);
+    m.scale.set(1.04, 1.025, 1);
     m.renderOrder = -1;
     g.add(m);
   }
   const outline = new THREE.Mesh(geo, rim);
-  outline.position.z = z0 - BOARD / 2 - 0.006;
-  outline.scale.set(1.06, 1.04, 1);
+  outline.position.z = z0 - BOARD / 2 - 0.008;
+  outline.scale.set(1.07, 1.045, 1);
   outline.renderOrder = -2;
   g.add(outline);
-  // top end-grain (readable from birdseye / high oblique)
-  const top = new THREE.Mesh(new THREE.PlaneGeometry(Math.max(0.04, x1 - x0) * 1.04, BOARD), rim);
+  // painted top face (宣纸) — the key high-angle read
+  const tw = Math.max(0.05, x1 - x0) * 1.06;
+  const top = new THREE.Mesh(new THREE.PlaneGeometry(tw, BOARD * 1.02), topMat());
   top.rotation.x = -Math.PI / 2;
-  top.position.set((x0 + x1) / 2, y1 + 0.002, z0);
-  top.renderOrder = -1;
+  top.position.set((x0 + x1) / 2, y1 + 0.004, z0);
+  top.renderOrder = 0;
   g.add(top);
-  // left / right edge strips (readable from side)
+  // ink rim around top face
+  const topInk = new THREE.Mesh(new THREE.PlaneGeometry(tw * 1.06, BOARD * 1.08), rim);
+  topInk.rotation.x = -Math.PI / 2;
+  topInk.position.set((x0 + x1) / 2, y1 + 0.002, z0);
+  topInk.renderOrder = -1;
+  g.add(topInk);
   for (const sx of [-1, 1]) {
-    const edge = new THREE.Mesh(new THREE.PlaneGeometry(BOARD, Math.max(0.04, y1 - y0) * 1.02), rim);
+    const edge = new THREE.Mesh(new THREE.PlaneGeometry(BOARD, Math.max(0.05, y1 - y0) * 1.03), rim);
     edge.rotation.y = sx * Math.PI / 2;
-    edge.position.set(sx > 0 ? x1 + 0.001 : x0 - 0.001, (y0 + y1) / 2, z0);
+    edge.position.set(sx > 0 ? x1 + 0.002 : x0 - 0.002, (y0 + y1) / 2, z0);
     edge.renderOrder = -1;
     g.add(edge);
   }
@@ -531,12 +552,20 @@ function actorRig(role: ActorRole, _color: number): Rig {
 
 function faceCam(rig: { root: THREE.Group; turn: THREE.Group }, maxYaw: number): void {
   if (!CAM) return;
-  const v = rig.root.worldToLocal(CAM.getWorldPosition(new THREE.Vector3()));
+  const camW = CAM.getWorldPosition(new THREE.Vector3());
+  const v = rig.root.worldToLocal(camW.clone());
   let yaw = Math.atan2(v.x, v.z);
-  if (Math.abs(yaw) > Math.PI * 0.75) yaw = yaw - Math.sign(yaw) * Math.PI; // v33: only well behind (>135°) show the back; side views keep the painted front
-  void maxYaw; // v33: full Y billboard (no cap) so a side view never sees the board edge-on
+  if (Math.abs(yaw) > Math.PI * 0.75) yaw = yaw - Math.sign(yaw) * Math.PI;
+  void maxYaw;
   let d = yaw - rig.turn.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
   rig.turn.rotation.y += d * 0.12;
+  // v38: soft pitch lean when camera is high — tip painted face toward lens so overview isn't a hairline
+  const rootW = rig.root.getWorldPosition(new THREE.Vector3());
+  const dx = camW.x - rootW.x, dy = camW.y - rootW.y, dz = camW.z - rootW.z;
+  const elev = Math.atan2(dy, Math.hypot(dx, dz)); // 0 horizon … ~1.2 overhead
+  // v38b: lean hard when polar is high so 工笔 face (not just kraft top) faces the lens
+  const lean = Math.min(1.05, Math.max(0, (elev - 0.12) * 1.3));
+  rig.turn.rotation.x += (lean - rig.turn.rotation.x) * 0.35;
 }
 
 const sm = (a: number, b: number, v: number) => { const k = Math.min(1, Math.max(0, (v - a) / (b - a))); return k * k * (3 - 2 * k); };

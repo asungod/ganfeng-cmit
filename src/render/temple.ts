@@ -13,7 +13,7 @@ const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: numb
   yewan: { sun: [-10, 30, -14], col: 0x7a90ff, I: 0.45, hemi: 0.14, env: 0.3, exp: 0.95, fog: 0x0e1018, hdri: "qwantani_night_puresky", bg: 0.45, lamp: 2.8 },
 };
 const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, number, number]; look: [number, number, number] }> = {
-  overview: { eye: [18, 16, 18], look: [0, 1.8, 2] }, // v37b: higher/wider — court + figures, not 戏台 roof fill
+  overview: { eye: [16, 20, 16], look: [0, 2.0, 4] }, // v38: higher — board top faces readable
   kaichao: { eye: [5, 2.6, 9], look: [0, 3.2, -6] },
   xiban: { eye: [2.6, 4.4, -1.5], look: [0.9, 2.6, 10.5] },
   // judge views: actors from the front row, crowd faces from the stage apron
@@ -54,7 +54,7 @@ export class TempleScene {
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.maxPolarAngle = Math.PI * 0.49;
-    this.controls.minPolarAngle = Math.PI * 0.28; // v37b: higher polar to read board thickness without roof-fill
+    this.controls.minPolarAngle = Math.PI * 0.18; // v38: allow steeper overview for board top faces
     this.controls.minDistance = 8; // v36: keep orbits out of foliage
     this.controls.maxDistance = 55;
     this.controls.target.set(...POSE.overview.look);
