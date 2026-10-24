@@ -13,7 +13,7 @@ const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: numb
   yewan: { sun: [-10, 30, -14], col: 0x7a90ff, I: 0.45, hemi: 0.14, env: 0.3, exp: 0.95, fog: 0x0e1018, hdri: "qwantani_night_puresky", bg: 0.45, lamp: 2.8 },
 };
 const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, number, number]; look: [number, number, number] }> = {
-  overview: { eye: [16, 14, 18], look: [0, 3, -4] }, // v36: farther so orbits stay clear of walls/trees
+  overview: { eye: [18, 16, 18], look: [0, 1.8, 2] }, // v37b: higher/wider — court + figures, not 戏台 roof fill
   kaichao: { eye: [5, 2.6, 9], look: [0, 3.2, -6] },
   xiban: { eye: [2.6, 4.4, -1.5], look: [0.9, 2.6, 10.5] },
   // judge views: actors from the front row, crowd faces from the stage apron
@@ -54,7 +54,7 @@ export class TempleScene {
     this.controls = new OrbitControls(this.camera, canvas);
     this.controls.enableDamping = true;
     this.controls.maxPolarAngle = Math.PI * 0.49;
-    this.controls.minPolarAngle = Math.PI * 0.38; // v36: no roof-filled high frames
+    this.controls.minPolarAngle = Math.PI * 0.28; // v37b: higher polar to read board thickness without roof-fill
     this.controls.minDistance = 8; // v36: keep orbits out of foliage
     this.controls.maxDistance = 55;
     this.controls.target.set(...POSE.overview.look);
@@ -203,14 +203,14 @@ export class TempleScene {
       stage.add(c);
     }
     const sroof = curvedRoof(11, 8, 2.0, roofTile, gold, true);
-    sroof.position.y = 6;
+    sroof.position.y = 6.55; // v37c: more headroom so high polar never clips 生旦净
     stage.add(sroof);
     // performers (simple robed figures) — visible during the opera
     const robe = [0xb8202a, 0x1e5aa0, 0xd8a820];
     for (let i = 0; i < 3; i++) {
       const f = makeFigure(robe[i], i + 8, 1.12, "performer");
       // v28: 老生 / 净 / 旦 spaced 1.9 apart; 净 set back so his 靠旗 never cross the 旦's 水袖
-      f.position.set(-0.2 + i * 1.75, 1.92, i === 0 ? 0.5 : i === 1 ? 1.7 : -0.9); // v33: depth-staggered so no one hides another in side60; // v31: 净 mid-depth (visible in side60), 旦 downstage; v29: 老生 upstage so side views clear the 靠旗
+      f.position.set(-0.1 + i * 1.65, 1.92, i === 0 ? -0.85 : i === 1 ? 0.15 : -1.35); // v37c: apron-forward, clear of eave when polar high
       f.rotation.y = Math.PI;
       f.name = "performer";
       stage.add(f);
@@ -266,20 +266,22 @@ export class TempleScene {
       trim.position.set(flag.position.x, 6.12, z);
       S.add(trim);
     }
-    // procession: worshippers with incense banners walking the axis
+    // procession: worshippers on the open courtyard axis only (v37: never under 戏台/殿 roofs)
     const pilgrimColors = [0x8a5a3a, 0x6a4a2a, 0xa07040, 0x5a4830, 0x9a6840];
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < 14; i++) {
       const f = makeFigure(pilgrimColors[i % pilgrimColors.length], i + 7, 1, "robed");
-      f.position.set((i % 2 ? 0.8 : -0.8), 0, 14 - i * 1.1);
+      // open court ≈ z 6.5 → -1.5 (stage apron ~7.5, hall platform ~-6)
+      f.position.set((i % 2 ? 0.85 : -0.85), 0, 6.2 - i * 0.55);
       this.procession.add(f);
     }
     S.add(this.procession);
-    // audience facing the stage
+    // audience facing the stage — keep clear of stage apron / roof drip line
     const crowdColors = [0x2e4a6a, 0x6a3a2a, 0x3a5a4a, 0x7a6040, 0x4a3a5a, 0x8a7a60, 0x5a2a2a, 0x3a4048];
     for (let i = 0; i < 28; i++) {
       const row = Math.floor(i / 7), col = i % 7;
       const f = makeFigure(crowdColors[i % crowdColors.length], i * 3 + 11, 0.92 + (i % 5) * 0.02, "crowd");
-      f.position.set(-5.0 + col * 1.65 + (row % 2) * 0.55 + Math.sin(i * 7.1) * 0.35, 0, 6.5 - row * 1.35 + Math.cos(i * 3.3) * 0.3);
+      // v37: start further from stage (was 6.5) so high-angle never clips heads through 戏台 eaves
+      f.position.set(-4.8 + col * 1.6 + (row % 2) * 0.5 + Math.sin(i * 7.1) * 0.3, 0, 4.8 - row * 1.2 + Math.cos(i * 3.3) * 0.2);
       f.rotation.y = (i % 7 - 3) * 0.04;
       this.audience.add(f);
     }
@@ -386,7 +388,9 @@ export class TempleScene {
     this.haze.update(t);
     if (this.procession.visible)
       this.procession.children.forEach((f, i) => {
-        f.position.z = 15 - ((t * 0.6 + i * 1.1) % 20);
+        // v37: walk only the open court (z 6.4 → -1.6); never under 戏台 roof
+        const span = 8.0;
+        f.position.z = 6.4 - ((t * 0.45 + i * 0.55) % span);
         f.position.y = Math.abs(Math.sin(t * 3 + i)) * 0.04;
       });
     // v29: hide lanterns that pass right in front of the lens (camera flights, close orbits)

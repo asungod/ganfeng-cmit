@@ -154,20 +154,52 @@ export function contactShadow(w = 0.75, d = 0.42): THREE.Mesh {
   m.rotation.x = -Math.PI / 2; m.position.y = 0.012; m.renderOrder = 1;
   return m;
 }
+/** Cardboard thickness in metres — high/side angles must read a carved 皮影 board, not a zero-width sheet. */
+const BOARD = 0.24;
 function part(key: string, b: [number, number, number, number], ppm: number, draw: Draw, opts: { back?: boolean; seg?: [number, number]; z?: number } = {}): Part {
   const [x0, y0, x1, y1] = b;
   const seg = opts.seg ?? [1, 1];
   const geo = new THREE.PlaneGeometry(x1 - x0, y1 - y0, seg[0], seg[1]);
   geo.translate((x0 + x1) / 2, (y0 + y1) / 2, 0);
   const g = new THREE.Group();
+  const z0 = opts.z ?? 0;
   const front = paperTexMesh(key + ":f", b, ppm, (x) => draw(x, false), geo, opts.back === false ? THREE.DoubleSide : THREE.FrontSide);
+  front.position.z = z0 + BOARD / 2;
   g.add(front);
-  if (opts.back !== false) g.add(paperTexMesh(key + ":b", b, ppm, (x) => draw(x, true), geo, THREE.BackSide));
-  if (opts.z) front.position.z = opts.z, g.children[1] && (g.children[1].position.z = opts.z);
-  // 纸板厚度: dark inked rim behind every cut piece so side views read as a carved board, not a sheet
-  const rim = new THREE.Mesh(geo, rimMat(front.material as THREE.MeshStandardMaterial));
-  rim.position.z = (opts.z ?? 0) - 0.007; rim.scale.set(1.035, 1.02, 1); rim.renderOrder = -1;
-  g.add(rim);
+  if (opts.back !== false) {
+    const back = paperTexMesh(key + ":b", b, ppm, (x) => draw(x, true), geo, THREE.BackSide);
+    back.position.z = z0 - BOARD / 2;
+    g.add(back);
+  }
+  // v37b: inked rim stack + side/top edge strips so overhead/side views show board thickness
+  const rim = rimMat(front.material as THREE.MeshStandardMaterial);
+  const layers = 4;
+  for (let i = 0; i < layers; i++) {
+    const m = new THREE.Mesh(geo, rim);
+    m.position.z = z0 - BOARD / 2 + (i + 0.5) * (BOARD / layers);
+    m.scale.set(1.034, 1.022, 1);
+    m.renderOrder = -1;
+    g.add(m);
+  }
+  const outline = new THREE.Mesh(geo, rim);
+  outline.position.z = z0 - BOARD / 2 - 0.006;
+  outline.scale.set(1.06, 1.04, 1);
+  outline.renderOrder = -2;
+  g.add(outline);
+  // top end-grain (readable from birdseye / high oblique)
+  const top = new THREE.Mesh(new THREE.PlaneGeometry(Math.max(0.04, x1 - x0) * 1.04, BOARD), rim);
+  top.rotation.x = -Math.PI / 2;
+  top.position.set((x0 + x1) / 2, y1 + 0.002, z0);
+  top.renderOrder = -1;
+  g.add(top);
+  // left / right edge strips (readable from side)
+  for (const sx of [-1, 1]) {
+    const edge = new THREE.Mesh(new THREE.PlaneGeometry(BOARD, Math.max(0.04, y1 - y0) * 1.02), rim);
+    edge.rotation.y = sx * Math.PI / 2;
+    edge.position.set(sx > 0 ? x1 + 0.001 : x0 - 0.001, (y0 + y1) / 2, z0);
+    edge.renderOrder = -1;
+    g.add(edge);
+  }
   return { g, geo, base: Float32Array.from(geo.attributes.position.array as Float32Array) };
 }
 function paperTexMesh(key: string, b: [number, number, number, number], ppm: number, draw: (x: Ctx) => void, geo: THREE.BufferGeometry, side: THREE.Side): THREE.Mesh {

@@ -4,7 +4,8 @@ import * as THREE from "three";
 import { qingwaMat } from "./guofeng";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { HourId, RoomId } from "../data/hakka";
-import { makeBamboo, makeTree, shadowSize, Flight, disposeScene, gableRoof, lantern, loadHdri, makePost, makeRenderer, particles, phMat, wbox, type Post } from "./kit";
+import { setPaperCamera } from "./paperFigure";
+import { makeBamboo, makeFigure, makeTree, shadowSize, Flight, disposeScene, gableRoof, lantern, loadHdri, makePost, makeRenderer, particles, phMat, wbox, type Post } from "./kit";
 
 type Pose = { eye: [number, number, number]; look: [number, number, number]; fov?: number };
 /** Overview + per-room camera poses (metres; front of the house faces +z). */
@@ -14,7 +15,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
   tianjing: { eye: [0.3, 1.3, 2.6], look: [0, 4.4, -0.8], fov: 66 }, // v34: from the 下厅 edge across the open 天井 to 祖堂, sky in frame
   zutang: { eye: [0, 1.7, 2.4], look: [0, 1.7, -4] },
-  zhengwu: { eye: [0.95, 1.58, -5.2], look: [-0.15, 1.02, -7.55], fov: 56 }, // v36: inside 上堂 doorway → 八仙桌 + side benches, less wall
+  zhengwu: { eye: [0.95, 1.58, -6.0], look: [-0.15, 1.02, -8.4], fov: 56 }, // v37: follow 上堂 moved to z=-7.5
   hengwu: { eye: [-3.95, 1.7, 4.3], look: [-5.6, 1.3, -4.5], fov: 55 }, // v34: down the 横屋 row: doors, 木窗格, 灶台, 水缸, 簸箕, 农具
   xiangdao: { eye: [5.3, 1.8, 4.3], look: [4.6, 1.4, -5], fov: 55 }, // v34: east 巷道 (west lane belongs to 横屋 view)
   jiaolou: { eye: [21, 4.2, 19], look: [11, 5.2, 9] }, // v34: outside, front-right 炮楼 with 射击孔, bamboo behind camera line
@@ -51,6 +52,7 @@ export class WeiwuScene {
   private fills: { l: THREE.PointLight; k: number }[] = [];
   private haze!: THREE.Mesh;
   private winMats: THREE.MeshStandardMaterial[] = [];
+  private folk = new THREE.Group();
 
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = makeRenderer(canvas, 1);
@@ -159,32 +161,33 @@ export class WeiwuScene {
       s.position.set(i * 2.2, 4.1, D / 2 + T / 2 + 0.01);
       S.add(s);
     }
-    // perimeter wall-rooms: shed roof all around inside the outer wall
-    const ring = (len: number, x: number, z: number, rotY: number) => {
-      const r = gableRoof(len, 4.2, 1.3, tile, ridge);
-      r.position.set(x, H - 0.4, z);
-      r.rotation.y = rotY;
-      S.add(r);
-      const inner = wbox(len, H - 0.6, 0.3, earthIn);
-      inner.position.set(x + Math.sin(rotY) * 0, (H - 0.6) / 2, z);
-      if (rotY === 0) inner.position.z += z > 0 ? -2.1 : 2.1;
-      else inner.position.x += x > 0 ? -2.1 : 2.1;
-      if (rotY !== 0) return; // v35: side ring inner faces are replaced by the 横屋 wings (moved outward)
-      if (z < 0) { // v35: back ring face used to cut straight across the axis between 祖堂 and 上堂 — keep only the bays beside the halls
-        for (const sx of [-1, 1]) {
-          const seg = wbox(3.0, H - 0.6, 0.3, earthIn);
-          seg.position.set(sx * 5.2, (H - 0.6) / 2, inner.position.z);
-          S.add(seg); this.solids.push(seg);
-        }
-        return;
-      }
-      S.add(inner); this.solids.push(inner);
-    };
-    ring(W, 0, -D / 2 + 2.1, 0);
-    ring(W / 2 - 1.6, -(W / 4 + 0.8), D / 2 - 2.1, 0);
-    ring(W / 2 - 1.6, W / 4 + 0.8, D / 2 - 2.1, 0);
-    ring(D - 8.4, -W / 2 + 2.1, 0, Math.PI / 2);
-    ring(D - 8.4, W / 2 - 2.1, 0, Math.PI / 2);
+    // v37b: perimeter sheds hug the outer wall only — never reach axis halls or 横屋.
+    // Front: two short bays flanking the 门楼 (outside |x|>5). Back: corner bays only.
+    // No side-ring roofs (横屋 owns the flanks).
+    const wallRoomDepth = 1.35;
+    for (const sx of [-1, 1]) {
+      // front wall rooms flanking the gate
+      const fx = sx * 7.4;
+      const fzWall = D / 2;
+      const fz = fzWall - wallRoomDepth / 2;
+      const flen = 5.2;
+      const fr = gableRoof(flen, wallRoomDepth, 0.65, tile, ridge);
+      fr.position.set(fx, H - 0.05, fz);
+      S.add(fr);
+      const finner = wbox(flen, H - 0.6, 0.28, earthIn);
+      finner.position.set(fx, (H - 0.6) / 2, fzWall - wallRoomDepth);
+      S.add(finner); this.solids.push(finner);
+      // back corner bays — clear 上堂 (hall X ≈ ±3.7) and 横屋 (≈ ±7–9)
+      const bx = sx * 8.6;
+      const bzWall = -D / 2;
+      const bz = bzWall + wallRoomDepth / 2;
+      const br = gableRoof(3.2, wallRoomDepth, 0.65, tile, ridge);
+      br.position.set(bx, H - 0.05, bz);
+      S.add(br);
+      const bseg = wbox(3.2, H - 0.6, 0.28, earthIn);
+      bseg.position.set(bx, (H - 0.6) / 2, bzWall + wallRoomDepth);
+      S.add(bseg); this.solids.push(bseg);
+    }
 
     // 门楼 gate house
     const gate = new THREE.Group();
@@ -214,8 +217,8 @@ export class WeiwuScene {
     ]);
     plaque.position.set(0, 4.1, 0.72);
     gate.add(plaque);
-    const gr = gableRoof(gw + 2.2, 2.4, 0.9, tile, ridge);
-    gr.position.y = 4.9;
+    const gr = gableRoof(gw + 1.6, 1.55, 0.8, tile, ridge); // v37b: shallower — clear of 下堂 eaves
+    gr.position.set(0, 4.9, 0.35);
     gate.add(gr);
     gate.position.set(0, 0, D / 2);
     S.add(gate);
@@ -266,7 +269,8 @@ export class WeiwuScene {
         r.position.set(0, 4.25, -depth / 2 + (i + 0.5) * (depth / 9));
         hg.add(r);
       }
-      const roof = gableRoof(hw + 0.6, depth + 0.4, 1.9, tile, ridge);
+      // v37b: eaves barely past walls so birdseye shows distinct ridges + open 天井
+      const roof = gableRoof(hw + 0.15, depth - 0.15, 1.55, tile, ridge);
       roof.position.y = 4.3;
       hg.add(roof);
       if (name === "zutang") {
@@ -350,38 +354,54 @@ export class WeiwuScene {
       S.add(hg);
     };
     const furn = makeFurniture(wood, lac);
-    hall(5.2, 4, "lower");
-    hall(-1.9, 5, "zutang");
-    hall(-6.6, 3.2, "upper");
+    hall(4.4, 3.6, "lower"); // v37b: pulled south — clear of 门楼/front sheds
+    hall(-1.4, 4.2, "zutang");
+    hall(-7.0, 2.6, "upper"); // v37c: back face inside rear wall (was piercing coping)
     // 天井 paved courtyards between the halls (sunken, stone)
-    for (const z of [1.6, -4.7]) {
+    for (const z of [1.4, -5.0]) {
       const tj = wbox(7.4, 0.06, 2.2, stone);
       tj.position.set(0, 0.03, z);
       S.add(tj);
     }
+    // v37: a few courtyard villagers in open 天井 (never under roofs) — for oblique paper-board read
+    {
+      const cols = [0x3f5f86, 0x7a4a38, 0xc85a6a, 0x4a6a56, 0x8a6a42, 0x5a4830];
+      const spots: [number, number, number][] = [
+        [-1.6, 0, 1.4], [1.4, 0, 1.15], [0.2, 0, 1.75],
+        [-1.8, 0, -4.9], [1.5, 0, -5.15], [0.1, 0, -4.7],
+        [-2.2, 0, 3.4], [2.0, 0, 3.1],
+      ];
+      spots.forEach(([x, y, z], i) => {
+        const f = makeFigure(cols[i % cols.length], 40 + i * 5, 0.95, "crowd");
+        f.position.set(x, y, z);
+        f.rotation.y = (i % 2 ? 0.2 : -0.15) + (i * 0.4);
+        this.folk.add(f);
+      });
+      S.add(this.folk);
+    }
     // 横屋 side rows (two long wings) and 巷道 lanes
     for (const sx of [-1, 1]) {
       const wing = new THREE.Group();
-      const body = wbox(2.6, 3.4, 12, earthIn);
+      const body = wbox(2.5, 3.4, 8.6, earthIn);
       body.position.set(0, 1.7, 0);
       wing.add(body); this.solids.push(body);
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 4; i++) {
         const door = wbox(0.9, 2.0, 0.1, wood);
-        door.position.set(-sx * 1.31, 1.0, -4.8 + i * 2.4);
+        door.position.set(-sx * 1.26, 1.0, -3.6 + i * 2.4);
         door.rotation.y = Math.PI / 2;
         wing.add(door);
       }
-      for (let i = 0; i < 5; i++) { // v34: 木窗格 between doors, warm glow at dusk/night
+      for (let i = 0; i < 4; i++) { // v34: 木窗格 between doors, warm glow at dusk/night
         const wm = new THREE.MeshStandardMaterial({ map: latticeTex(), color: 0xffffff, emissive: 0xffb060, emissiveIntensity: 0, roughness: 0.8 });
         this.winMats.push(wm);
         const w = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.7), wm);
-        w.position.set(-sx * 1.32, 1.9, -3.6 + i * 2.4); w.rotation.y = -sx * Math.PI / 2; wing.add(w);
+        w.position.set(-sx * 1.27, 1.9, -2.4 + i * 2.4); w.rotation.y = -sx * Math.PI / 2; wing.add(w);
       }
-      const r = gableRoof(12, 2.6, 0.9, tile, ridge);
+      const r = gableRoof(8.4, 2.05, 0.78, tile, ridge); // v37c: clear of 上堂 eaves + corner towers
       r.rotation.y = Math.PI / 2;
       r.position.y = 3.4;
       wing.add(r);
-      wing.position.set(sx * 8.0, 0, -0.5); // v35: outward → 巷道 ≈ 3.2 m wide
+      wing.position.set(sx * 8.6, 0, -0.4); // v37c: centered on mid-courts, clear 上堂
       S.add(wing);
     }
     // v34: 横屋 lane life — 灶台, 水缸, 簸箕, 农具, 条凳 (west lane), and a few in the east 巷道
@@ -550,6 +570,11 @@ export class WeiwuScene {
     this.flight.step(dt);
     this.fireflies.update(now / 1000);
     this.smoke.update(now / 1000);
+    setPaperCamera(this.camera);
+    this.folk.traverse((o) => {
+      const an = o.userData.anim as ((t: number) => void) | undefined;
+      if (an) an(now / 1000);
+    });
     this.controls.update();
     this.collide();
     { // v30: dim exposure/sky when looking into the low dusk sun (backlit washout)
