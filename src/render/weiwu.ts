@@ -10,12 +10,12 @@ import { makeBamboo, makeFigure, makeTree, shadowSize, Flight, disposeScene, gab
 type Pose = { eye: [number, number, number]; look: [number, number, number]; fov?: number };
 /** Overview + per-room camera poses (metres; front of the house faces +z). */
 const POSES: Record<RoomId | "overview", Pose> = {
-  overview: { eye: [15, 22, 13], look: [0, 1.0, -0.5] }, // v40: high oblique — roofs + folk readable (not stick-nadir)
+  overview: { eye: [10, 14, 12], look: [0, 1.4, -1.0] }, // v41r3: open bays face camera more
   heping: { eye: [9, 4.2, 22], look: [0, 2.2, 6] },
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
-  tianjing: { eye: [0.3, 1.3, 3.2], look: [0, 4.4, -0.5], fov: 66 },
-  zutang: { eye: [0.15, 1.65, 3.4], look: [0, 1.85, -1.6] }, // v40: altar framed
-  zhengwu: { eye: [1.05, 1.55, -4.6], look: [-0.1, 1.15, -7.6], fov: 54 }, // v40: slight lift, less floor wash
+  tianjing: { eye: [0.4, 2.2, 4.0], look: [0, 2.0, -1.5], fov: 58 }, // v41r2: courtyard → halls
+  zutang: { eye: [0.15, 3.5, 3.2], look: [0, 1.6, -1.3], fov: 46 }, // v41r3b: centre — no near-post fatten
+  zhengwu: { eye: [0.2, 3.6, -2.6], look: [0, 1.5, -6.8], fov: 46 }, // v41r3b: centre into open bay
   hengwu: { eye: [-5.2, 1.7, 3.5], look: [-7.5, 1.3, -2.0], fov: 55 }, // v38: follow wing out to x±9.4
   xiangdao: { eye: [5.2, 3.4, 7.0], look: [7.6, 1.9, -1.8], fov: 50 }, // v40: from courtyard into 巷道 — depth + both eaves
   jiaolou: { eye: [21, 4.2, 19], look: [11, 5.2, 9] }, // v34: outside, front-right 炮楼 with 射击孔, bamboo behind camera line
@@ -231,26 +231,30 @@ export class WeiwuScene {
         over.position.set(0, 3.6, -depth / 2);
         hg.add(over);
       }
+      // v41r3: side walls stop short of front — earth wall ends were reading as fat porch pillars
       for (const sx of [-1, 1]) {
-        const side = wbox(0.35, 4.2, depth, earthIn);
-        side.position.set((sx * hw) / 2, 2.1, 0);
+        const sideDepth = Math.max(1.2, depth - 0.65);
+        const side = wbox(0.32, 4.2, sideDepth, earthIn);
+        side.position.set((sx * hw) / 2, 2.1, -0.32);
         hg.add(side); this.solids.push(side);
       }
       const floor = wbox(hw, 0.25, depth, stone);
       floor.position.y = 0.12;
       hg.add(floor);
-      // lacquered columns on the open front + beam
-      for (const cx of [-2.1, -0.7, 0.7, 2.1]) {
-        const c = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.19, 4, 16), lac);
-        c.position.set(cx, 2.2, depth / 2 - 0.3);
+      // v41: thin 檐柱 at bay ends only — open doorway, interiors readable from birdseye
+      // (was 4× fat Ø~0.36 poles + chunky bases = pillar forest)
+      for (const cx of [-2.45, 2.45]) {
+        const c = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.06, 4, 10), lac);
+        c.position.set(cx, 2.2, depth / 2 - 0.42);
         c.castShadow = true;
         hg.add(c);
-        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 0.25, 12), stone);
-        base.position.set(cx, 0.32, depth / 2 - 0.3);
+        const baseM = new THREE.MeshStandardMaterial({ color: 0x3a342e, roughness: 0.92 });
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.08, 0.1, 8), baseM);
+        base.position.set(cx, 0.22, depth / 2 - 0.42);
         hg.add(base);
       }
-      const beam = wbox(hw, 0.35, 0.3, wood);
-      beam.position.set(0, 4.1, depth / 2 - 0.3);
+      const beam = wbox(hw, 0.22, 0.2, wood); // v41: slender 额枋
+      beam.position.set(0, 4.15, depth / 2 - 0.42);
       hg.add(beam);
       // ceiling rafters
       for (let i = 0; i < 9; i++) {
@@ -334,6 +338,9 @@ export class WeiwuScene {
       if (name === "zutang") { // 八仙桌 + 太师椅 pair before the altar
         const t = furn.baxian(); t.position.set(0, 0.25, -depth / 2 + 2.0); hg.add(t);
         for (const sx of [-1, 1]) { const c = furn.chair(); c.position.set(sx * 0.95, 0.25, -depth / 2 + 2.0); c.rotation.y = -sx * Math.PI / 2; hg.add(c); }
+      } else if (name === "lower") { // v41: centre 八仙桌 so open bay reads lived-in from overview
+        const t = furn.baxian(); t.position.set(0, 0.25, 0.15); hg.add(t);
+        for (const sx of [-1, 1]) { const b = furn.bench(1.5); b.position.set(sx * 1.2, 0.25, 0.15); b.rotation.y = -sx * Math.PI / 2; hg.add(b); }
       } else for (const sx of [-1, 1]) { const b = furn.bench(1.8); b.position.set(sx * 2.85, 0.25, 0); b.rotation.y = Math.PI / 2; hg.add(b); }
       if (name === "upper") { // v36: 八仙桌 + 条凳 pair so 正屋 reads as a lived hall
         const t = furn.baxian(); t.position.set(0, 0.25, -depth / 2 + 1.1); hg.add(t);
@@ -351,6 +358,16 @@ export class WeiwuScene {
       const tj = wbox(6.2, 0.06, 2.8, stone);
       tj.position.set(0, 0.03, z);
       S.add(tj);
+    }
+    // v41r2: courtyard life — 水缸 + 石凳 so mid 天井 isn't empty pavement
+    {
+      const pot = new THREE.MeshStandardMaterial({ color: 0x4a5a52, roughness: 0.75 });
+      const jar = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.34, 0.7, 16), pot);
+      jar.position.set(-2.2, 0.4, 2.0); S.add(jar);
+      const jar2 = jar.clone(); jar2.position.set(2.4, 0.4, -4.15); S.add(jar2);
+      for (const [x, z] of [[-0.8, 2.35], [0.9, 1.7], [-1.0, -4.35]] as [number, number][]) {
+        const st = wbox(0.55, 0.28, 0.4, stone); st.position.set(x, 0.2, z); S.add(st);
+      }
     }
     // v37: a few courtyard villagers in open 天井 (never under roofs) — for oblique paper-board read
     {
@@ -547,7 +564,7 @@ export class WeiwuScene {
       this.controls.target.copy(look);
     } else this.flight.go(eye, look, r === "overview" ? 2.2 : 1.8);
     this.camera.fov = p.fov ?? 42; this.camera.updateProjectionMatrix();
-    this.controls.minDistance = r === "overview" ? 22 : 0.05;
+    this.controls.minDistance = r === "overview" ? 16 : 0.05; // v41: allow closer hall read
     this.controls.maxPolarAngle = r === "overview" ? Math.PI * 0.495 : Math.PI * 0.92;
     this.controls.minPolarAngle = r === "overview" ? Math.PI * 0.22 : Math.PI * 0.2; // v40: block pure nadir sticks
   }

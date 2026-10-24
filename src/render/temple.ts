@@ -143,7 +143,7 @@ export class TempleScene {
       for (let i = 0; i < cols; i++) {
         const x = -w / 2 + (i * w) / (cols - 1);
         for (const z of [d / 2, -d / 2]) {
-          const c = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.25, h, 16), lac);
+          const c = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, h, 12), lac); // v41: slender 檐柱
           c.position.set(x, platform + h / 2, z);
           c.castShadow = true;
           g.add(c);
@@ -197,7 +197,7 @@ export class TempleScene {
     curtain.position.set(0, 3.2, 2.45);
     stage.add(curtain);
     for (const x of [-4.1, 4.1]) for (const z of [-2.7, 2.7]) {
-      const c = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 4, 14), lac);
+      const c = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.1, 4, 12), lac); // v41: thin stage posts
       c.position.set(x, 3.9, z);
       c.castShadow = true;
       stage.add(c);
