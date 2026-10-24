@@ -157,7 +157,7 @@ export function contactShadow(w = 0.75, d = 0.42): THREE.Mesh {
   return m;
 }
 /** Cardboard thickness — side/close read an edge; high elev must NOT show pale slab tops. */
-const BOARD = 0.14;
+const BOARD = 0.10; // v42g: thinner cardboard edge
 function part(key: string, b: [number, number, number, number], ppm: number, draw: Draw, opts: { back?: boolean; seg?: [number, number]; z?: number } = {}): Part {
   const [x0, y0, x1, y1] = b;
   const seg = opts.seg ?? [1, 1];
@@ -530,7 +530,7 @@ function faceCam(rig: { root: THREE.Group; turn: THREE.Group }, maxYaw: number):
   // v39b: NEVER tip flat (elev*0.92→1.15 laid figures on the ground = beige slabs).
   // Hide board tops only near nadir (birdseye); mid-high/side keep dark cardboard edge.
   // Soft lean ≤0.34 so 工笔 faces stay readable without tipping flat.
-  const hi = elev > 0.48; // v40b: hide rim fill sooner — mid-high reads 工笔 face
+  const hi = elev > 0.38; // v42g: hide rim sooner on mid/high
   if ((rig as { _edgeHide?: boolean })._edgeHide !== hi) {
     (rig as { _edgeHide?: boolean })._edgeHide = hi;
     rig.root.traverse((o) => { if (o.userData?.paperEdge) o.visible = !hi; });

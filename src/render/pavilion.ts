@@ -38,7 +38,7 @@ export class PavilionScene {
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
   private glow: THREE.Mesh;
-  private glowBase = 0.34; // v41r2: less hero wash
+  private glowBase = 0.38; // v42: richer 落霞 core, still gated by facing
   private glowRefl!: THREE.Mesh;
   private warm = true;
   private ray = new THREE.Raycaster();
@@ -58,7 +58,7 @@ export class PavilionScene {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower() ? 1 : 1.5));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.52; // v41r2: deeper dusk, less blowout
+    this.renderer.toneMappingExposure = 0.55; // v42: a touch brighter dusk mood
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -158,7 +158,7 @@ export class PavilionScene {
     this.resize();
     this.applyMood();
     // hero composition: pavilion right, setting sun left over the river
-    this.camera.position.set(-10.2, 1.65, 4.8);
+    this.camera.position.set(-9.4, 2.35, 5.6); // v42: hero — pavilion + river + 落霞 band
     this.controls.target.set(1.2, 1.5, -12.5); // v40: more 落霞 in frame
     this.started = true;
     this.loop();
@@ -251,7 +251,7 @@ export class PavilionScene {
       if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.sunColor.value.setRGB(1, 0.85, 0.66).multiplyScalar(Math.max(0, 1 - el * 1.6)); // v30: no specular blowouts top-down
       { // v36: 江雾 only when camera stays on the near bank — past the pavilion it washed orbits white
         const zGate = Math.min(1, Math.max(0, (this.camera.position.z + 2) / 8));
-        this.mist.material.opacity = 0.04 * Math.max(0, 1 - el * 1.5) * zGate;
+        this.mist.material.opacity = 0.055 * Math.max(0, 1 - el * 1.6) * zGate; // v42: soft bank mist
         this.mist.points.visible = zGate > 0.05;
       }
       { // v35/v36: only show painted 落霞 + water reflection when looking toward it

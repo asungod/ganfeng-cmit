@@ -13,12 +13,12 @@ const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: numb
   yewan: { sun: [-10, 30, -14], col: 0x7a90ff, I: 0.45, hemi: 0.14, env: 0.3, exp: 0.95, fog: 0x0e1018, hdri: "qwantani_night_puresky", bg: 0.45, lamp: 2.8 },
 };
 const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, number, number]; look: [number, number, number] }> = {
-  overview: { eye: [13, 9.2, 15], look: [0, 1.8, 3] }, // v40: slightly lower — 工笔 faces, less board-top
+  overview: { eye: [12, 9.2, 16], look: [-0.5, 1.0, 3.5] }, // v42g: SE high, look left-of-folk — action in clear center-right
   kaichao: { eye: [5, 2.6, 9], look: [0, 3.2, -6] },
   xiban: { eye: [2.6, 4.4, -1.5], look: [0.9, 2.6, 10.5] },
   // judge views: actors from the front row, crowd faces from the stage apron
   // v25: further back, aim stage-right so trio clears left ws-panel
-  kanxi: { eye: [2.15, 3.5, 2.6], look: [2.15, 2.9, 11.6] },
+  kanxi: { eye: [2.15, 3.35, 1.4], look: [2.15, 2.85, 11.6] }, // v42: pull back from stage apron
   guanzhong: { eye: [0.8, 2.75, 9.2], look: [0, 1.25, 3.6] },
 };
 

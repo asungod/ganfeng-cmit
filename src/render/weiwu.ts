@@ -13,9 +13,9 @@ const POSES: Record<RoomId | "overview", Pose> = {
   overview: { eye: [10, 14, 12], look: [0, 1.4, -1.0] }, // v41r3: open bays face camera more
   heping: { eye: [9, 4.2, 22], look: [0, 2.2, 6] },
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
-  tianjing: { eye: [0.4, 2.2, 4.0], look: [0, 2.0, -1.5], fov: 58 }, // v41r2: courtyard → halls
-  zutang: { eye: [0.15, 3.5, 3.2], look: [0, 1.6, -1.3], fov: 46 }, // v41r3b: centre — no near-post fatten
-  zhengwu: { eye: [0.2, 3.6, -2.6], look: [0, 1.5, -6.8], fov: 46 }, // v41r3b: centre into open bay
+  tianjing: { eye: [0.0, 2.85, 3.35], look: [0, 1.5, -1.2], fov: 64 }, // v42f: mid 天井 axial — open zutang bay + altar, thin posts bookend
+  zutang: { eye: [0.0, 2.9, 3.55], look: [0, 1.5, -1.45], fov: 62 }, // v42g: slightly further mid 天井 — altar+桌, thin posts
+  zhengwu: { eye: [0.0, 2.95, -3.85], look: [0, 1.45, -6.65], fov: 58 }, // v42g: mid rear 天井 — clear of 祖堂 side ends, 八仙桌 reads
   hengwu: { eye: [-5.2, 1.7, 3.5], look: [-7.5, 1.3, -2.0], fov: 55 }, // v38: follow wing out to x±9.4
   xiangdao: { eye: [5.2, 3.4, 7.0], look: [7.6, 1.9, -1.8], fov: 50 }, // v40: from courtyard into 巷道 — depth + both eaves
   jiaolou: { eye: [21, 4.2, 19], look: [11, 5.2, 9] }, // v34: outside, front-right 炮楼 with 射击孔, bamboo behind camera line
@@ -243,8 +243,8 @@ export class WeiwuScene {
       hg.add(floor);
       // v41: thin 檐柱 at bay ends only — open doorway, interiors readable from birdseye
       // (was 4× fat Ø~0.36 poles + chunky bases = pillar forest)
-      for (const cx of [-2.45, 2.45]) {
-        const c = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.06, 4, 10), lac);
+      for (const cx of [-2.05, 2.05]) { // v42c: inboard enough to bookend room cams
+        const c = new THREE.Mesh(new THREE.CylinderGeometry(0.048, 0.052, 4, 10), lac); // v42: Ø~0.10
         c.position.set(cx, 2.2, depth / 2 - 0.42);
         c.castShadow = true;
         hg.add(c);
