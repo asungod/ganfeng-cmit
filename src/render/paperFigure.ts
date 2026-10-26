@@ -210,20 +210,39 @@ function faceBase(x: Ctx, skin: string, cy: number, rx = 0.08, ry = 0.102): void
   path(x, [[0, cy + ry], [rx * 0.78, cy + ry * 0.72], [rx, cy + ry * 0.1], [rx * 0.82, cy - ry * 0.5], [rx * 0.42, cy - ry * 0.92], [0, cy - ry], [-rx * 0.42, cy - ry * 0.92], [-rx * 0.82, cy - ry * 0.5], [-rx, cy + ry * 0.1], [-rx * 0.78, cy + ry * 0.72]]);
   x.fillStyle = skin; x.fill(); x.lineWidth = 0.003; x.strokeStyle = INK; x.stroke();
 }
-function opEyes(x: Ctx, cy: number, tilt: number, brow: string, browW: number, browTilt: number): void {
+function opEyes(x: Ctx, cy: number, tilt: number, brow: string, browW: number, browTilt: number, phoenix = false): void {
   for (const s of [-1, 1]) {
-    x.save(); x.translate(s * 0.032, cy); x.scale(s, 1);
-    // almond eye with long tilted upper lid (吊眉画眼)
-    path(x, [[-0.017, -0.001], [0, 0.007 + tilt * 0.2], [0.02, 0.006 + tilt], [0.03, 0.012 + tilt * 1.5], [0.018, -0.004], [0, -0.006]]);
-    x.fillStyle = "#fbf6ee"; x.fill(); x.lineWidth = 0.0032; x.strokeStyle = INK; x.stroke();
-    ell(x, 0.002, 0.0, 0.0055, 0.0058, "#120a06");
-    ell(x, 0.0035, 0.0018, 0.0016, 0.0016, "#ffffff");
-    line(x, [[-0.018, 0.001], [0.005, 0.009], [0.03, 0.013 + tilt * 1.5], [0.04, 0.02 + tilt * 2]], 0.0035, INK);
-    // brow
-    path(x, [[-0.022, 0.022], [0.0, 0.03 + browTilt * 0.4], [0.03, 0.04 + browTilt], [0.04, 0.046 + browTilt * 1.3], [0.025, 0.034 + browTilt * 0.8], [0, 0.022 + browTilt * 0.3 - browW], [-0.02, 0.018 - browW * 0.5]]);
+    x.save(); x.translate(s * 0.033, cy); x.scale(s, 1);
+    // 丹凤眼 / almond — longer outer tip, crisp ink rim
+    const tip = phoenix ? 0.034 : 0.03;
+    path(x, [[-0.018, 0.0], [0, 0.008 + tilt * 0.25], [0.018, 0.007 + tilt], [tip, 0.014 + tilt * 1.6], [0.02, -0.003], [0.004, -0.007], [-0.014, -0.004]]);
+    x.fillStyle = "#fbf7f0"; x.fill(); x.lineWidth = 0.0034; x.strokeStyle = INK; x.stroke();
+    // iris + pupil + dual catchlight (神采)
+    ell(x, 0.003, 0.001, 0.0062, 0.0064, "#1a1008");
+    ell(x, 0.003, 0.001, 0.0034, 0.0036, "#080402");
+    ell(x, 0.005, 0.0028, 0.0018, 0.0018, "#ffffff");
+    ell(x, 0.001, -0.001, 0.0009, 0.0009, "rgba(255,255,255,0.7)");
+    // upper lid crease + outer flick
+    line(x, [[-0.018, 0.002], [0.006, 0.01], [tip, 0.015 + tilt * 1.6], [tip + 0.012, 0.022 + tilt * 2.1]], 0.0036, INK);
+    // 柳叶眉 willow / 剑眉 sword brow
+    if (phoenix) {
+      path(x, [[-0.02, 0.02], [0.002, 0.028 + browTilt * 0.3], [0.028, 0.038 + browTilt], [0.042, 0.044 + browTilt * 1.2], [0.03, 0.036 + browTilt * 0.7], [0.004, 0.024 - browW], [-0.018, 0.017]]);
+    } else {
+      path(x, [[-0.022, 0.022], [0.0, 0.031 + browTilt * 0.4], [0.03, 0.042 + browTilt], [0.042, 0.05 + browTilt * 1.3], [0.026, 0.036 + browTilt * 0.8], [0, 0.022 + browTilt * 0.3 - browW], [-0.02, 0.017 - browW * 0.5]]);
+    }
     x.fillStyle = brow; x.fill();
     x.restore();
   }
+}
+function folkEye(x: Ctx, sx: number, ey: number, open: number, soft: boolean): void {
+  // open always has sclera + iris + catchlight; soft = child larger iris
+  const rx = (soft ? 0.011 : 0.0095) * open, ry = (soft ? 0.007 : 0.0058) * open;
+  ell(x, sx, ey, rx, ry, "#fbf7f0", 0.0026);
+  const ir = soft ? 0.0052 : 0.0044;
+  ell(x, sx + (sx > 0 ? 0.0008 : -0.0008), ey + 0.0004, ir * open, ir * 1.05 * open, "#1a1008");
+  ell(x, sx + (sx > 0 ? 0.0008 : -0.0008), ey + 0.0004, ir * 0.55 * open, ir * 0.58 * open, "#080402");
+  ell(x, sx + (sx > 0 ? 0.0022 : -0.0022), ey + 0.002, 0.0015 * open, 0.0015 * open, "#ffffff");
+  // slight crescent smile crease under eye when soft smile
 }
 function paintFace(x: Ctx, kind: Face, skin: string, cy: number, seed: number): void {
   const r = rng(seed * 7 + 3);
@@ -245,7 +264,13 @@ function paintFace(x: Ctx, kind: Face, skin: string, cy: number, seed: number): 
     shape(x, [[-0.03, cy - 0.052], [0, cy - 0.045], [0.03, cy - 0.052], [0.022, cy - 0.075], [0, cy - 0.082], [-0.022, cy - 0.075]], "#151012", 0.005, "#fbf4e6"); // mouth patch
     shape(x, [[-0.012, cy - 0.06], [0.012, cy - 0.06], [0, cy - 0.068]], "#e0202a", 0);
     x.restore();
-    for (const s of [-1, 1]) { x.save(); x.translate(s * 0.045, cy + 0.015); x.scale(s, 1); ell(x, 0, 0, 0.011, 0.006, "#fbf6ee", 0.0025); ell(x, 0.001, 0, 0.004, 0.004, "#100806"); x.restore(); }
+    for (const s of [-1, 1]) {
+      x.save(); x.translate(s * 0.045, cy + 0.015); x.scale(s, 1);
+      ell(x, 0, 0, 0.012, 0.0065, "#fbf6ee", 0.0025);
+      ell(x, 0.001, 0, 0.0045, 0.0045, "#100806");
+      ell(x, 0.003, 0.0015, 0.0015, 0.0015, "#ffffff");
+      x.restore();
+    }
     return;
   }
   if (kind === "dan" || kind === "laosheng") {
@@ -256,34 +281,67 @@ function paintFace(x: Ctx, kind: Face, skin: string, cy: number, seed: number): 
     x.save(); x.scale(1, 1.2); x.fillStyle = g; x.beginPath(); x.ellipse(0, (cy + 0.0) / 1.2, 0.075, 0.06, 0, 0, Math.PI * 2); x.fill(); x.restore();
     x.fillStyle = kind === "dan" ? "rgba(255,250,245,0.9)" : "rgba(255,240,220,0.5)";
     x.beginPath(); x.ellipse(0, cy - 0.005, 0.009, 0.03, 0, 0, Math.PI * 2); x.fill(); // highlighted nose bridge
-    opEyes(x, cy + 0.012, kind === "dan" ? 0.01 : 0.006, INK, kind === "dan" ? 0.002 : 0.007, kind === "dan" ? 0.012 : 0.016);
+    if (kind === "dan") {
+      opEyes(x, cy + 0.012, 0.011, INK, 0.0015, 0.01, true); // 柳叶眉 + 丹凤眼
+    } else {
+      opEyes(x, cy + 0.012, 0.007, INK, 0.008, 0.018, false); // 剑眉 神采
+    }
     line(x, [[-0.006, cy - 0.032], [0, cy - 0.036], [0.006, cy - 0.032]], 0.0025, shade("#a05040", 0));
-    if (kind === "dan") { // small cherry lips
-      shape(x, [[-0.013, cy - 0.06], [-0.004, cy - 0.055], [0, cy - 0.057], [0.004, cy - 0.055], [0.013, cy - 0.06], [0, cy - 0.068]], "#c8102e", 0.0015);
-    } else line(x, [[-0.016, cy - 0.06], [0, cy - 0.063], [0.016, cy - 0.06]], 0.004, "#8a2a20");
+    if (kind === "dan") { // small cherry lips, slight 含蓄 smile
+      shape(x, [[-0.014, cy - 0.058], [-0.004, cy - 0.053], [0, cy - 0.055], [0.004, cy - 0.053], [0.014, cy - 0.058], [0.004, cy - 0.066], [0, cy - 0.068], [-0.004, cy - 0.066]], "#c8102e", 0.0015);
+      ell(x, 0, cy - 0.058, 0.004, 0.002, "#f07080", 0);
+    } else {
+      line(x, [[-0.018, cy - 0.058], [0, cy - 0.062], [0.018, cy - 0.058]], 0.0045, "#8a2a20");
+      // subtle philtrum shadow for 老生
+      line(x, [[0, cy - 0.038], [0, cy - 0.052]], 0.002, shade("#a05040", -0.2));
+    }
     return;
   }
-  // villagers — 年画 folk faces, each slightly different
+  // villagers — 年画 folk faces (v44: clearer eyes, 含蓄 smile, readable age)
   const sk = skin;
-  // v29: per-seed face shape / eye spacing / age marks so the crowd isn't one face
-  const fw = 0.068 + r() * 0.014, fh = 0.086 + r() * 0.014;
+  const child = kind === "child", elder = kind === "elder", woman = kind === "woman";
+  const fw = (child ? 0.072 : 0.068) + r() * 0.014, fh = (child ? 0.09 : 0.086) + r() * 0.014;
   faceBase(x, sk, cy, fw, fh);
-  const blush = x.createRadialGradient(0, 0, 0, 0, 0, 0.026);
-  blush.addColorStop(0, "rgba(220,90,80,0.55)"); blush.addColorStop(1, "rgba(220,90,80,0)");
-  for (const s of [-1, 1]) { x.save(); x.translate(s * 0.042, cy - 0.03); x.fillStyle = blush; x.beginPath(); x.arc(0, 0, 0.026, 0, Math.PI * 2); x.fill(); x.restore(); }
-  const smile = r() < 0.4, ey = cy + 0.002 + r() * 0.014, es = 0.026 + r() * 0.01, ez = 0.8 + r() * 0.5;
+  // soft cheeks (stronger on child / woman)
+  const blushR = child ? 0.032 : woman ? 0.028 : 0.024;
+  const blush = x.createRadialGradient(0, 0, 0, 0, 0, blushR);
+  blush.addColorStop(0, child || woman ? "rgba(230,110,100,0.65)" : "rgba(220,90,80,0.5)");
+  blush.addColorStop(1, "rgba(220,90,80,0)");
+  for (const s of [-1, 1]) { x.save(); x.translate(s * (child ? 0.038 : 0.042), cy - (child ? 0.022 : 0.03)); x.fillStyle = blush; x.beginPath(); x.arc(0, 0, blushR, 0, Math.PI * 2); x.fill(); x.restore(); }
+  const smile = r() < 0.55; // 含蓄 — open eyes + slight mouth curve, not closed-eye cartoon grin
+  const ey = cy + 0.004 + r() * 0.012, es = 0.028 + r() * 0.008, open = child ? 1.15 : 0.9 + r() * 0.25;
   for (const s of [-1, 1]) {
-    if (smile) line(x, [[s * (es + 0.013), ey], [s * es, ey + 0.008], [s * (es - 0.014), ey]], 0.0045, INK);
-    else { ell(x, s * es, ey, 0.009 * ez, 0.0055 * ez, "#fbf6ee", 0.0025); ell(x, s * es, ey, 0.0042 * ez, 0.0045 * ez, "#140a06"); }
-    const bt = (r() - 0.5) * 0.01;
-    line(x, [[s * 0.016, ey + 0.022], [s * 0.03, ey + 0.03 + bt], [s * 0.05, ey + 0.026]], kind === "elder" ? 0.006 : 0.005, kind === "elder" ? "#e8e4da" : INK);
+    folkEye(x, s * es, ey, open, child);
+    if (smile) line(x, [[s * (es + 0.006), ey - 0.008], [s * es, ey - 0.011], [s * (es - 0.008), ey - 0.007]], 0.0022, shade(sk, -0.35)); // under-eye crescent
+    const bt = (r() - 0.5) * 0.008;
+    const bw = elder ? 0.0065 : child ? 0.0035 : woman ? 0.004 : 0.005;
+    const bc = elder ? "#e8e4da" : INK;
+    if (woman || child) {
+      // soft 柳叶 brow
+      path(x, [[s * 0.014, ey + 0.02], [s * 0.028, ey + 0.028 + bt], [s * 0.048, ey + 0.026 + bt * 0.5], [s * 0.03, ey + 0.022], [s * 0.016, ey + 0.016]]);
+      x.fillStyle = bc; x.fill();
+    } else {
+      line(x, [[s * 0.014, ey + 0.02], [s * 0.03, ey + 0.03 + bt], [s * 0.052, ey + 0.027]], bw, bc);
+    }
   }
-  line(x, [[-0.004, cy - 0.022], [0.004, cy - 0.028], [0.009, cy - 0.022]], 0.003, shade(sk, -0.4));
-  if (kind === "elder" || r() < 0.3) for (const s of [-1, 1]) line(x, [[s * 0.022, cy - 0.03], [s * 0.032, cy - 0.05]], 0.0025, shade(sk, -0.3)); // 法令纹
-  if (r() < 0.25) ell(x, (r() - 0.5) * 0.08, cy - 0.01 - r() * 0.03, 0.004, 0.004, shade(sk, -0.5)); // 痣
-  if (r() < 0.6 || kind === "child") shape(x, [[-0.014, cy - 0.048], [0, cy - 0.044], [0.014, cy - 0.048], [0, cy - 0.06]], "#b23a30", 0.002);
-  else line(x, [[-0.016, cy - 0.05], [0, cy - 0.054], [0.016, cy - 0.05]], 0.004, "#7a3020");
-  if (kind === "elder") { // white beard + moustache
+  // nose
+  line(x, [[-0.004, cy - 0.02], [0.004, cy - 0.028], [0.01, cy - 0.02]], 0.003, shade(sk, -0.4));
+  if (elder) {
+    for (const s of [-1, 1]) {
+      line(x, [[s * 0.02, cy - 0.028], [s * 0.034, cy - 0.052]], 0.0028, shade(sk, -0.35)); // 法令纹
+      line(x, [[s * 0.018, ey + 0.012], [s * 0.03, ey + 0.002]], 0.002, shade(sk, -0.28)); // brow-corner crease
+      line(x, [[s * 0.01, cy - 0.012], [s * 0.022, cy - 0.02]], 0.0018, shade(sk, -0.25)); // 鼻翼纹
+    }
+    // forehead wrinkles
+    for (const dy of [0.055, 0.068, 0.08]) line(x, [[-0.03, cy + dy], [0.03, cy + dy]], 0.0018, shade(sk, -0.22));
+  } else if (r() < 0.28) for (const s of [-1, 1]) line(x, [[s * 0.022, cy - 0.03], [s * 0.032, cy - 0.05]], 0.0025, shade(sk, -0.3));
+  if (r() < 0.22) ell(x, (r() - 0.5) * 0.08, cy - 0.01 - r() * 0.03, 0.004, 0.004, shade(sk, -0.5)); // 痣
+  // mouth: 含蓄 smile curve or calm line
+  if (child || smile || r() < 0.45) {
+    const my = cy - (child ? 0.046 : 0.05);
+    shape(x, [[-0.015, my], [0, my + 0.005], [0.015, my], [0, my - 0.01]], child ? "#c84840" : "#b23a30", 0.002);
+  } else line(x, [[-0.016, cy - 0.05], [0, cy - (smile ? 0.056 : 0.053)], [0.016, cy - 0.05]], 0.004, "#7a3020");
+  if (elder) { // white beard + moustache
     shape(x, [[-0.045, cy - 0.055], [0, cy - 0.065], [0.045, cy - 0.055], [0.03, cy - 0.13], [0, cy - 0.17], [-0.03, cy - 0.13]], "#efebe2", 0.0025, "#9a9488");
     line(x, [[-0.04, cy - 0.04], [-0.01, cy - 0.035], [0.01, cy - 0.035], [0.04, cy - 0.04]], 0.006, "#efebe2");
   } else if (kind === "villager" && r() < 0.35) line(x, [[-0.03, cy - 0.042], [-0.008, cy - 0.036], [0.008, cy - 0.036], [0.03, cy - 0.042]], 0.004, INK);

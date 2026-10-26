@@ -274,6 +274,12 @@ export class WeiwuScene {
         const altar = wbox(3.2, 1.0, 0.9, lac);
         altar.position.set(0, 0.75, -depth / 2 + 0.8);
         hg.add(altar);
+        // v44: 束腰 + front 牙板 + corner legs so altar isn't a plain modern slab
+        const aw = wbox(3.28, 0.07, 0.94, lac); aw.position.set(0, 1.22, -depth / 2 + 0.8); hg.add(aw);
+        const ap = wbox(2.95, 0.16, 0.06, lac); ap.position.set(0, 1.05, -depth / 2 + 1.22); hg.add(ap);
+        for (const sx of [-1.45, 1.45]) {
+          const lg = wbox(0.11, 0.48, 0.11, lac); lg.position.set(sx, 0.28, -depth / 2 + 1.1); hg.add(lg);
+        }
         const shrine = wbox(2.2, 1.6, 0.6, lac);
         shrine.position.set(0, 2.05, -depth / 2 + 0.5);
         hg.add(shrine);
@@ -674,21 +680,111 @@ function tabletTexture(): THREE.CanvasTexture {
   return t;
 }
 
-/** v34 中国风 furnishings, simple procedural: 八仙桌, 太师椅, 条凳, 灶台, 水缸, 簸箕, 农具 */
+/** v44 中国风 furnishings — Ming/Qing joinery cues: 八仙桌, 太师椅, 条凳, 灶台, 水缸, 簸箕, 农具 */
 function makeFurniture(wood: THREE.Material, lac: THREE.Material) {
   const box = (w: number, h: number, d: number, m: THREE.Material, x: number, y: number, z: number) => { const b = wbox(w, h, d, m); b.position.set(x, y, z); b.castShadow = true; return b; };
   const brick = new THREE.MeshStandardMaterial({ color: 0x8a6a58, roughness: 0.95 });
   const iron = new THREE.MeshStandardMaterial({ color: 0x1e1c1a, roughness: 0.5, metalness: 0.6 });
   const pot = new THREE.MeshStandardMaterial({ color: 0x4a3426, roughness: 0.35 });
+  // v44: warm 紫檀 rosewood lacquer — readable under dim altar light (not flat modern black)
+  const rose = (lac as THREE.MeshStandardMaterial).clone();
+  rose.color = new THREE.Color(0x7a3220);
+  rose.roughness = 0.48;
+  rose.metalness = 0.12;
+  const L = rose;
+  const addHoof = (g: THREE.Group, x: number, z: number, m: THREE.Material) => { g.add(box(0.09, 0.045, 0.09, m, x, 0.03, z)); };
   // straw moved into boji() as straw2 (v36)
   return {
-    baxian(): THREE.Group { const g = new THREE.Group(); g.add(box(1.0, 0.06, 1.0, lac, 0, 0.8, 0)); g.add(box(0.92, 0.1, 0.92, lac, 0, 0.72, 0));
-      for (const [x, z] of [[-0.44, -0.44], [0.44, -0.44], [-0.44, 0.44], [0.44, 0.44]]) g.add(box(0.07, 0.78, 0.07, lac, x, 0.39, z)); return g; },
-    chair(): THREE.Group { const g = new THREE.Group(); g.add(box(0.55, 0.05, 0.5, lac, 0, 0.48, 0)); g.add(box(0.55, 0.6, 0.05, lac, 0, 0.8, -0.23));
-      for (const [x, z] of [[-0.24, -0.22], [0.24, -0.22], [-0.24, 0.22], [0.24, 0.22]]) g.add(box(0.05, 0.48, 0.05, lac, x, 0.24, z));
-      for (const x of [-0.26, 0.26]) g.add(box(0.04, 0.22, 0.48, lac, x, 0.62, 0)); return g; },
-    bench(len: number): THREE.Group { const g = new THREE.Group(); g.add(box(len, 0.06, 0.26, wood, 0, 0.45, 0));
-      for (const x of [-len / 2 + 0.12, len / 2 - 0.12]) for (const z of [-0.08, 0.08]) g.add(box(0.05, 0.44, 0.05, wood, x, 0.22, z)); return g; },
+    baxian(): THREE.Group {
+      const g = new THREE.Group();
+      // 面心板 top with overhang
+      g.add(box(1.06, 0.055, 1.06, L, 0, 0.82, 0));
+      // 束腰 waist
+      g.add(box(0.96, 0.05, 0.96, L, 0, 0.768, 0));
+      // 牙板 apron on four sides
+      g.add(box(0.9, 0.1, 0.045, L, 0, 0.695, 0.455));
+      g.add(box(0.9, 0.1, 0.045, L, 0, 0.695, -0.455));
+      g.add(box(0.045, 0.1, 0.9, L, 0.455, 0.695, 0));
+      g.add(box(0.045, 0.1, 0.9, L, -0.455, 0.695, 0));
+      // 托角牙 corner spandrels
+      for (const [x, z] of [[-0.42, -0.42], [0.42, -0.42], [-0.42, 0.42], [0.42, 0.42]] as const) {
+        g.add(box(0.12, 0.055, 0.04, L, x, 0.70, z * 0.98));
+        g.add(box(0.04, 0.055, 0.12, L, x * 0.98, 0.70, z));
+      }
+      // square legs + 马蹄脚
+      for (const [x, z] of [[-0.42, -0.42], [0.42, -0.42], [-0.42, 0.42], [0.42, 0.42]] as const) {
+        g.add(box(0.07, 0.64, 0.07, L, x, 0.34, z));
+        addHoof(g, x, z, L);
+      }
+      // 罗锅枨 side stretchers with mid hump
+      for (const z of [-0.42, 0.42] as const) {
+        g.add(box(0.78, 0.04, 0.04, L, 0, 0.22, z));
+        g.add(box(0.16, 0.055, 0.04, L, 0, 0.275, z));
+      }
+      for (const x of [-0.42, 0.42] as const) {
+        g.add(box(0.04, 0.04, 0.78, L, x, 0.22, 0));
+        g.add(box(0.04, 0.055, 0.16, L, x, 0.275, 0));
+      }
+      return g;
+    },
+    chair(): THREE.Group {
+      const g = new THREE.Group();
+      // 椅盘 seat + apron
+      g.add(box(0.58, 0.045, 0.48, L, 0, 0.48, 0.02));
+      g.add(box(0.54, 0.07, 0.04, L, 0, 0.425, 0.24));
+      g.add(box(0.54, 0.07, 0.04, L, 0, 0.425, -0.20));
+      g.add(box(0.04, 0.07, 0.42, L, -0.26, 0.425, 0.02));
+      g.add(box(0.04, 0.07, 0.42, L, 0.26, 0.425, 0.02));
+      // legs + 马蹄
+      for (const [x, z] of [[-0.24, -0.18], [0.24, -0.18], [-0.24, 0.22], [0.24, 0.22]] as const) {
+        g.add(box(0.05, 0.46, 0.05, L, x, 0.23, z));
+        addHoof(g, x, z, L);
+      }
+      // 枨 stretchers (rear / side / front 脚踏)
+      g.add(box(0.44, 0.03, 0.03, L, 0, 0.15, -0.18));
+      g.add(box(0.48, 0.035, 0.04, L, 0, 0.12, 0.22));
+      g.add(box(0.03, 0.03, 0.36, L, -0.24, 0.16, 0.02));
+      g.add(box(0.03, 0.03, 0.36, L, 0.24, 0.16, 0.02));
+      // back posts
+      for (const x of [-0.24, 0.24] as const) g.add(box(0.045, 0.56, 0.045, L, x, 0.78, -0.18));
+      // open back: mid 靠背板 splat + side rails (not solid modern slab)
+      g.add(box(0.13, 0.36, 0.03, L, 0, 0.72, -0.18));
+      g.add(box(0.03, 0.3, 0.03, L, -0.11, 0.70, -0.18));
+      g.add(box(0.03, 0.3, 0.03, L, 0.11, 0.70, -0.18));
+      // 搭脑 curved top rail
+      const rail = new THREE.Mesh(new THREE.TorusGeometry(0.245, 0.026, 8, 20, Math.PI), L);
+      rail.position.set(0, 1.06, -0.18);
+      rail.castShadow = true; g.add(rail);
+      for (const x of [-0.245, 0.245] as const) {
+        const kn = new THREE.Mesh(new THREE.SphereGeometry(0.032, 8, 6), L);
+        kn.position.set(x, 1.06, -0.18); kn.castShadow = true; g.add(kn);
+      }
+      // 扶手 armrests + scrolled front
+      for (const s of [-1, 1] as const) {
+        g.add(box(0.04, 0.04, 0.36, L, s * 0.24, 0.72, 0.02));
+        g.add(box(0.04, 0.24, 0.04, L, s * 0.24, 0.60, 0.20));
+        const scroll = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.016, 6, 12, Math.PI * 1.2), L);
+        scroll.rotation.set(0, Math.PI / 2, s > 0 ? 0.2 : -0.2);
+        scroll.position.set(s * 0.24, 0.72, 0.22);
+        scroll.castShadow = true; g.add(scroll);
+      }
+      return g;
+    },
+    bench(len: number): THREE.Group {
+      const g = new THREE.Group();
+      g.add(box(len, 0.05, 0.28, wood, 0, 0.45, 0));
+      g.add(box(len - 0.1, 0.07, 0.04, wood, 0, 0.395, 0.12));
+      g.add(box(len - 0.1, 0.07, 0.04, wood, 0, 0.395, -0.12));
+      for (const x of [-len / 2 + 0.12, len / 2 - 0.12] as const) {
+        for (const z of [-0.1, 0.1] as const) {
+          g.add(box(0.05, 0.42, 0.05, wood, x, 0.21, z));
+          g.add(box(0.065, 0.04, 0.065, wood, x, 0.03, z));
+        }
+        g.add(box(0.04, 0.03, 0.18, wood, x, 0.14, 0));
+      }
+      g.add(box(len - 0.3, 0.03, 0.03, wood, 0, 0.12, 0));
+      return g;
+    },
     zao(): THREE.Group { const g = new THREE.Group(); g.add(box(1.0, 0.8, 1.4, brick, 0, 0.4, 0)); g.add(box(1.04, 0.05, 1.44, new THREE.MeshStandardMaterial({ color: 0x6a5a48, roughness: 0.9 }), 0, 0.82, 0)); // v40: no white slab from birdseye
       for (const z of [-0.33, 0.33]) { const w = new THREE.Mesh(new THREE.SphereGeometry(0.26, 16, 6, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), iron); w.position.set(0, 0.9, z); w.rotation.x = Math.PI; g.add(w); }
       g.add(box(0.32, 2.4, 0.32, brick, -0.3, 2.0, 0.55)); const mouth = box(0.3, 0.25, 0.02, iron, 0.51, 0.3, 0); mouth.rotation.y = Math.PI / 2; g.add(mouth); return g; },
