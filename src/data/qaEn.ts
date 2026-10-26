@@ -45,7 +45,7 @@ export const QA_EN: Record<string, { q: string[]; kw: string[] }> = {
   },
   "q-song-fencai": {
     q: [
-      "Why can't a Song meiping be famille rose?",
+      "Why can't a Song vase use famille rose?",
       "Why is Song with famille rose a conflict?",
       "Can Song dynasty porcelain have fencai enamel?",
       "Is famille rose possible on Song dynasty porcelain?",
