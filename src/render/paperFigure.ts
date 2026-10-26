@@ -218,10 +218,10 @@ function opEyes(x: Ctx, cy: number, tilt: number, brow: string, browW: number, b
     path(x, [[-0.018, 0.0], [0, 0.008 + tilt * 0.25], [0.018, 0.007 + tilt], [tip, 0.014 + tilt * 1.6], [0.02, -0.003], [0.004, -0.007], [-0.014, -0.004]]);
     x.fillStyle = "#fbf7f0"; x.fill(); x.lineWidth = 0.0034; x.strokeStyle = INK; x.stroke();
     // iris + pupil + dual catchlight (神采)
-    ell(x, 0.003, 0.001, 0.0062, 0.0064, "#1a1008");
-    ell(x, 0.003, 0.001, 0.0034, 0.0036, "#080402");
-    ell(x, 0.005, 0.0028, 0.0018, 0.0018, "#ffffff");
-    ell(x, 0.001, -0.001, 0.0009, 0.0009, "rgba(255,255,255,0.7)");
+    ell(x, 0.003, 0.001, 0.0072, 0.0074, "#1a1008");
+    ell(x, 0.003, 0.001, 0.004, 0.0042, "#080402");
+    ell(x, 0.0052, 0.003, 0.0022, 0.0022, "#ffffff");
+    ell(x, 0.001, -0.0012, 0.0011, 0.0011, "rgba(255,255,255,0.75)");
     // upper lid crease + outer flick
     line(x, [[-0.018, 0.002], [0.006, 0.01], [tip, 0.015 + tilt * 1.6], [tip + 0.012, 0.022 + tilt * 2.1]], 0.0036, INK);
     // 柳叶眉 willow / 剑眉 sword brow
@@ -235,14 +235,13 @@ function opEyes(x: Ctx, cy: number, tilt: number, brow: string, browW: number, b
   }
 }
 function folkEye(x: Ctx, sx: number, ey: number, open: number, soft: boolean): void {
-  // open always has sclera + iris + catchlight; soft = child larger iris
-  const rx = (soft ? 0.011 : 0.0095) * open, ry = (soft ? 0.007 : 0.0058) * open;
-  ell(x, sx, ey, rx, ry, "#fbf7f0", 0.0026);
-  const ir = soft ? 0.0052 : 0.0044;
+  // open always has sclera + iris + catchlight; soft = child larger iris (v44b: bolder for mid-distance)
+  const rx = (soft ? 0.013 : 0.011) * open, ry = (soft ? 0.0085 : 0.007) * open;
+  ell(x, sx, ey, rx, ry, "#fbf7f0", 0.003);
+  const ir = soft ? 0.0062 : 0.0052;
   ell(x, sx + (sx > 0 ? 0.0008 : -0.0008), ey + 0.0004, ir * open, ir * 1.05 * open, "#1a1008");
   ell(x, sx + (sx > 0 ? 0.0008 : -0.0008), ey + 0.0004, ir * 0.55 * open, ir * 0.58 * open, "#080402");
-  ell(x, sx + (sx > 0 ? 0.0022 : -0.0022), ey + 0.002, 0.0015 * open, 0.0015 * open, "#ffffff");
-  // slight crescent smile crease under eye when soft smile
+  ell(x, sx + (sx > 0 ? 0.0026 : -0.0026), ey + 0.0022, 0.002 * open, 0.002 * open, "#ffffff");
 }
 function paintFace(x: Ctx, kind: Face, skin: string, cy: number, seed: number): void {
   const r = rng(seed * 7 + 3);
@@ -266,9 +265,9 @@ function paintFace(x: Ctx, kind: Face, skin: string, cy: number, seed: number): 
     x.restore();
     for (const s of [-1, 1]) {
       x.save(); x.translate(s * 0.045, cy + 0.015); x.scale(s, 1);
-      ell(x, 0, 0, 0.012, 0.0065, "#fbf6ee", 0.0025);
-      ell(x, 0.001, 0, 0.0045, 0.0045, "#100806");
-      ell(x, 0.003, 0.0015, 0.0015, 0.0015, "#ffffff");
+      ell(x, 0, 0, 0.014, 0.008, "#fbf6ee", 0.003);
+      ell(x, 0.001, 0, 0.0055, 0.0055, "#100806");
+      ell(x, 0.0035, 0.002, 0.002, 0.002, "#ffffff");
       x.restore();
     }
     return;
