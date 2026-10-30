@@ -82,7 +82,7 @@ export class TempleScene {
     const stone = phMat("stone_tiles", [1, 1], { color: 0xd0cabe });
     const paving = phMat("stone_tiles", [14, 14], { color: 0xe0dad0 });
     const redWall = phMat("red_plaster_weathered", [1, 1], { color: 0xc04a3a });
-    const lac = phMat("lacquered_cherry_wood", [1, 2], { color: 0xb02a1e });
+    const lac = phMat("lacquered_cherry_wood", [1, 2], { color: 0x6a4030 }); // v53r5: mid 红木 brown (match weiwu, not scarlet)
     const wood = phMat("dark_wooden_planks", [1, 1], { color: 0x7a4a34 });
     const tile = new THREE.MeshStandardMaterial({ color: 0x2e3a36, roughness: 0.5, metalness: 0.2, side: THREE.DoubleSide });
     const roofTile = qingwaMat([1, 1]); roofTile.side = THREE.DoubleSide; roofTile.color.set(0x9aa8a4); // v29: 筒瓦 texture on roofs (was flat grey)
@@ -255,9 +255,9 @@ export class TempleScene {
       stage.add(f);
     }
     // v50: soft warm fill — enough to open the box, no circular glare on 守旧
-    const stFill = new THREE.PointLight(0xffd2a0, 2.4, 9, 1.8); stFill.position.set(0, 5.0, 0.2); stage.add(stFill);
-    const stFill2 = new THREE.PointLight(0xffc890, 1.1, 6.5, 2.0); stFill2.position.set(3.4, 3.8, -1.4); stage.add(stFill2);
-    const stFill3 = new THREE.PointLight(0xffc890, 1.1, 6.5, 2.0); stFill3.position.set(-3.4, 3.8, -1.4); stage.add(stFill3);
+    const stFill = new THREE.PointLight(0xffd2a0, 1.1, 7, 2.2); stFill.position.set(0, 4.6, 0.6); stage.add(stFill); // v53r5: cut back-wall orbs
+    const stFill2 = new THREE.PointLight(0xffc890, 0.55, 5.5, 2.2); stFill2.position.set(3.0, 3.6, -0.6); stage.add(stFill2);
+    const stFill3 = new THREE.PointLight(0xffc890, 0.55, 5.5, 2.2); stFill3.position.set(-3.0, 3.6, -0.6); stage.add(stFill3);
     stage.position.set(0, 0, 11.5);
     S.add(stage);
     this.stageLight.position.set(0, 9, 4);
@@ -268,7 +268,7 @@ export class TempleScene {
     const rimA = new THREE.DirectionalLight(0xbcd0ff, 1.0); rimA.position.set(-6, 6, 16); rimA.target.position.set(0, 2, 10); S.add(rimA, rimA.target);
     const rimB = new THREE.DirectionalLight(0xffe2c0, 0.7); rimB.position.set(6, 5, -2); rimB.target.position.set(0, 1, 5); S.add(rimB, rimB.target);
     // v50: stronger face fill so daytime 看戏机位 reads 工笔 faces
-    const faceFill = new THREE.PointLight(0xffe6cc, 1.1, 14, 1.8); faceFill.position.set(0, 3.4, 7.2); S.add(faceFill); // v53r4: less wall circle
+    const faceFill = new THREE.PointLight(0xffe6cc, 0.7, 12, 2.0); faceFill.position.set(0, 3.2, 6.5); S.add(faceFill); // v53r5: further cut courtyard circle
 
     // 宣德炉 bronze censer on the axis (v23)
     // v24: smaller 宣德炉, closer to the hall so 台上望众 doesn't hide the courtyard
@@ -325,17 +325,17 @@ export class TempleScene {
       // v37: start further from stage (was 6.5) so high-angle never clips heads through 戏台 eaves
       const x = -4.8 + col * 1.6 + (row % 2) * 0.5 + Math.sin(i * 7.1) * 0.3;
       const z = 4.8 - row * 1.2 + Math.cos(i * 3.3) * 0.2;
-      f.position.set(x, -0.02, z); // v53r2: less underground clip on sit hips
+      f.position.set(x, 0.16, z); // v53r5: lift onto stool so deep sit doesn't bury feet
       // v52: yaw firmly at stage apron (z=11.5); tiny personal offset only
       f.rotation.y = Math.atan2(-x, 11.5 - z) + (col - 3) * 0.025;
       this.audience.add(f);
       // v53r1: stools under sit+lean (modes 6,7 dominate watching map)
       if (i % 8 === 0 || i % 8 === 4 || i % 8 === 1 || i % 8 === 5 || i % 8 === 6) {
         const stool = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.22, 0.25, 0.2, 8),
+          new THREE.CylinderGeometry(0.26, 0.28, 0.34, 8),
           new THREE.MeshStandardMaterial({ color: 0x5a3a28, roughness: 0.9, metalness: 0.05 }),
         );
-        stool.position.set(x, 0.06, z + 0.02);
+        stool.position.set(x, 0.14, z + 0.02); // v53r5: taller stool under sit hips
         stool.castShadow = true;
         this.audience.add(stool);
       }

@@ -787,7 +787,7 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
   const arms: Rig["arms"] = [];
   // v51b: watching crowd — denser sit/lean/clap/point (not all identical idle/拱手)
   const raw = Math.floor(seed / 3) % 8;
-  const mode = watching ? [6, 7, 6, 6, 7, 6, 6, 7][raw] : raw; // v53r4: sit majority + lean variety
+  const mode = watching ? [6, 6, 6, 6, 6, 6, 7, 6][raw] : raw; // v53r5: sit-dominant (lean only 1/8) — audience read as seated
   // v25: cloth-like 拱手/clap sleeves — wide hanging folds, not tube-to-tube
   const thickArm = mode === 1 || mode === 3;
   for (const s of [-1, 1]) {
@@ -899,14 +899,14 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
       set(A, 0.08, -0.4); set(B, 0.08, -0.4);
       head.rotation.z = Math.sin(t * 0.6) * 0.14;
     } else if (mode === 6) { // v52 sit-watch — plant on stool, stronger squat
-      body.position.y = -0.28 + Math.sin(t * 1.1) * 0.003; // v53r4: sit without burying legs (was bust-on-base)
-      body.scale.y += (0.9 - body.scale.y) * 0.25; // hips on low stool
-      set(A, -0.7 + Math.sin(t * 0.7) * 0.03, -1.65, 0.48);
-      set(B, -0.62 + Math.sin(t * 0.9) * 0.03, -1.58, 0.48);
+      body.position.y = -0.5 + Math.sin(t * 1.1) * 0.003; // v53r5: deeper sit so crowd reads seated (stool lifts feet)
+      body.scale.y += (0.78 - body.scale.y) * 0.28; // hips on stool
+      set(A, -0.85 + Math.sin(t * 0.7) * 0.03, -1.75, 0.55);
+      set(B, -0.78 + Math.sin(t * 0.9) * 0.03, -1.68, 0.55);
       head.position.y = 1.4;
       head.rotation.z = 0.07 + Math.sin(t * 0.45) * 0.05;
-    } else if (mode === 7) { // v51 lean-watch — forward lean, arms soft toward stage
-      body.position.y = Math.sin(t * 1.3) * 0.004;
+    } else if (mode === 7) { // v51 lean-watch — soft crouch lean (not full stand)
+      body.position.y = -0.18 + Math.sin(t * 1.3) * 0.004; // v53r5
       set(A, -0.22 + Math.sin(t * 0.8) * 0.04, -0.95, 0.65);
       set(B, -0.08 + Math.sin(t * 0.7) * 0.03, -0.55, 0.8);
       head.position.y = 1.4;

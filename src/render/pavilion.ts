@@ -130,10 +130,10 @@ export class PavilionScene {
     void skyBand;
     // v52: wide flat 国风 dusk wash — vermilion→gold ribbon along horizon, not an orb
     // v52c: bands BEHIND far hills (z<-34) so terrain never clips them into a sun-disc silhouette
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(220, 5.6), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffc898, transparent: true, opacity: 0.7, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r4: depth so band sits behind pavilion
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(240, 3.8), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffc898, transparent: true, opacity: 0.68, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r5: thinner band
     this.glow.position.set(0, 5.35, -58); // v53r3: further behind so band not over pavilion
     this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
-    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(180, 4), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.75, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r4
+    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(200, 2.8), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.7, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r5 thinner
     this.horizonBand.position.set(0, 5.0, -55); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2; // v53r3
     this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(56, 36), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.42, depthWrite: false, fog: false }));
     this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-4, 0.06, -10); this.glowRefl.renderOrder = 2;
@@ -511,7 +511,7 @@ export function makePavilion(): THREE.Group {
   const stone = phMat("stone_tiles", [2, 2], { color: 0x9a948a });
   const stoneDark = phMat("stone_tiles", [3, 3], { color: 0x6a645c });
   const wood = phMat("dark_wooden_planks", [1, 1], { color: 0x5a3a2c }); // v50: darker body = sharper dusk silhouette
-  const dan = phMat("lacquered_cherry_wood", [1, 2], { color: 0xb03828 });
+  const dan = phMat("lacquered_cherry_wood", [1, 2], { color: 0x6a4030 }); // v53r5: mid 红木 brown not scarlet
   const gold = mat(0xd4b06a, 0.38, 0.42); // v50: brighter 金线 eaves
   const tile = new THREE.MeshStandardMaterial({ color: 0x24302c, roughness: 0.48, metalness: 0.22, side: THREE.DoubleSide });
 
@@ -532,7 +532,7 @@ export function makePavilion(): THREE.Group {
   }
   balustrade(g, 7.2, 6.4, 1.1, stone, 0.32);
 
-  const lampMat = new THREE.MeshStandardMaterial({ color: 0xffc070, emissive: 0xff7a30, emissiveIntensity: 1.1, roughness: 0.4 });
+  const lampMat = new THREE.MeshStandardMaterial({ color: 0xffc070, emissive: 0xff7a30, emissiveIntensity: 0.55, roughness: 0.55 }); // v53r5: less deck orb
   for (const [lx, lz] of [[-3.9, 3.4], [3.9, 3.4], [-1.3, 4.2], [1.3, 4.2]] as [number, number][]) {
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 1.2, 6), wood);
     pole.position.set(lx, 1.1, lz);
@@ -874,16 +874,16 @@ function luoxiaSky(): THREE.Texture {
   x.fillStyle = eg; x.fillRect(W * 0.02, H * 0.55, W * 0.96, H * 0.45);
   x.restore();
   let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  // v53r2: even fewer softer 横抹 — hero still read as streaky sausage
-  for (let i = 0; i < 7; i++) {
-    const cy = H * (0.35 + rnd() * 0.45), cx = W * (0.08 + rnd() * 0.84), len = W * (0.22 + rnd() * 0.38), th = 10 + rnd() * 18;
+  // v53r5: flat horizontal 横抹 only — no ellipse sausages that read as pills
+  for (let i = 0; i < 5; i++) {
+    const cy = H * (0.42 + rnd() * 0.32), cx = W * (0.1 + rnd() * 0.8), len = W * (0.28 + rnd() * 0.4), th = 4 + rnd() * 7;
     const near = 1 - Math.abs(cx / W - 0.45) * 1.2;
-    x.save(); x.filter = "blur(8px)";
-    x.fillStyle = `rgba(${100 + near * 40},${50 + near * 20},${90},${0.16 + rnd() * 0.14})`; // v53r2
-    x.beginPath(); x.ellipse(cx, cy, len / 2, th, (rnd() - 0.5) * 0.02, 0, Math.PI * 2); x.fill();
-    x.filter = "blur(5px)";
-    x.fillStyle = `rgba(255,${130 + near * 70},${70 + near * 40},${0.22 + near * 0.12})`; // v53r2
-    x.beginPath(); x.ellipse(cx + len * 0.03, cy + th * 0.55, len * 0.4, th * 0.35, 0, 0, Math.PI * 2); x.fill();
+    x.save(); x.filter = "blur(6px)";
+    x.fillStyle = `rgba(${110 + near * 35},${55 + near * 18},${85},${0.14 + rnd() * 0.1})`;
+    x.fillRect(cx - len / 2, cy - th / 2, len, th);
+    x.filter = "blur(4px)";
+    x.fillStyle = `rgba(255,${140 + near * 60},${80 + near * 35},${0.18 + near * 0.1})`;
+    x.fillRect(cx - len * 0.35, cy + th * 0.15, len * 0.7, th * 0.45);
     x.restore();
   }
   // a distant 孤鹜 brushed against the glow

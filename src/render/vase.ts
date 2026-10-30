@@ -139,7 +139,7 @@ export class PorcelainVitrine {
 
     this.amb = new THREE.AmbientLight(0x7a8b9c, 0.18);
     const hemi = new THREE.HemisphereLight(0x9aabbb, 0x181410, 0.32); // v52: soft museum fill
-    this.key = new THREE.SpotLight(0xffd4a8, 34, 18, 0.48, 0.38, 1.65);
+    this.key = new THREE.SpotLight(0xe8dce8, 30, 18, 0.48, 0.38, 1.65); // v53r5: cooler key for 青花
     this.key.position.set(2.05, 3.72, 2.05);
     this.key.castShadow = true;
     this.key.shadow.mapSize.set(2048, 2048);
@@ -154,7 +154,7 @@ export class PorcelainVitrine {
     this.rim.position.set(-2.9, 2.55, -2.8);
     this.fill = new THREE.PointLight(0xc5d0da, 1.05, 11, 2); // v53r3: less cream blowout
     this.fill.position.set(-1.55, 1.15, 2.7);
-    this.well = new THREE.PointLight(0xfff1d8, 0.55, 3.2, 2); // v53r4: less hot spot on cream
+    this.well = new THREE.PointLight(0xe8eef4, 0.4, 3.0, 2.2); // v53r5: cool well, no cream blob
     this.well.position.set(0, 1.7, 0);
     this.scene.add(this.amb, hemi, this.key, this.key.target, this.rim, this.fill, this.well);
 
@@ -442,7 +442,7 @@ export class PorcelainVitrine {
     const cool = glaze === "yingqing" ? 0xb7d8cc : glaze === "jihong" ? 0xd4a090 : 0x93b4d4;
     this.rim.color.setHex(cool);
     this.rim.intensity = glaze === "jihong" ? 1.2 : 1.7;
-    this.key.color.setHex(glaze === "jihong" ? 0xffc9a0 : 0xffd4a8);
+    this.key.color.setHex(glaze === "jihong" ? 0xffc9a0 : glaze === "qinghua" ? 0xd8e0ec : 0xffd4a8); // v53r5 cooler青花
     this.key.intensity = height < 0.5 ? 18 : 24; // v53r3: cooler key keeps 青花 dark
     this.well.intensity = glaze === "yingqing" ? 2.0 : 1.2;
   }
