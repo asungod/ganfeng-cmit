@@ -157,7 +157,7 @@ export function contactShadow(w = 0.75, d = 0.42): THREE.Mesh {
   return m;
 }
 /** Cardboard thickness — side/close read an edge; high elev must NOT show pale slab tops. */
-const BOARD = 0.10; // v42g: thinner cardboard edge
+const BOARD = 0.145; // v50: thicker cardboard — side/oblique reads edge, not flat paper
 function part(key: string, b: [number, number, number, number], ppm: number, draw: Draw, opts: { back?: boolean; seg?: [number, number]; z?: number } = {}): Part {
   const [x0, y0, x1, y1] = b;
   const seg = opts.seg ?? [1, 1];
@@ -175,7 +175,7 @@ function part(key: string, b: [number, number, number, number], ppm: number, dra
   }
   const rim = rimMat(front.material as THREE.MeshStandardMaterial);
   // v40: thickness fill ONLY — no oversized outline (was harsh black alpha fringe)
-  const layers = 2;
+  const layers = 3; // v50: denser rim sandwich so side silhouette holds
   for (let i = 0; i < layers; i++) {
     const m = new THREE.Mesh(geo, rim);
     m.position.z = z0 - BOARD / 2 + (i + 0.5) * (BOARD / layers);
@@ -580,7 +580,7 @@ function faceCam(rig: { root: THREE.Group; turn: THREE.Group }, maxYaw: number):
   if (Math.abs(yaw) > Math.PI * 0.75) yaw = yaw - Math.sign(yaw) * Math.PI;
   void maxYaw;
   let d = yaw - rig.turn.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
-  rig.turn.rotation.y += d * 0.14;
+  rig.turn.rotation.y += d * 0.22; // v50: snappier face-cam so oblique 看戏 still shows faces
   const rootW = rig.root.getWorldPosition(new THREE.Vector3());
   const dx = camW.x - rootW.x, dy = camW.y - rootW.y, dz = camW.z - rootW.z;
   const elev = Math.atan2(dy, Math.hypot(dx, dz)); // 0 horizon … ~1.4 nadir

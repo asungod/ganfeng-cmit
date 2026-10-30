@@ -38,7 +38,7 @@ export class PavilionScene {
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
   private glow: THREE.Mesh;
-  private glowBase = 0.38; // v42: richer 落霞 core, still gated by facing
+  private glowBase = 0.55; // v50: stronger 落霞 wash for hero / orbit
   private glowRefl!: THREE.Mesh;
   private warm = true;
   private ray = new THREE.Raycaster();
@@ -58,7 +58,7 @@ export class PavilionScene {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower() ? 1 : 1.5));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.55; // v42: a touch brighter dusk mood
+    this.renderer.toneMappingExposure = 0.62; // v50: slightly brighter dusk so 阁 silhouette + 落霞 read
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -84,7 +84,7 @@ export class PavilionScene {
     this.hemi = new THREE.HemisphereLight(0xffc8a0, 0x1a1418, 0.85);
     this.scene.add(this.hemi);
 
-    this.sunLight = new THREE.DirectionalLight(0xffd4a0, 3.1);
+    this.sunLight = new THREE.DirectionalLight(0xffd8a8, 3.5); // v50
     this.sunLight.position.copy(MARK.luoxia);
     this.sunLight.castShadow = true;
     this.sunLight.shadow.mapSize.set(shadowSize(), shadowSize());
@@ -108,7 +108,7 @@ export class PavilionScene {
     const pavilion = makePavilion();
     pavilion.position.set(3.4, 0, -12.5);
     pavilion.rotation.y = -0.42;
-    pavilion.scale.setScalar(1.1);
+    pavilion.scale.setScalar(1.22); // v50: stronger 阁楼 silhouette against 落霞
     this.scene.add(pavilion);
     // riverbank: terraced mud + stone face + willow fringe (not a flat box)
     this.scene.add(makeRiverbank());
@@ -130,10 +130,10 @@ export class PavilionScene {
     this.scene.add(this.sun);
     void skyBand;
     // v36: fixed Mesh plane (not Sprite) so side/back orbits no longer see a billboard washing the frame white
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(36, 12), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffc8a0, transparent: true, opacity: 0.62, depthWrite: false, side: THREE.DoubleSide, fog: false }));
-    this.glow.position.set(-24, 11, -48); this.glow.lookAt(0, 6, 0); this.glow.renderOrder = -1;
-    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(22, 28), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.22, depthWrite: false, fog: false }));
-    this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-12, 0.1, -20); this.glowRefl.renderOrder = 2;
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(44, 16), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd0a8, transparent: true, opacity: 0.78, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+    this.glow.position.set(-22, 10.5, -46); this.glow.lookAt(0, 5.5, 0); this.glow.renderOrder = -1;
+    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(26, 32), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.32, depthWrite: false, fog: false }));
+    this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-11, 0.1, -18); this.glowRefl.renderOrder = 2;
     this.scene.add(this.glowRefl, this.glow);
 
     const pool = new THREE.Mesh(
@@ -158,8 +158,8 @@ export class PavilionScene {
     this.resize();
     this.applyMood();
     // hero composition: pavilion right, setting sun left over the river
-    this.camera.position.set(-9.4, 2.35, 5.6); // v42: hero — pavilion + river + 落霞 band
-    this.controls.target.set(1.2, 1.5, -12.5); // v40: more 落霞 in frame
+    this.camera.position.set(-10.2, 2.55, 6.2); // v50: hero — larger 阁 + river + 落霞
+    this.controls.target.set(1.6, 1.8, -12.2);
     this.started = true;
     this.loop();
   }
@@ -258,8 +258,8 @@ export class PavilionScene {
         const tg = this.controls.target, cp = this.camera.position;
         const ax = this.glow.position.x - tg.x, az = this.glow.position.z - tg.z, bx = tg.x - cp.x, bz = tg.z - cp.z;
         const f = Math.max(0, (ax * bx + az * bz) / (Math.hypot(ax, az) * Math.hypot(bx, bz) + 1e-6));
-        const gm = this.glow.material as THREE.MeshBasicMaterial; const ff = Math.max(0, (f - 0.35) / 0.65); gm.opacity = this.glowBase * (1 - el * 0.9) * Math.pow(ff, 4); this.glow.visible = gm.opacity > 0.03;
-        (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.14 : 0.08) * Math.max(0, 1 - el * 1.8) * Math.pow(ff, 3);
+        const gm = this.glow.material as THREE.MeshBasicMaterial; const ff = Math.max(0, (f - 0.22) / 0.78); gm.opacity = this.glowBase * (1 - el * 0.85) * Math.pow(ff, 2.6); this.glow.visible = gm.opacity > 0.03;
+        (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.22 : 0.1) * Math.max(0, 1 - el * 1.6) * Math.pow(ff, 2.2);
       }
     }
     this.post.render();
@@ -331,7 +331,7 @@ export class PavilionScene {
 }
 
 function palette(mood: MoodId, focus: ImageId) {
-  const dusk = { zenith: 0x1a1d38, haze: 0x7a5548, sky: 0.58, sun: 0xffc488, glow: 0xff7a3a, hill: 0x2a1a22, water: 0x6a7a88, key: 2.6 };
+  const dusk = { zenith: 0x1a1d38, haze: 0x8a5a48, sky: 0.68, sun: 0xffc890, glow: 0xff8a42, hill: 0x2a1a22, water: 0x5a7088, key: 3.0 }; // v50
   if (mood === "sanyan") return { zenith: 0x2a3348, haze: 0x8a8a94, sky: 0.8, sun: 0xd8c0a0, glow: 0x88aacc, hill: 0x3d4450, water: 0x5a7080, key: 2.2 };
   if (mood === "yuzhou") return { zenith: 0x1c2438, haze: 0x8a5a52, sky: 0.65, sun: 0xe0905a, glow: 0xc06030, hill: 0x241818, water: 0x4a5a70, key: 2.4 };
   if (mood === "yanzhen") return { zenith: 0x14182a, haze: 0x4a4458, sky: 0.4, sun: 0xb86a55, glow: 0x884030, hill: 0x1a1216, water: 0x34405a, key: 1.6 };
@@ -352,8 +352,8 @@ function makeWater(): THREE.Group {
     nt.wrapS = nt.wrapT = THREE.RepeatWrapping;
     const w = new Water(new THREE.PlaneGeometry(100, 100), {
       textureWidth: 1024, textureHeight: 1024, waterNormals: nt,
-      sunDirection: MARK.luoxia.clone().normalize(), sunColor: 0xffd8a8,
-      waterColor: 0x1c3446, distortionScale: 1.2, alpha: 1, fog: false,
+      sunDirection: MARK.luoxia.clone().normalize(), sunColor: 0xffe0b0,
+      waterColor: 0x1a3040, distortionScale: 1.05, alpha: 1, fog: false,
     });
     w.rotation.x = -Math.PI / 2;
     w.name = "waterMain";
@@ -492,10 +492,10 @@ export function makePavilion(): THREE.Group {
   const g = new THREE.Group();
   const stone = phMat("stone_tiles", [2, 2], { color: 0x9a948a });
   const stoneDark = phMat("stone_tiles", [3, 3], { color: 0x6a645c });
-  const wood = phMat("dark_wooden_planks", [1, 1], { color: 0x8a5a44 });
-  const dan = phMat("lacquered_cherry_wood", [1, 2], { color: 0xc04030 });
-  const gold = mat(0xc6a15b, 0.42, 0.35);
-  const tile = new THREE.MeshStandardMaterial({ color: 0x2c3632, roughness: 0.48, metalness: 0.18, side: THREE.DoubleSide });
+  const wood = phMat("dark_wooden_planks", [1, 1], { color: 0x5a3a2c }); // v50: darker body = sharper dusk silhouette
+  const dan = phMat("lacquered_cherry_wood", [1, 2], { color: 0xb03828 });
+  const gold = mat(0xd4b06a, 0.38, 0.42); // v50: brighter 金线 eaves
+  const tile = new THREE.MeshStandardMaterial({ color: 0x24302c, roughness: 0.48, metalness: 0.22, side: THREE.DoubleSide });
 
   // 高台：两级台基 + 正面踏步
   const base = new THREE.Mesh(new THREE.BoxGeometry(8.6, 0.5, 7.6), stoneDark);
@@ -523,7 +523,7 @@ export function makePavilion(): THREE.Group {
     g.add(pole, lamp);
   }
 
-  const paper = new THREE.MeshStandardMaterial({ color: 0xffe2b0, emissive: 0xc07030, emissiveIntensity: 0.32, roughness: 0.6 });
+  const paper = new THREE.MeshStandardMaterial({ color: 0xffe6b8, emissive: 0xd08038, emissiveIntensity: 0.55, roughness: 0.55 }); // v50: warmer window glow
   const stories = [
     { y0: 1.1, w: 4.8, d: 4.3, h: 1.45, roofW: 7.0, roofD: 6.3, rise: 1.0 },
     { y0: 3.0, w: 3.9, d: 3.5, h: 1.2, roofW: 5.8, roofD: 5.2, rise: 0.95 },
@@ -846,23 +846,24 @@ function makeRiverbank(): THREE.Group {
 function luoxiaSky(): THREE.Texture {
   const W = 1024, H = 320, c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d")!;
   const v = x.createLinearGradient(0, H, 0, 0);
-  v.addColorStop(0, "rgba(255,196,110,0.95)"); v.addColorStop(0.18, "rgba(250,150,80,0.85)"); v.addColorStop(0.38, "rgba(226,104,82,0.6)");
-  v.addColorStop(0.6, "rgba(176,92,112,0.32)"); v.addColorStop(0.82, "rgba(110,80,120,0.1)"); v.addColorStop(1, "rgba(80,70,110,0)");
+  // v50: hotter gold → vermilion → rose → mauve (国画 evening wash, more contrast)
+  v.addColorStop(0, "rgba(255,210,120,1)"); v.addColorStop(0.14, "rgba(255,150,70,0.95)"); v.addColorStop(0.32, "rgba(236,90,70,0.78)");
+  v.addColorStop(0.52, "rgba(190,80,110,0.48)"); v.addColorStop(0.74, "rgba(120,70,130,0.2)"); v.addColorStop(1, "rgba(70,60,110,0)");
   x.fillStyle = v; x.fillRect(0, 0, W, H);
   // hotter core where the sun sets (left of centre)
-  const r = x.createRadialGradient(W * 0.42, H * 0.95, 10, W * 0.42, H * 0.95, W * 0.4);
-  r.addColorStop(0, "rgba(255,226,160,0.8)"); r.addColorStop(0.4, "rgba(255,160,90,0.35)"); r.addColorStop(1, "rgba(255,140,80,0)");
+  const r = x.createRadialGradient(W * 0.4, H * 0.92, 8, W * 0.4, H * 0.92, W * 0.48);
+  r.addColorStop(0, "rgba(255,236,180,0.95)"); r.addColorStop(0.35, "rgba(255,170,90,0.5)"); r.addColorStop(1, "rgba(255,120,60,0)");
   x.fillStyle = r; x.fillRect(0, 0, W, H);
   let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  // cloud strokes: dusky rose body, bright under-lit lower edge
-  for (let i = 0; i < 20; i++) {
-    const cy = H * (0.32 + rnd() * 0.5), cx = W * (0.08 + rnd() * 0.84), len = W * (0.12 + rnd() * 0.28), th = 7 + rnd() * 11;
-    const near = 1 - Math.abs(cx / W - 0.42) * 1.4;
-    x.save(); x.filter = "blur(5px)";
-    x.fillStyle = `rgba(${120 + near * 40},${70 + near * 20},${100},${0.5 + rnd() * 0.25})`;
+  // cloud strokes: dusky rose body, bright under-lit lower edge — denser for 国画 presence
+  for (let i = 0; i < 28; i++) {
+    const cy = H * (0.28 + rnd() * 0.55), cx = W * (0.06 + rnd() * 0.88), len = W * (0.14 + rnd() * 0.3), th = 8 + rnd() * 14;
+    const near = 1 - Math.abs(cx / W - 0.4) * 1.5;
+    x.save(); x.filter = "blur(4.5px)";
+    x.fillStyle = `rgba(${110 + near * 50},${60 + near * 25},${95},${0.55 + rnd() * 0.3})`;
     x.beginPath(); x.ellipse(cx, cy, len / 2, th, (rnd() - 0.5) * 0.03, 0, Math.PI * 2); x.fill();
-    x.filter = "blur(2.5px)";
-    x.fillStyle = `rgba(255,${150 + near * 70},${90 + near * 40},${0.65 + near * 0.35})`;
+    x.filter = "blur(2px)";
+    x.fillStyle = `rgba(255,${140 + near * 80},${80 + near * 50},${0.7 + near * 0.3})`;
     x.beginPath(); x.ellipse(cx + len * 0.04, cy + th * 0.7, len * 0.44, th * 0.42, 0, 0, Math.PI * 2); x.fill();
     x.restore();
   }

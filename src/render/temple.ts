@@ -190,35 +190,64 @@ export class TempleScene {
     const floor = wbox(8.6, 0.12, 5.6, wood);
     floor.position.y = 1.86;
     stage.add(floor);
-    const back = wbox(8.4, 4, 0.2, lac);
+    // v50: matte 守旧 backdrop (ink teal wash) — kills lacquer glare hotspot
+    const shoujiuMat = new THREE.MeshStandardMaterial({
+      color: 0x1a2a28, roughness: 0.97, metalness: 0, side: THREE.FrontSide,
+    });
+    const back = wbox(8.4, 4, 0.18, shoujiuMat);
     back.position.set(0, 3.9, 2.6);
     stage.add(back);
-    const curtain = wbox(3.2, 2.4, 0.06, new THREE.MeshStandardMaterial({ color: 0x9a1a14, roughness: 0.8 }));
-    curtain.position.set(0, 3.2, 2.45);
+    // soft painted centre panel (muted crimson silk, not plastic red)
+    const panelMat = new THREE.MeshStandardMaterial({ color: 0x6a2420, roughness: 0.94, metalness: 0 });
+    const curtain = wbox(2.8, 2.2, 0.05, panelMat);
+    curtain.position.set(0, 3.15, 2.48);
     stage.add(curtain);
+    const panelTrim = wbox(2.9, 0.06, 0.06, gold);
+    panelTrim.position.set(0, 4.28, 2.46);
+    stage.add(panelTrim);
+    // soft side 守旧 wings (cloth, slightly transparent)
+    const wingMat = new THREE.MeshStandardMaterial({
+      color: 0x4a1e1a, roughness: 0.96, metalness: 0, side: THREE.DoubleSide, transparent: true, opacity: 0.82,
+    });
+    for (const sx of [-1, 1]) {
+      const wing = wbox(1.6, 3.4, 0.03, wingMat);
+      wing.position.set(sx * 3.2, 3.6, 2.42);
+      wing.rotation.y = sx * 0.12;
+      stage.add(wing);
+    }
+    // 额枋 across front + 柱础 so the stage reads as architecture, not four sticks
+    const efang = wbox(8.6, 0.28, 0.32, lac);
+    efang.position.set(0, 5.85, -2.55);
+    stage.add(efang);
+    const efangGold = wbox(8.7, 0.06, 0.34, gold);
+    efangGold.position.set(0, 6.02, -2.55);
+    stage.add(efangGold);
     for (const x of [-4.1, 4.1]) for (const z of [-2.7, 2.7]) {
-      const c = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.1, 4, 12), lac); // v41: thin stage posts
-      c.position.set(x, 3.9, z);
+      const base = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.22, 12), stone);
+      base.position.set(x, 1.97, z);
+      stage.add(base);
+      const c = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.125, 3.7, 12), lac);
+      c.position.set(x, 3.95, z);
       c.castShadow = true;
       stage.add(c);
     }
     const sroof = curvedRoof(11, 8, 2.0, roofTile, gold, true);
     sroof.position.y = 6.55; // v37c: more headroom so high polar never clips 生旦净
     stage.add(sroof);
-    // performers (simple robed figures) — visible during the opera
+    // performers — apron-forward, depth-staggered so side/oblique still reads faces
     const robe = [0xb8202a, 0x1e5aa0, 0xd8a820];
     for (let i = 0; i < 3; i++) {
       const f = makeFigure(robe[i], i + 8, 1.12, "performer");
-      // v28: 老生 / 净 / 旦 spaced 1.9 apart; 净 set back so his 靠旗 never cross the 旦's 水袖
-      f.position.set(-0.1 + i * 1.65, 1.92, i === 0 ? -0.85 : i === 1 ? 0.15 : -1.35); // v37c: apron-forward, clear of eave when polar high
+      // v50: slightly wider apron stagger; 净 still set back of 水袖
+      f.position.set(-0.25 + i * 1.7, 1.92, i === 0 ? -0.95 : i === 1 ? 0.05 : -1.45);
       f.rotation.y = Math.PI;
       f.name = "performer";
       stage.add(f);
     }
-    // v29: warm fill inside the 戏台 so side / oblique views aren't a black box
-    const stFill = new THREE.PointLight(0xffd2a0, 7, 10, 1.4); stFill.position.set(0, 5.2, 0.6); stage.add(stFill);
-    const stFill2 = new THREE.PointLight(0xffc890, 3, 7, 1.6); stFill2.position.set(3.6, 3.6, -1.6); stage.add(stFill2);
-    const stFill3 = new THREE.PointLight(0xffc890, 3, 7, 1.6); stFill3.position.set(-3.6, 3.6, -1.6); stage.add(stFill3);
+    // v50: soft warm fill — enough to open the box, no circular glare on 守旧
+    const stFill = new THREE.PointLight(0xffd2a0, 2.4, 9, 1.8); stFill.position.set(0, 5.0, 0.2); stage.add(stFill);
+    const stFill2 = new THREE.PointLight(0xffc890, 1.1, 6.5, 2.0); stFill2.position.set(3.4, 3.8, -1.4); stage.add(stFill2);
+    const stFill3 = new THREE.PointLight(0xffc890, 1.1, 6.5, 2.0); stFill3.position.set(-3.4, 3.8, -1.4); stage.add(stFill3);
     stage.position.set(0, 0, 11.5);
     S.add(stage);
     this.stageLight.position.set(0, 9, 4);
@@ -226,9 +255,10 @@ export class TempleScene {
     this.stageLight.castShadow = true;
     S.add(this.stageLight, this.stageLight.target);
     // cool rim lights so cloth silhouettes read against the dark stage / courtyard
-    const rimA = new THREE.DirectionalLight(0xbcd0ff, 1.1); rimA.position.set(-6, 6, 16); rimA.target.position.set(0, 2, 10); S.add(rimA, rimA.target);
-    const rimB = new THREE.DirectionalLight(0xffe2c0, 0.8); rimB.position.set(6, 5, -2); rimB.target.position.set(0, 1, 5); S.add(rimB, rimB.target);
-    const faceFill = new THREE.PointLight(0xffe6cc, 1.4, 14, 1.6); faceFill.position.set(0, 3.2, 7.8); S.add(faceFill);
+    const rimA = new THREE.DirectionalLight(0xbcd0ff, 1.0); rimA.position.set(-6, 6, 16); rimA.target.position.set(0, 2, 10); S.add(rimA, rimA.target);
+    const rimB = new THREE.DirectionalLight(0xffe2c0, 0.7); rimB.position.set(6, 5, -2); rimB.target.position.set(0, 1, 5); S.add(rimB, rimB.target);
+    // v50: stronger face fill so daytime 看戏机位 reads 工笔 faces
+    const faceFill = new THREE.PointLight(0xffe6cc, 2.2, 16, 1.5); faceFill.position.set(0, 3.4, 7.2); S.add(faceFill);
 
     // 宣德炉 bronze censer on the axis (v23)
     // v24: smaller 宣德炉, closer to the hall so 台上望众 doesn't hide the courtyard
@@ -245,12 +275,12 @@ export class TempleScene {
       for (const i of [-3, 3]) this.addLantern(
         new THREE.Vector3(i * 2.6, 5.1 - Math.cos((i / 3) * 1.2) * 0.4, z));
     }
-    // banners — muted cloth, not harsh yellow plastic
+    // banners — soft crimson cloth (never harsh yellow plastic)
     const bannerMat = new THREE.MeshStandardMaterial({
-      color: 0x5a1a16, roughness: 0.96, metalness: 0, side: THREE.DoubleSide,
-      transparent: true, opacity: 0.78,
+      color: 0x4a1814, roughness: 0.98, metalness: 0, side: THREE.DoubleSide,
+      transparent: true, opacity: 0.72,
     });
-    const bannerEdge = new THREE.MeshStandardMaterial({ color: 0x3a1210, roughness: 0.9 });
+    const bannerEdge = new THREE.MeshStandardMaterial({ color: 0x2e100e, roughness: 0.95 });
     for (const x of [-10, 10]) for (const z of [-5, 5]) {
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 7, 8), wood);
       pole.position.set(x, 3.5, z);
@@ -344,7 +374,7 @@ export class TempleScene {
     const night = slot === "yewan";
     this.haze.material.color.set(night ? 0x2a2a38 : 0xf0e0d0);
     this.smoke.material.color.set(night ? 0x8a7a70 : 0xe8e0d8);
-    this.stageLight.intensity = act === "xiban" ? (slot === "yewan" ? 3.5 : 1.5) : 0;
+    this.stageLight.intensity = act === "xiban" ? (slot === "yewan" ? 3.2 : 1.05) : 0;
     this.scene.traverse((o) => { if (o.name === "performer") o.visible = act === "xiban"; });
     if (act !== this.act || instant) {
       this.act = act;
