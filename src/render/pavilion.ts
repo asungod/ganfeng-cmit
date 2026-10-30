@@ -130,11 +130,11 @@ export class PavilionScene {
     void skyBand;
     // v52: wide flat 国风 dusk wash — vermilion→gold ribbon along horizon, not an orb
     // v52c: bands BEHIND far hills (z<-34) so terrain never clips them into a sun-disc silhouette
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(200, 6.4), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd0a8, transparent: true, opacity: 0.82, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false })); // v53r2: softer thinner band
-    this.glow.position.set(0, 4.95, -42);
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(220, 5.6), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffc898, transparent: true, opacity: 0.72, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false })); // v53r3: behind pavilion softer
+    this.glow.position.set(0, 5.35, -58); // v53r3: further behind so band not over pavilion
     this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
     this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(180, 4), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.9, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false }));
-    this.horizonBand.position.set(0, 4.6, -40); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2;
+    this.horizonBand.position.set(0, 5.0, -55); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2; // v53r3
     this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(56, 36), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.42, depthWrite: false, fog: false }));
     this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-4, 0.06, -10); this.glowRefl.renderOrder = 2;
     this.scene.add(this.glowRefl, this.glow, this.horizonBand);
@@ -870,7 +870,7 @@ function luoxiaSky(): THREE.Texture {
   // v52b: wide soft gold ribbon only — no ellipse/orb core
   x.save(); x.filter = "blur(12px)";
   const eg = x.createLinearGradient(0, H * 0.55, 0, H);
-  eg.addColorStop(0, "rgba(255,190,100,0)"); eg.addColorStop(0.5, "rgba(255,200,120,0.55)"); eg.addColorStop(1, "rgba(255,230,165,0.8)");
+  eg.addColorStop(0, "rgba(255,190,100,0)"); eg.addColorStop(0.5, "rgba(255,200,120,0.35)"); eg.addColorStop(1, "rgba(255,230,165,0.55)"); // v53r3
   x.fillStyle = eg; x.fillRect(W * 0.02, H * 0.55, W * 0.96, H * 0.45);
   x.restore();
   let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);

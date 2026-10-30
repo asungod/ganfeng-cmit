@@ -19,7 +19,7 @@ const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, n
   // judge views: actors from the front row, crowd faces from the stage apron
   // v25: further back, aim stage-right so trio clears left ws-panel
   kanxi: { eye: [2.15, 3.35, 1.4], look: [2.15, 2.85, 11.6] }, // v42: pull back from stage apron
-  guanzhong: { eye: [-3.8, 2.35, 7.4], look: [0.6, 1.2, 5.1] }, // v53r2: 3/4 faces, less stage-apron wood fill
+  guanzhong: { eye: [-4.2, 1.95, 6.6], look: [0.8, 1.05, 5.0] }, // v53r3: lower 3/4 — sit hips readable
 };
 
 export class TempleScene {
@@ -71,7 +71,7 @@ export class TempleScene {
     this.scene.add(this.smoke.points);
     this.haze = particles(160, new THREE.Box3(new THREE.Vector3(-16, 0.5, -14), new THREE.Vector3(16, 4, 16)), 0xf0e0d0, 2.4, 0.035, "mist");
     this.scene.add(this.haze.points);
-    this.post = makePost(this.renderer, this.scene, this.camera, 0.45, 0.85);
+    this.post = makePost(this.renderer, this.scene, this.camera, 0.22, 0.8); // v53r3: cut wall circle bloom
     this.resize();
     this.set("kaichao", "chendan", true);
     this.loop();
@@ -393,7 +393,7 @@ export class TempleScene {
     this.scene.backgroundIntensity = c.bg;
     for (const l of this.lamps) l.intensity = c.lamp * 2.5;
     for (const m of this.lampMeshes) (m.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.3 + c.lamp * 0.6;
-    this.post.bloom.strength = slot === "yewan" ? 0.55 : 0.25;
+    this.post.bloom.strength = slot === "yewan" ? 0.4 : 0.12; // v53r3
     this.procession.visible = act === "kaichao";
     this.audience.visible = act === "xiban";
     this.smoke.material.opacity = act === "kaichao" ? 0.16 : 0.09;

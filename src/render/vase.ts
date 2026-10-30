@@ -25,7 +25,7 @@ export class PorcelainVitrine {
   private amb: THREE.AmbientLight;
   private well: THREE.PointLight;
   private look: { shape: ShapeId; glaze: GlazeId; era: EraId } = { shape: "meiping", glaze: "qinghua", era: "ming" };
-  craft = { cobalt: 0.93, points: 8, crack: 0.35 }; // v53r2: deeper 青花 vs cream body
+  craft = { cobalt: 0.97, points: 9, crack: 0.32 }; // v53r3: near-full cobalt + denser points
   private wantWire = false;
   private buildGen = 0;
   private buildTimers: number[] = [];
@@ -152,7 +152,7 @@ export class PorcelainVitrine {
     this.key.target.position.set(0, 0.55, 0);
     this.rim = new THREE.DirectionalLight(0x8aa4c0, 1.55);
     this.rim.position.set(-2.9, 2.55, -2.8);
-    this.fill = new THREE.PointLight(0xc5d0da, 1.55, 11, 2); // v52
+    this.fill = new THREE.PointLight(0xc5d0da, 1.05, 11, 2); // v53r3: less cream blowout
     this.fill.position.set(-1.55, 1.15, 2.7);
     this.well = new THREE.PointLight(0xfff1d8, 1.05, 3.2, 2);
     this.well.position.set(0, 1.7, 0);
@@ -443,7 +443,7 @@ export class PorcelainVitrine {
     this.rim.color.setHex(cool);
     this.rim.intensity = glaze === "jihong" ? 1.2 : 1.7;
     this.key.color.setHex(glaze === "jihong" ? 0xffc9a0 : 0xffd4a8);
-    this.key.intensity = height < 0.5 ? 26 : 34;
+    this.key.intensity = height < 0.5 ? 18 : 24; // v53r3: cooler key keeps 青花 dark
     this.well.intensity = glaze === "yingqing" ? 2.0 : 1.2;
   }
 
@@ -890,7 +890,7 @@ function cobaltOf(era: EraId): Cobalt {
     case "yuan":
       return { deep: "#0f1528", mid: "#1b2850", wash: "#2c3c66", iron: true };
     case "ming":
-      return { deep: "#071018", mid: "#0e1c40", wash: "#1e3260", iron: false }; // v53r2 inkier ming
+      return { deep: "#050e16", mid: "#0a1838", wash: "#183058", iron: false }; // v53r3
     case "qing":
       return { deep: "#121d3c", mid: "#24386c", wash: "#3c5288", iron: false };
     case "song":
