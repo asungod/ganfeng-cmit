@@ -150,7 +150,7 @@ export class PorcelainVitrine {
     this.key.shadow.camera.near = 1;
     this.key.shadow.camera.far = 14;
     this.key.target.position.set(0, 0.55, 0);
-    this.rim = new THREE.DirectionalLight(0x8aa4c0, 1.55);
+    this.rim = new THREE.DirectionalLight(0x7a98b8, 1.7); // v53r6: cooler rim for 青花 edge
     this.rim.position.set(-2.9, 2.55, -2.8);
     this.fill = new THREE.PointLight(0xc5d0da, 1.05, 11, 2); // v53r3: less cream blowout
     this.fill.position.set(-1.55, 1.15, 2.7);

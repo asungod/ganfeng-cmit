@@ -131,10 +131,10 @@ export class PavilionScene {
     // v52: wide flat 国风 dusk wash — vermilion→gold ribbon along horizon, not an orb
     // v52c: bands BEHIND far hills (z<-34) so terrain never clips them into a sun-disc silhouette
     this.glow = new THREE.Mesh(new THREE.PlaneGeometry(240, 3.8), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffc898, transparent: true, opacity: 0.68, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r5: thinner band
-    this.glow.position.set(0, 5.35, -58); // v53r3: further behind so band not over pavilion
+    this.glow.position.set(0, 4.6, -58); // v53r6: pin on hill crest
     this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
     this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(200, 2.8), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.7, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r5 thinner
-    this.horizonBand.position.set(0, 5.0, -55); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2; // v53r3
+    this.horizonBand.position.set(0, 4.35, -55); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2; // v53r6
     this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(56, 36), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.42, depthWrite: false, fog: false }));
     this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-4, 0.06, -10); this.glowRefl.renderOrder = 2;
     this.scene.add(this.glowRefl, this.glow, this.horizonBand);
@@ -541,7 +541,7 @@ export function makePavilion(): THREE.Group {
     g.add(pole, lamp);
   }
 
-  const paper = new THREE.MeshStandardMaterial({ color: 0xffe6b8, emissive: 0xd08038, emissiveIntensity: 0.55, roughness: 0.55 }); // v50: warmer window glow
+  const paper = new THREE.MeshStandardMaterial({ color: 0xffe6b8, emissive: 0xd08038, emissiveIntensity: 0.28, roughness: 0.65 }); // v53r6: softer window bloom
   const stories = [
     { y0: 1.1, w: 4.8, d: 4.3, h: 1.45, roofW: 7.0, roofD: 6.3, rise: 1.0 },
     { y0: 3.0, w: 3.9, d: 3.5, h: 1.2, roofW: 5.8, roofD: 5.2, rise: 0.95 },

@@ -19,7 +19,7 @@ const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, n
   // judge views: actors from the front row, crowd faces from the stage apron
   // v25: further back, aim stage-right so trio clears left ws-panel
   kanxi: { eye: [2.15, 3.35, 1.4], look: [2.15, 2.85, 11.6] }, // v42: pull back from stage apron
-  guanzhong: { eye: [-4.2, 1.95, 6.6], look: [0.8, 1.05, 5.0] }, // v53r3: lower 3/4 — sit hips readable
+  guanzhong: { eye: [-3.6, 1.55, 7.2], look: [0.6, 0.85, 5.2] }, // v53r6: lower hip-line on sit crowd
 };
 
 export class TempleScene {
@@ -127,7 +127,7 @@ export class TempleScene {
       body.position.y = platform + h / 2;
       g.add(body);
       if (open) {
-        const doorM = new THREE.MeshStandardMaterial({ color: 0x2a0d08, roughness: 0.6, emissive: 0x3a1408, emissiveIntensity: 0.6 });
+        const doorM = new THREE.MeshStandardMaterial({ color: 0x2a0d08, roughness: 0.7, emissive: 0x3a1408, emissiveIntensity: 0.22 }); // v53r6: cut stage-door bloom
         for (let i = -2; i <= 2; i++) {
           const dr = wbox(w * 0.13, h * 0.78, 0.08, doorM);
           dr.position.set(i * w * 0.16, platform + h * 0.39, d * 0.4 + 0.05);
@@ -396,7 +396,7 @@ export class TempleScene {
     this.post.bloom.strength = slot === "yewan" ? 0.35 : 0.06; // v53r4
     this.procession.visible = act === "kaichao";
     this.audience.visible = act === "xiban";
-    this.smoke.material.opacity = act === "kaichao" ? 0.16 : 0.09;
+    this.smoke.material.opacity = act === "kaichao" ? 0.1 : 0.05; // v53r6: less chalk plume
     const night = slot === "yewan";
     this.haze.material.color.set(night ? 0x2a2a38 : 0xf0e0d0);
     this.smoke.material.color.set(night ? 0x8a7a70 : 0xe8e0d8);

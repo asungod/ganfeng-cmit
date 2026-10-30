@@ -873,7 +873,7 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
     faceCam(rig, watching ? 0.22 : 0.38); // v52: less cam peek — keep stage facing
     const t = t0 * sp + ph;
     head.position.x = Math.sin(t * 0.23) * 0.006;
-    if (mode !== 6) body.scale.y += (1 - body.scale.y) * 0.25;
+    if (mode !== 6 && mode !== 7) { body.scale.y += (1 - body.scale.y) * 0.25; body.rotation.x += (0 - body.rotation.x) * 0.25; }
     if (mode === 1) { // clapping in bursts
       body.position.y = Math.sin(t * 1.3) * 0.004;
       const burst = Math.sin(t * 0.35) > 0.5 ? Math.abs(Math.sin(t * 8)) : 0.5;
@@ -899,14 +899,16 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
       set(A, 0.08, -0.4); set(B, 0.08, -0.4);
       head.rotation.z = Math.sin(t * 0.6) * 0.14;
     } else if (mode === 6) { // v52 sit-watch — plant on stool, stronger squat
-      body.position.y = -0.5 + Math.sin(t * 1.1) * 0.003; // v53r5: deeper sit so crowd reads seated (stool lifts feet)
-      body.scale.y += (0.78 - body.scale.y) * 0.28; // hips on stool
-      set(A, -0.85 + Math.sin(t * 0.7) * 0.03, -1.75, 0.55);
-      set(B, -0.78 + Math.sin(t * 0.9) * 0.03, -1.68, 0.55);
+      body.position.y = -0.42 + Math.sin(t * 1.1) * 0.003; // v53r6: sit + forward pitch (paper cards need lean to read seated)
+      body.scale.y += (0.8 - body.scale.y) * 0.28;
+      body.rotation.x += (0.42 - body.rotation.x) * 0.28; // chin toward stage, hips back on stool
+      set(A, -0.9 + Math.sin(t * 0.7) * 0.03, -1.7, 0.6);
+      set(B, -0.82 + Math.sin(t * 0.9) * 0.03, -1.62, 0.6);
       head.position.y = 1.4;
       head.rotation.z = 0.07 + Math.sin(t * 0.45) * 0.05;
     } else if (mode === 7) { // v51 lean-watch — soft crouch lean (not full stand)
-      body.position.y = -0.18 + Math.sin(t * 1.3) * 0.004; // v53r5
+      body.position.y = -0.14 + Math.sin(t * 1.3) * 0.004; // v53r6
+      body.rotation.x += (0.12 - body.rotation.x) * 0.25;
       set(A, -0.22 + Math.sin(t * 0.8) * 0.04, -0.95, 0.65);
       set(B, -0.08 + Math.sin(t * 0.7) * 0.03, -0.55, 0.8);
       head.position.y = 1.4;
