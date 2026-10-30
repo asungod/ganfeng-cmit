@@ -6,7 +6,7 @@ import { lowPower, shadowSize, Flight, loadHdri, makePost, particles, phMat, sky
 import type { ImageId, MoodId } from "../data/tengwang";
 
 const MARK: Record<ImageId, THREE.Vector3> = {
-  luoxia: new THREE.Vector3(-10, 5.2, -18),
+  luoxia: new THREE.Vector3(-6, 5.0, -38), // v52: pin ON dusk band, not mid-sky ball
   guwu: new THREE.Vector3(-2.4, 3.4, -6),
   qiushui: new THREE.Vector3(0.2, 0.05, 2.2),
   changtian: new THREE.Vector3(1.5, 8.5, -10),
@@ -38,7 +38,7 @@ export class PavilionScene {
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
   private glow: THREE.Mesh;
-  private glowBase = 1.0; // v52: flat horizon band (sphere removed)
+  private glowBase = 1.15; // v52: ensure band reads full-width
   private glowRefl!: THREE.Mesh;
   private horizonBand!: THREE.Mesh;
   private warm = true;
@@ -130,9 +130,9 @@ export class PavilionScene {
     void skyBand;
     // v52: wide flat 国风 dusk wash — vermilion→gold ribbon along horizon, not an orb
     // v52c: bands BEHIND far hills (z<-34) so terrain never clips them into a sun-disc silhouette
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(140, 11), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd8b0, transparent: true, opacity: 0.92, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false })); // v52e: flatter ribbon
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(180, 10), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd8b0, transparent: true, opacity: 0.95, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false })); // v52g: full-horizon ribbon
     this.glow.position.set(0, 5.2, -42); // v52e: sit on horizon this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
-    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(140, 4.2), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.88, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false }));
+    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(180, 4), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.9, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false }));
     this.horizonBand.position.set(0, 4.6, -40); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2;
     this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(56, 36), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.42, depthWrite: false, fog: false }));
     this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-4, 0.06, -10); this.glowRefl.renderOrder = 2;

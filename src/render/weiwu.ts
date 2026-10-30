@@ -23,7 +23,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
 
 const HOURS: Record<HourId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; lamp: number }> = {
   dawn: { sun: [-30, 9, 18], col: 0xffc7a0, I: 2.2, hemi: 0.35, env: 0.6, exp: 0.95, fog: 0xb7b0b4, hdri: "qwantani_puresky", lamp: 0.2 },
-  noon: { sun: [12, 40, 14], col: 0xfff2dc, I: 3.55, hemi: 0.72, env: 1.05, exp: 0.95, fog: 0xc8d2dc, hdri: "qwantani_puresky", lamp: 0.15 }, // v52: brighter hall fill
+  noon: { sun: [12, 40, 14], col: 0xfff2dc, I: 3.7, hemi: 0.9, env: 1.15, exp: 1.08, fog: 0xc8d2dc, hdri: "qwantani_puresky", lamp: 0.35 }, // v52g noon
   dusk: { sun: [34, 9, 10], col: 0xf0dcc8, I: 2.55, hemi: 0.95, env: 1.0, exp: 1.12, fog: 0x8a8078, hdri: "qwantani_sunset_puresky", lamp: 0.55 },
   night: { sun: [-14, 30, -10], col: 0x8aa4ff, I: 0.35, hemi: 0.12, env: 0.25, exp: 1.15, fog: 0x10131e, hdri: "qwantani_night_puresky", lamp: 2.6 },
 };
@@ -547,9 +547,9 @@ export class WeiwuScene {
     this.fireflies.points.visible = h === "night"; // v36: dusk no longer shows fireflies (peach blobs on 横屋 floor)
     const hz = { dawn: 0xa8a0a4, noon: 0xb8c4d0, dusk: 0x5e5458, night: 0x0c0f18 }[h];
     (this.haze.material as THREE.MeshBasicMaterial).color.set(hz);
-    const fk = { dawn: 1.2, noon: 1.85, dusk: 2.2, night: 3.2 }[h]; // v52: noon halls readable
+    const fk = { dawn: 1.2, noon: 2.4, dusk: 2.2, night: 3.2 }[h]; // v52g noon punch
     for (const f of this.fills) f.l.intensity = fk * f.k;
-    for (const m of this.winMats) m.emissiveIntensity = { dawn: 0.1, noon: 0.22, dusk: 0.5, night: 1.1 }[h]; // v52 noon skim
+    for (const m of this.winMats) m.emissiveIntensity = { dawn: 0.1, noon: 0.45, dusk: 0.5, night: 1.1 }[h]; // v52g
     this.post.bloom.strength = h === "night" ? 0.75 : 0.28;
   }
 

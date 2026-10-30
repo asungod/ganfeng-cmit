@@ -68,16 +68,15 @@ export class DuskPainting {
       ctx.fillStyle = band;
       ctx.fillRect(w * 0.02, horizon - h * (0.2 - i * 0.025), w * 0.72, h * (0.22 - i * 0.02));
     }
-    // soft elongated gold wash near left horizon (ellipse, not sphere)
-    ctx.globalAlpha = 0.55;
-    const eg = ctx.createRadialGradient(sx, horizon - 4, 2, sx, horizon - 4, w * 0.55);
-    eg.addColorStop(0, pal.sun);
-    eg.addColorStop(0.35, pal.sunSoft);
+    // v52: flatter gold ribbon (no radial core that reads as a sun disc)
+    ctx.globalAlpha = 0.5;
+    const eg = ctx.createLinearGradient(0, horizon - h * 0.08, 0, horizon + 4);
+    eg.addColorStop(0, "rgba(0,0,0,0)");
+    eg.addColorStop(0.4, pal.sunSoft);
+    eg.addColorStop(0.75, pal.sun);
     eg.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = eg;
-    ctx.beginPath();
-    ctx.ellipse(sx, horizon - 2, w * 0.38, h * 0.07, 0, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillRect(w * 0.04, horizon - h * 0.09, w * 0.7, h * 0.12);
     ctx.restore();
 
     // distant hills

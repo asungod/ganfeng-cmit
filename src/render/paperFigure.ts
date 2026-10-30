@@ -153,7 +153,7 @@ export function contactShadow(w = 0.75, d = 0.42): THREE.Mesh {
     x.fillStyle = g; x.fillRect(0, 0, 128, 128); shadowTex = new THREE.CanvasTexture(c); shadowTex.colorSpace = THREE.SRGBColorSpace;
   }
   const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
-  m.rotation.x = -Math.PI / 2; m.position.y = 0.012; m.renderOrder = 1;
+  m.rotation.x = -Math.PI / 2; m.position.y = 0.006; m.renderOrder = 1; // v52: hug ground
   return m;
 }
 /** Cardboard thickness — side/close read an edge; high elev must NOT show pale slab tops. */
@@ -593,9 +593,10 @@ function faceCam(rig: { root: THREE.Group; turn: THREE.Group }, maxYaw: number):
     rig.root.traverse((o) => { if (o.userData?.paperEdge) o.visible = !hi; });
   }
   // soft lean only — hard cap so birdseye/nadir stays upright billboards
-  // v52: softer elev lean — less "float" feet on mid cameras
-  const lean = Math.min(0.22, Math.max(0, (elev - 0.22) * 0.36));
-  rig.turn.rotation.x += (lean - rig.turn.rotation.x) * 0.22;
+  // v52: watching crowd — no elev lean (feet stay planted); others soft lean
+  const watching = !!(rig.root.userData && rig.root.userData.watching);
+  const lean = watching ? 0 : Math.min(0.2, Math.max(0, (elev - 0.22) * 0.32));
+  rig.turn.rotation.x += (lean - (watching ? 0 : rig.turn.rotation.x)) * (watching ? 0.35 : 0.22);
 }
 
 const sm = (a: number, b: number, v: number) => { const k = Math.min(1, Math.max(0, (v - a) / (b - a))); return k * k * (3 - 2 * k); };
@@ -860,6 +861,7 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
   }
   const kid = type === "child";
   root.scale.setScalar(scale * (kid ? 0.68 : type === "woman" ? 0.93 : 0.96 + r() * 0.08));
+  if (watching) root.userData.watching = true;
   const rig = { root, turn };
   const ph = r() * 20, sp = 0.8 + r() * 0.4;
   const [A, B] = arms;
@@ -909,9 +911,8 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
       set(B, -0.08 + Math.sin(t * 0.7) * 0.03, -0.55, 0.8);
       head.position.y = 1.4;
       head.rotation.z = 0.08 + Math.sin(t * 0.5) * 0.04;
-      // extra forward lean on top of elev tip (still capped under billboard flat)
-      const leanT = Math.min(0.4, Math.max(rig.turn.rotation.x, 0.16));
-      rig.turn.rotation.x += (leanT - rig.turn.rotation.x) * 0.18;
+      // v52: slight chin tip only — no body lean that lifts feet
+      head.rotation.z = 0.1 + Math.sin(t * 0.5) * 0.04;
     } else { // idle watch — soft sway, slight asymmetric head tip toward stage
       body.position.y = Math.sin(t * 1.3) * 0.004;
       set(A, 0.05 + Math.sin(t) * 0.025, -0.18 + Math.sin(t * 0.6) * 0.04);
