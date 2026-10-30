@@ -50,6 +50,7 @@ export class WeiwuScene {
   private solids: THREE.Mesh[] = [];
   private boxes: THREE.Box3[] = [];
   private fills: { l: THREE.PointLight; k: number }[] = [];
+  private skyFill: THREE.DirectionalLight | null = null;
   private haze!: THREE.Mesh;
   private winMats: THREE.MeshStandardMaterial[] = [];
   private folk = new THREE.Group();
@@ -335,6 +336,13 @@ export class WeiwuScene {
       }
       // v34: warm interior fill so halls read at every hour
       const fl = new THREE.PointLight(0xffc890, 1, 7.5, 1.5); fl.position.set(0, 3.2, 0.2); hg.add(fl); this.fills.push({ l: fl, k: name === "zutang" ? 1.7 : 1.15 }); // v52
+      if (!this.skyFill && name === "zutang") {
+        // v52: noon courtyard skylight into 祖堂 (Directional through open front)
+        this.skyFill = new THREE.DirectionalLight(0xfff2dc, 0);
+        this.skyFill.position.set(0, 18, 8);
+        this.skyFill.target.position.set(0, 1.2, -1);
+        this.scene.add(this.skyFill, this.skyFill.target);
+      }
       if (name === "zutang") { // 八仙桌 + 太师椅 pair before the altar
         const t = furn.baxian(); t.position.set(0, 0.25, -depth / 2 + 2.0); hg.add(t);
         for (const sx of [-1, 1]) { const c = furn.chair(); c.position.set(sx * 0.95, 0.25, -depth / 2 + 2.0); c.rotation.y = -sx * Math.PI / 2; hg.add(c); }
@@ -549,6 +557,7 @@ export class WeiwuScene {
     (this.haze.material as THREE.MeshBasicMaterial).color.set(hz);
     const fk = { dawn: 1.2, noon: 2.4, dusk: 2.2, night: 3.2 }[h]; // v52g noon punch
     for (const f of this.fills) f.l.intensity = fk * f.k;
+    if (this.skyFill) this.skyFill.intensity = { dawn: 0.35, noon: 1.55, dusk: 0.25, night: 0 }[h];
     for (const m of this.winMats) m.emissiveIntensity = { dawn: 0.1, noon: 0.45, dusk: 0.5, night: 1.1 }[h]; // v52g
     this.post.bloom.strength = h === "night" ? 0.75 : 0.28;
   }
