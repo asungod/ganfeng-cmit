@@ -154,7 +154,7 @@ export class PorcelainVitrine {
     this.rim.position.set(-2.9, 2.55, -2.8);
     this.fill = new THREE.PointLight(0xb8c6d4, 0.85, 11, 2); // v53r8: cooler fill — glaze stays inkier
     this.fill.position.set(-1.55, 1.15, 2.7);
-    this.well = new THREE.PointLight(0xe8eef4, 0.4, 3.0, 2.2); // v53r5: cool well, no cream blob
+    this.well = new THREE.PointLight(0xd8e4f0, 0.32, 3.0, 2.2); // v53r9: cooler/dimmer well — inkier 青花
     this.well.position.set(0, 1.7, 0);
     this.scene.add(this.amb, hemi, this.key, this.key.target, this.rim, this.fill, this.well);
 

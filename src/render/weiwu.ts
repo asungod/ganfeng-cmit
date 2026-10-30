@@ -13,7 +13,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
   overview: { eye: [10, 14, 12], look: [0, 1.4, -1.0] }, // v41r3: open bays face camera more
   heping: { eye: [9, 4.2, 22], look: [0, 2.2, 6] },
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
-  tianjing: { eye: [3.0, 3.9, 4.15], look: [-0.25, 3.45, -0.6], fov: 58 }, // v53r8: mid-court open sky + jars/folk, less kitchen-wing alley
+  tianjing: { eye: [1.8, 4.35, 3.55], look: [0.15, 3.55, -1.4], fov: 56 }, // v53r9: higher mid-court — open sky + jars, less eave lantern
   zutang: { eye: [0.0, 2.9, 3.55], look: [0, 1.5, -1.45], fov: 62 }, // v42g: slightly further mid 天井 — altar+桌, thin posts
   zhengwu: { eye: [0.0, 2.95, -3.85], look: [0, 1.45, -6.65], fov: 58 }, // v42g: mid rear 天井 — clear of 祖堂 side ends, 八仙桌 reads
   hengwu: { eye: [-5.2, 1.7, 3.5], look: [-7.5, 1.3, -2.0], fov: 55 }, // v38: follow wing out to x±9.4
@@ -40,6 +40,7 @@ export class WeiwuScene {
   private hemi = new THREE.HemisphereLight(0xdfe8ff, 0x6a4a30, 0.4);
   private lamps: THREE.PointLight[] = [];
   private lampMeshes: THREE.Mesh[] = [];
+  private lanterns: THREE.Object3D[] = []; // v53r9: whole groups so noon can hide orb meshes
   private fireflies;
   private smoke!: ReturnType<typeof particles>;
   private raf = 0;
@@ -525,6 +526,7 @@ export class WeiwuScene {
     const l = lantern(0xff4a22);
     l.position.copy(p);
     parent.add(l);
+    this.lanterns.push(l); // v53r9
     this.lampMeshes.push(l.children[0] as THREE.Mesh);
     if (this.lamps.length < 6) {
       const pl = new THREE.PointLight(0xffa070, 1, 5.5, 2); // v26: shorter, softer spill on plaster
@@ -551,15 +553,16 @@ export class WeiwuScene {
     }
     this.scene.backgroundIntensity = h === "night" ? 0.5 : 1;
     for (const l of this.lamps) l.intensity = c.lamp * (h === "night" ? 1.6 : 0.9);
-    for (const m of this.lampMeshes) (m.material as THREE.MeshStandardMaterial).emissiveIntensity = (h === "night" ? 0.55 : h === "dusk" ? 0.22 : 0.05) + c.lamp * 0.9; // v53r8: noon lanterns nearly dark
+    for (const m of this.lampMeshes) (m.material as THREE.MeshStandardMaterial).emissiveIntensity = (h === "night" ? 0.55 : h === "dusk" ? 0.22 : 0.0) + c.lamp * (h === "noon" || h === "dawn" ? 0.15 : 0.9); // v53r9: noon/dawn nearly unlit
+    for (const l of this.lanterns) l.visible = h === "night" || h === "dusk"; // v53r9: hide daytime lantern orbs
     this.fireflies.points.visible = h === "night"; // v36: dusk no longer shows fireflies (peach blobs on 横屋 floor)
     const hz = { dawn: 0xa8a0a4, noon: 0xb8c4d0, dusk: 0x5e5458, night: 0x0c0f18 }[h];
     (this.haze.material as THREE.MeshBasicMaterial).color.set(hz);
-    const fk = { dawn: 1.15, noon: 1.55, dusk: 1.9, night: 3.2 }[h]; // v53r2: cooler noon punch on 红木
+    const fk = { dawn: 1.15, noon: 1.35, dusk: 1.9, night: 3.2 }[h]; // v53r9: less noon fill bloom ball on 神主墙
     for (const f of this.fills) f.l.intensity = fk * f.k;
     if (this.skyFill) this.skyFill.intensity = { dawn: 0.3, noon: 1.05, dusk: 0.22, night: 0 }[h]; // v53r3: less noon wash on 红木
-    for (const m of this.winMats) m.emissiveIntensity = { dawn: 0.1, noon: 0.45, dusk: 0.5, night: 1.1 }[h]; // v52g
-    this.post.bloom.strength = h === "night" ? 0.7 : 0.10; // v53r7: cut noon round glow on 祖堂/lantern
+    for (const m of this.winMats) m.emissiveIntensity = { dawn: 0.08, noon: 0.16, dusk: 0.5, night: 1.1 }[h]; // v53r9: kill noon lattice glow orb
+    this.post.bloom.strength = h === "night" ? 0.7 : (h === "dusk" ? 0.12 : 0.04); // v53r9: noon almost no round bloom
   }
 
   setRoom(r: RoomId | "overview", instant = false): void {
@@ -608,7 +611,7 @@ export class WeiwuScene {
       const k = Math.max(0, d.dot(sd)); const f = this.hourId === "night" ? 0 : k * k;
       this.renderer.toneMappingExposure = c.exp * (1 - 0.3 * f);
       this.scene.backgroundIntensity = this.hourId === "night" ? 0.5 : (this.hourId === "dusk" ? 0.45 : 1) - 0.4 * f;
-      this.post.bloom.strength = (this.hourId === "night" ? 0.7 : 0.10) * (1 - 0.7 * f); // v53r7
+      this.post.bloom.strength = (this.hourId === "night" ? 0.7 : this.hourId === "dusk" ? 0.12 : 0.04) * (1 - 0.7 * f); // v53r9
     }
     this.post.render();
   };
@@ -709,15 +712,15 @@ function makeFurniture(wood: THREE.Material, lac: THREE.Material) {
   const brick = new THREE.MeshStandardMaterial({ color: 0x8a6a58, roughness: 0.95 });
   const iron = new THREE.MeshStandardMaterial({ color: 0x1e1c1a, roughness: 0.5, metalness: 0.6 });
   const pot = new THREE.MeshStandardMaterial({ color: 0x4a3426, roughness: 0.35 });
-  // v53r8: lift mid 红木 — zhengwu table still read dark-red in noon
-  const grain = woodGrainMap("#9a7858", "#5a3c28");
+  // v53r9: mid 红木 browner-readable — noon table not charcoal, not scarlet
+  const grain = woodGrainMap("#a08058", "#5c3e26");
   const rose = (lac as THREE.MeshStandardMaterial).clone();
-  rose.map = grain; rose.color = new THREE.Color(0x7a6348); rose.roughness = 0.94; rose.metalness = 0;
-  rose.envMapIntensity = 0.07;
+  rose.map = grain; rose.color = new THREE.Color(0x826848); rose.roughness = 0.93; rose.metalness = 0;
+  rose.envMapIntensity = 0.08;
   const L = rose;
   const apron = (lac as THREE.MeshStandardMaterial).clone();
-  apron.map = grain; apron.color = new THREE.Color(0x5a4230); apron.roughness = 0.95; apron.metalness = 0;
-  apron.envMapIntensity = 0.06;
+  apron.map = grain; apron.color = new THREE.Color(0x5e4630); apron.roughness = 0.94; apron.metalness = 0;
+  apron.envMapIntensity = 0.07;
   const A = apron;
   const addHoof = (g: THREE.Group, x: number, z: number, m: THREE.Material) => {
     g.add(box(0.12, 0.045, 0.12, m, x, 0.03, z));

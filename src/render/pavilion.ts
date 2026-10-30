@@ -130,12 +130,12 @@ export class PavilionScene {
     void skyBand;
     // v52: wide flat 国风 dusk wash — vermilion→gold ribbon along horizon, not an orb
     // v52c: bands BEHIND far hills (z<-34) so terrain never clips them into a sun-disc silhouette
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(260, 2.55), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffc898, transparent: true, opacity: 0.72, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r7: thinner ribbon band
-    this.glow.position.set(0, 4.6, -58); // v53r6: pin on hill crest
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(260, 1.65), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffc898, transparent: true, opacity: 0.68, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r9: thin horizontal ribbon only
+    this.glow.position.set(0, 4.55, -58); // v53r6: pin on hill crest
     this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
-    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(220, 1.9), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.74, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r7 thinner ribbon
-    this.horizonBand.position.set(0, 4.35, -55); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2; // v53r6
-    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(56, 28), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.28, depthWrite: false, fog: false })); // v53r8: softer river catch — less white disk
+    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(220, 1.2), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.70, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r9 thinner
+    this.horizonBand.position.set(0, 4.3, -55); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2; // v53r6
+    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(48, 22), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.18, depthWrite: false, fog: false })); // v53r9: softer river catch — no disk
     this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-4, 0.06, -10); this.glowRefl.renderOrder = 2;
     this.scene.add(this.glowRefl, this.glow, this.horizonBand);
 
@@ -270,7 +270,7 @@ export class PavilionScene {
         const hb = this.horizonBand.material as THREE.MeshBasicMaterial;
         hb.opacity = skyOp * 0.9; this.horizonBand.visible = hb.opacity > 0.02;
         // v51b: lift low-eye 江面 catch light
-        (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.62 : 0.16) * Math.max(0.32, 1 - el * 1.15) * Math.pow(ff, 1.05);
+        (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.38 : 0.10) * Math.max(0.28, 1 - el * 1.15) * Math.pow(ff, 1.05); // v53r9
       }
     }
     this.post.render();

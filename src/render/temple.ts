@@ -44,6 +44,7 @@ export class TempleScene {
   private last = performance.now();
   private disposed = false;
   private act: ActId = "kaichao";
+  private slotId: SlotId = "baitian"; // v53r9: persist so update() doesn't re-show daytime lanterns
 
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = makeRenderer(canvas, 0.9);
@@ -377,6 +378,7 @@ export class TempleScene {
   }
 
   set(act: ActId, slot: SlotId, instant = false): void {
+    this.slotId = slot; // v53r9
     const c = SLOT[slot];
     this.sun.position.set(...c.sun);
     this.sun.color.set(c.col);
@@ -393,7 +395,7 @@ export class TempleScene {
     this.scene.backgroundIntensity = c.bg;
     for (const l of this.lamps) l.intensity = c.lamp * 1.2; // v53r4: daytime wall orbs
     for (const m of this.lampMeshes) (m.material as THREE.MeshStandardMaterial).emissiveIntensity = (slot === "yewan" ? 0.35 : 0.02) + c.lamp * 0.55; // v53r8
-    for (const l of this.lanterns) l.visible = slot === "yewan" || c.lamp > 0.4; // v53r8: hide daytime hanging lanterns (were wall orbs)
+    for (const l of this.lanterns) l.visible = slot === "yewan" || c.lamp > 0.4; // v53r9: hide daytime hanging lanterns (were wall orbs)
     this.post.bloom.strength = slot === "yewan" ? 0.35 : 0.02; // v53r7: daytime almost no bloom circles
     this.procession.visible = act === "kaichao";
     this.audience.visible = act === "xiban";
@@ -449,10 +451,12 @@ export class TempleScene {
         f.position.z = 6.4 - ((t * 0.45 + i * 0.55) % span);
         f.position.y = Math.abs(Math.sin(t * 3 + i)) * 0.012; // v52: tiny step, not float
       });
-    // v29: hide lanterns that pass right in front of the lens (camera flights, close orbits)
-    { // v31: also hide near lanterns that sit between the lens and the 戏台 performers
+    // v29/v31/v53r9: near-lens cull — but NEVER re-show daytime lanterns (set() already hid them)
+    {
       const cp = this.camera.position, st = new THREE.Vector3(0, 3, 11.5).sub(cp).normalize();
+      const slotOk = this.slotId === "yewan" || SLOT[this.slotId].lamp > 0.4;
       for (const l of this.lanterns) {
+        if (!slotOk) { l.visible = false; continue; }
         const d = l.position.distanceTo(cp);
         const toL = l.position.clone().sub(cp).normalize();
         l.visible = d > 3.2 && !(d < 9 && toL.dot(st) > 0.985);
