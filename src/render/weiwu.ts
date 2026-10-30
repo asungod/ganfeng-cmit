@@ -334,7 +334,7 @@ export class WeiwuScene {
         for (const sx of [-1.7, 1.7]) this.addLantern(hg, new THREE.Vector3(sx, 3.3, depth / 2 - 0.9));
       }
       // v34: warm interior fill so halls read at every hour
-      const fl = new THREE.PointLight(0xffc890, 1, 7, 1.6); fl.position.set(0, 3.2, 0.2); hg.add(fl); this.fills.push({ l: fl, k: name === "zutang" ? 1.3 : 1 });
+      const fl = new THREE.PointLight(0xffc890, 1, 7.5, 1.5); fl.position.set(0, 3.2, 0.2); hg.add(fl); this.fills.push({ l: fl, k: name === "zutang" ? 1.7 : 1.15 }); // v52
       if (name === "zutang") { // 八仙桌 + 太师椅 pair before the altar
         const t = furn.baxian(); t.position.set(0, 0.25, -depth / 2 + 2.0); hg.add(t);
         for (const sx of [-1, 1]) { const c = furn.chair(); c.position.set(sx * 0.95, 0.25, -depth / 2 + 2.0); c.rotation.y = -sx * Math.PI / 2; hg.add(c); }
@@ -547,9 +547,9 @@ export class WeiwuScene {
     this.fireflies.points.visible = h === "night"; // v36: dusk no longer shows fireflies (peach blobs on 横屋 floor)
     const hz = { dawn: 0xa8a0a4, noon: 0xb8c4d0, dusk: 0x5e5458, night: 0x0c0f18 }[h];
     (this.haze.material as THREE.MeshBasicMaterial).color.set(hz);
-    const fk = { dawn: 1.2, noon: 0.8, dusk: 2.2, night: 3.2 }[h];
+    const fk = { dawn: 1.2, noon: 1.85, dusk: 2.2, night: 3.2 }[h]; // v52: noon halls readable
     for (const f of this.fills) f.l.intensity = fk * f.k;
-    for (const m of this.winMats) m.emissiveIntensity = { dawn: 0.1, noon: 0, dusk: 0.5, night: 1.1 }[h];
+    for (const m of this.winMats) m.emissiveIntensity = { dawn: 0.1, noon: 0.22, dusk: 0.5, night: 1.1 }[h]; // v52 noon skim
     this.post.bloom.strength = h === "night" ? 0.75 : 0.28;
   }
 

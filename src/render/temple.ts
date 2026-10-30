@@ -9,7 +9,7 @@ import { makeFigure, makeTree, shadowSize, Flight, disposeScene, lantern, loadHd
 
 const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; bg: number; lamp: number }> = {
   chendan: { sun: [-30, 12, 20], col: 0xffc4a0, I: 2.6, hemi: 0.45, env: 0.8, exp: 1.0, fog: 0xa89aa4, hdri: "qwantani_puresky", bg: 0.8, lamp: 0.5 },
-  baitian: { sun: [14, 38, 18], col: 0xfff0d8, I: 3.6, hemi: 0.6, env: 1.0, exp: 0.95, fog: 0xc0c8d0, hdri: "qwantani_puresky", bg: 1, lamp: 0 },
+  baitian: { sun: [14, 38, 18], col: 0xfff0d8, I: 3.85, hemi: 0.78, env: 1.05, exp: 1.02, fog: 0xc0c8d0, hdri: "qwantani_puresky", bg: 1, lamp: 0 }, // v52
   yewan: { sun: [-10, 30, -14], col: 0x7a90ff, I: 0.45, hemi: 0.14, env: 0.3, exp: 0.95, fog: 0x0e1018, hdri: "qwantani_night_puresky", bg: 0.45, lamp: 2.8 },
 };
 const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, number, number]; look: [number, number, number] }> = {
@@ -19,7 +19,7 @@ const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, n
   // judge views: actors from the front row, crowd faces from the stage apron
   // v25: further back, aim stage-right so trio clears left ws-panel
   kanxi: { eye: [2.15, 3.35, 1.4], look: [2.15, 2.85, 11.6] }, // v42: pull back from stage apron
-  guanzhong: { eye: [0.8, 2.75, 9.2], look: [0, 1.25, 3.6] },
+  guanzhong: { eye: [0.55, 2.55, 9.6], look: [0.1, 1.05, 4.2] }, // v52: aim mid crowd faces
 };
 
 export class TempleScene {
@@ -325,17 +325,17 @@ export class TempleScene {
       // v37: start further from stage (was 6.5) so high-angle never clips heads through 戏台 eaves
       const x = -4.8 + col * 1.6 + (row % 2) * 0.5 + Math.sin(i * 7.1) * 0.3;
       const z = 4.8 - row * 1.2 + Math.cos(i * 3.3) * 0.2;
-      f.position.set(x, 0, z);
+      f.position.set(x, -0.04, z); // v52: plant feet — billboard lean read as float at y=0
       // v52: yaw firmly at stage apron (z=11.5); tiny personal offset only
-      f.rotation.y = Math.atan2(-x, 11.5 - z) + (col - 3) * 0.03 + ((i % 5) - 2) * 0.02;
+      f.rotation.y = Math.atan2(-x, 11.5 - z) + (col - 3) * 0.025;
       this.audience.add(f);
       // stools for sit modes (watching map raw%8 → modes 0,4 sit) + neighbors share benches
       if (i % 8 === 0 || i % 8 === 4 || i % 8 === 1) {
         const stool = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.24, 0.27, 0.28, 8),
+          new THREE.CylinderGeometry(0.22, 0.25, 0.22, 8),
           new THREE.MeshStandardMaterial({ color: 0x5a3a28, roughness: 0.9, metalness: 0.05 }),
         );
-        stool.position.set(x, 0.14, z + 0.04);
+        stool.position.set(x, 0.07, z + 0.02); // v52: low stool under sit hips
         stool.castShadow = true;
         this.audience.add(stool);
       }
@@ -446,7 +446,7 @@ export class TempleScene {
         // v37: walk only the open court (z 6.4 → -1.6); never under 戏台 roof
         const span = 8.0;
         f.position.z = 6.4 - ((t * 0.45 + i * 0.55) % span);
-        f.position.y = Math.abs(Math.sin(t * 3 + i)) * 0.04;
+        f.position.y = Math.abs(Math.sin(t * 3 + i)) * 0.012; // v52: tiny step, not float
       });
     // v29: hide lanterns that pass right in front of the lens (camera flights, close orbits)
     { // v31: also hide near lanterns that sit between the lens and the 戏台 performers

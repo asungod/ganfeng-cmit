@@ -115,10 +115,20 @@ export class PorcelainVitrine {
     this.scene.add(ring);
 
     this.scene.add(contactShadowDisc());
+    // v52: soft charcoal museum wall behind vase for depth (not void)
+    {
+      const wall = new THREE.Mesh(
+        new THREE.PlaneGeometry(6.5, 4.2),
+        new THREE.MeshStandardMaterial({ color: 0x2a2624, roughness: 0.95, metalness: 0, envMapIntensity: 0.15 }),
+      );
+      wall.position.set(0, 1.55, -2.35);
+      this.scene.add(wall);
+    }
+
 
     const floor = new THREE.Mesh(
       new THREE.CircleGeometry(3.4, 64),
-      new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.96, metalness: 0 }),
+      new THREE.MeshStandardMaterial({ color: 0x1a1614, roughness: 0.92, metalness: 0.08 }), // v52: warm museum floor
     );
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -0.181;

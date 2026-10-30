@@ -464,7 +464,7 @@ export function makeHills(): THREE.Group {
   // 层叠山脊（远淡近浓），替代早期的压扁球体，避免“积木感”
   const g = new THREE.Group();
   const layers: { z: number; base: number; amp: number; color: number; seed: number; gap?: [number, number] }[] = [
-    { z: -34, base: 2.2, amp: 2.6, color: 0x6a3a3c, seed: 1.7 }, // v52c: lower flatter + warmer ridge (no ball silhouette)
+    { z: -34, base: 2.0, amp: 2.2, color: 0x7a4a48, seed: 1.7 }, // v52f: softer ridge under band
     { z: -27, base: 1.5, amp: 2.2, color: 0x4a3038, seed: 4.1 },
     { z: -20, base: 0.9, amp: 2.0, color: 0x30283a, seed: 7.3, gap: [-13, 2] },
     { z: -14, base: 0.4, amp: 1.5, color: 0x1e1a26, seed: 9.9, gap: [-16, 11] },
@@ -894,6 +894,10 @@ function luoxiaSky(): THREE.Texture {
   x.fillStyle = h; x.fillRect(0, 0, W, H);
   const t = x.createLinearGradient(0, 0, 0, H); t.addColorStop(0, "rgba(0,0,0,0)"); t.addColorStop(0.3, "rgba(0,0,0,1)"); t.addColorStop(1, "rgba(0,0,0,1)");
   x.fillStyle = t; x.fillRect(0, 0, W, H);
+  // v52f: soft foot fade so band meets hills without hard shelf
+  const foot = x.createLinearGradient(0, H, 0, H * 0.55);
+  foot.addColorStop(0, "rgba(42,32,64,0.95)"); foot.addColorStop(0.55, "rgba(42,32,64,0.25)"); foot.addColorStop(1, "rgba(42,32,64,0)");
+  x.fillStyle = foot; x.fillRect(0, 0, W, H);
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; return tex;
 }
 /** glow mirrored on the river: broken horizontal ripple dashes, brightest on the far side under the sunset */
@@ -916,5 +920,9 @@ function luoxiaRefl(): THREE.Texture {
   x.globalCompositeOperation = "destination-in";
   const g = x.createLinearGradient(0, 0, W, 0); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(0.5, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)");
   x.fillStyle = g; x.fillRect(0, 0, W, H);
+  // v52f: soft foot fade so band meets hills without hard shelf
+  const foot = x.createLinearGradient(0, H, 0, H * 0.55);
+  foot.addColorStop(0, "rgba(42,32,64,0.95)"); foot.addColorStop(0.55, "rgba(42,32,64,0.25)"); foot.addColorStop(1, "rgba(42,32,64,0)");
+  x.fillStyle = foot; x.fillRect(0, 0, W, H);
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; return tex;
 }

@@ -593,7 +593,8 @@ function faceCam(rig: { root: THREE.Group; turn: THREE.Group }, maxYaw: number):
     rig.root.traverse((o) => { if (o.userData?.paperEdge) o.visible = !hi; });
   }
   // soft lean only — hard cap so birdseye/nadir stays upright billboards
-  const lean = Math.min(0.34, Math.max(0, (elev - 0.18) * 0.48));
+  // v52: softer elev lean — less "float" feet on mid cameras
+  const lean = Math.min(0.22, Math.max(0, (elev - 0.22) * 0.36));
   rig.turn.rotation.x += (lean - rig.turn.rotation.x) * 0.22;
 }
 
@@ -896,8 +897,8 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
       set(A, 0.08, -0.4); set(B, 0.08, -0.4);
       head.rotation.z = Math.sin(t * 0.6) * 0.14;
     } else if (mode === 6) { // v52 sit-watch — plant on stool, stronger squat
-      body.position.y = -0.62 + Math.sin(t * 1.1) * 0.003;
-      body.scale.y += (0.86 - body.scale.y) * 0.25; // clearer sit squash
+      body.position.y = -0.48 + Math.sin(t * 1.1) * 0.003;
+      body.scale.y += (0.88 - body.scale.y) * 0.25; // hips on low stool
       set(A, -0.7 + Math.sin(t * 0.7) * 0.03, -1.65, 0.48);
       set(B, -0.62 + Math.sin(t * 0.9) * 0.03, -1.58, 0.48);
       head.position.y = 1.4;
