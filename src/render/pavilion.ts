@@ -135,7 +135,7 @@ export class PavilionScene {
     this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
     this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(220, 1.9), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.74, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r7 thinner ribbon
     this.horizonBand.position.set(0, 4.35, -55); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2; // v53r6
-    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(56, 36), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.42, depthWrite: false, fog: false }));
+    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(56, 28), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.28, depthWrite: false, fog: false })); // v53r8: softer river catch — less white disk
     this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-4, 0.06, -10); this.glowRefl.renderOrder = 2;
     this.scene.add(this.glowRefl, this.glow, this.horizonBand);
 

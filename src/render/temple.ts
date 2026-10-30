@@ -325,17 +325,17 @@ export class TempleScene {
       // v37: start further from stage (was 6.5) so high-angle never clips heads through 戏台 eaves
       const x = -4.8 + col * 1.6 + (row % 2) * 0.5 + Math.sin(i * 7.1) * 0.3;
       const z = 4.8 - row * 1.2 + Math.cos(i * 3.3) * 0.2;
-      f.position.set(x, 0.16, z); // v53r5: lift onto stool so deep sit doesn't bury feet
+      f.position.set(x, 0.10, z); // v53r8: plant hips closer to stool top — less float
       // v52: yaw firmly at stage apron (z=11.5); tiny personal offset only
       f.rotation.y = Math.atan2(-x, 11.5 - z) + (col - 3) * 0.025;
       this.audience.add(f);
       // v53r1: stools under sit+lean (modes 6,7 dominate watching map)
       if (i % 8 === 0 || i % 8 === 4 || i % 8 === 1 || i % 8 === 5 || i % 8 === 6) {
         const stool = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.26, 0.28, 0.34, 8),
-          new THREE.MeshStandardMaterial({ color: 0x5a3a28, roughness: 0.9, metalness: 0.05 }),
+          new THREE.CylinderGeometry(0.28, 0.30, 0.30, 8),
+          new THREE.MeshStandardMaterial({ color: 0x6a4a32, roughness: 0.92, metalness: 0.04 }),
         );
-        stool.position.set(x, 0.14, z + 0.02); // v53r5: taller stool under sit hips
+        stool.position.set(x, 0.12, z + 0.02); // v53r8: browner stool, hips sit flush
         stool.castShadow = true;
         this.audience.add(stool);
       }
@@ -392,7 +392,8 @@ export class TempleScene {
     }
     this.scene.backgroundIntensity = c.bg;
     for (const l of this.lamps) l.intensity = c.lamp * 1.2; // v53r4: daytime wall orbs
-    for (const m of this.lampMeshes) (m.material as THREE.MeshStandardMaterial).emissiveIntensity = (slot === "yewan" ? 0.35 : 0.04) + c.lamp * 0.55; // v53r7: daytime lanterns nearly dark — kill wall orbs
+    for (const m of this.lampMeshes) (m.material as THREE.MeshStandardMaterial).emissiveIntensity = (slot === "yewan" ? 0.35 : 0.02) + c.lamp * 0.55; // v53r8
+    for (const l of this.lanterns) l.visible = slot === "yewan" || c.lamp > 0.4; // v53r8: hide daytime hanging lanterns (were wall orbs)
     this.post.bloom.strength = slot === "yewan" ? 0.35 : 0.02; // v53r7: daytime almost no bloom circles
     this.procession.visible = act === "kaichao";
     this.audience.visible = act === "xiban";
@@ -400,7 +401,7 @@ export class TempleScene {
     const night = slot === "yewan";
     this.haze.material.color.set(night ? 0x2a2a38 : 0xf0e0d0);
     this.smoke.material.color.set(night ? 0x8a7a70 : 0xe8e0d8);
-    this.stageLight.intensity = act === "xiban" ? (slot === "yewan" ? 3.2 : 1.05) : 0;
+    this.stageLight.intensity = act === "xiban" ? (slot === "yewan" ? 3.2 : 0.72) : 0; // v53r8: daytime stage softer — less wall bounce orbs
     this.scene.traverse((o) => { if (o.name === "performer") o.visible = act === "xiban"; });
     if (act !== this.act || instant) {
       this.act = act;
