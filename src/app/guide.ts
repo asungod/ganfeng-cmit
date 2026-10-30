@@ -66,14 +66,14 @@ export class Guide {
 export const guide = new Guide();
 
 export const lines = {
-  hall: "欢迎来到赣风。三条参观线：瓷语——景德镇器型与釉色如何互相约束；阁序——把《滕王阁序》原句钉在夜阁画面上；客家——可走进的赣南围屋。请打开讲解，再选一门。建议顺序：先读唐代王勃《滕王阁序》；再看景德镇从北宋青白瓷、元青花到清粉彩的年代约束；最后走进如龙南关西新围（清嘉庆—道光）那样的赣南围屋。每一步出处均可在审计面板展开。",
+  hall: "欢迎来到赣风。三条线：瓷语（景德镇器型与釉色的时代约束）、阁序（《滕王阁序》原句钉在夜阁上）、客家（可走进的赣南围屋）。请打开讲解，再选一门。建议顺序：阁序 → 瓷语 → 客家。每一步出处均可在审计面板展开。",
   ciyu: "瓷语展柜。先锁定时代，再选器型与釉色。冲突不会生成「好看的错」，而会改锁并说明理由。眼前是程序复原的梅瓶，不是馆藏原件。",
   lock: (era: string, shape: string, glaze: string, note: string) =>
     note
       ? `风格改锁。${note} 当前展出：${era}，${shape}，${glaze}。`
       : `当前锁定：${era}，${shape}，${glaze}。请看展签与引用条。`,
   cite: (title: string, body: string) => `引用。${title}。${body.slice(0, 80)}`,
-  gexu: "阁序。点落霞、孤鹜、秋水，画面与王勃原句绑定，不是另写提示词出图。",
+  gexu: "阁序。点落霞、孤鹜、秋水，画面钉回王勃原句——不是另写提示词出图。",
   verse: (name: string, verse: string) => `${name}。${verse}`,
   kejia: "客家围屋。时辰与房间互相约束：暮时祖堂合，夜里角楼合。可点矩阵，或用问句写入时辰与房间。",
   room: (name: string, line: string) => `${name}。${line}`,

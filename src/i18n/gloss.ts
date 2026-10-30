@@ -12,7 +12,7 @@ export const GLOSS: Record<string, string> = {
   合: "Compatible", 勉: "Borderline", 勉强: "Borderline", 冲: "Conflict", 冲突: "Conflict",
   时代: "Era", 釉色: "Glaze", 器型: "Shape", 情境: "Mood", 意象: "Motif", 时辰: "Hour", 房间: "Room",
   门厅: "Lobby", 瓷语: "Porcelain Whispers", 阁序: "Tengwang Preface", 客家: "Hakka Weiwu", 围屋: "weiwu (walled house)", 土楼: "tulou",
-  合规: "OK", 已改锁: "Resolved", 未入展柜: "No cabinet", 未载入: "not loaded", 词面: "lexical",
+  合规: "OK", 已改锁: "Resolved", 未入展柜: "No exhibit locked", 未载入: "not loaded", 词面: "lexical",
   是: "yes", 否: "no", 同一: "same", 引: "Cite",
   阈值: "Threshold", 召回: "Recall", 精确: "Precision", 说明: "Note", 体积: "Size", 延迟: "Latency", 备注: "Remarks",
   故宫博物院: "The Palace Museum", 上海博物馆: "Shanghai Museum", 唐: "Tang dynasty",
