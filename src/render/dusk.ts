@@ -55,27 +55,30 @@ export class DuskPainting {
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, w, h);
 
-    // sun / 落霞 core
-    const sx = w * 0.28;
-    const sy = horizon - h * 0.08;
+    // v52: horizontal 落霞 band — no circular sun orb
+    const sx = w * 0.32;
     ctx.save();
-    for (let i = 0; i < 5; i++) {
-      const cx = sx - 30 + i * 62;
-      const cy = sy - 8 - i * 6;
-      const cloud = ctx.createRadialGradient(cx, cy, 6, cx, cy, w * (0.16 + i * 0.035));
-      cloud.addColorStop(0, pal.sunSoft);
-      cloud.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.globalAlpha = 0.28;
-      ctx.fillStyle = cloud;
-      ctx.fillRect(0, 0, w, horizon + 2);
+    for (let i = 0; i < 4; i++) {
+      const band = ctx.createLinearGradient(0, horizon - h * (0.22 - i * 0.03), 0, horizon + 2);
+      band.addColorStop(0, "rgba(0,0,0,0)");
+      band.addColorStop(0.35, pal.sunSoft);
+      band.addColorStop(0.75, pal.sun);
+      band.addColorStop(1, pal.rim);
+      ctx.globalAlpha = 0.22 + i * 0.06;
+      ctx.fillStyle = band;
+      ctx.fillRect(w * 0.02, horizon - h * (0.2 - i * 0.025), w * 0.72, h * (0.22 - i * 0.02));
     }
+    // soft elongated gold wash near left horizon (ellipse, not sphere)
+    ctx.globalAlpha = 0.55;
+    const eg = ctx.createRadialGradient(sx, horizon - 4, 2, sx, horizon - 4, w * 0.55);
+    eg.addColorStop(0, pal.sun);
+    eg.addColorStop(0.35, pal.sunSoft);
+    eg.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = eg;
+    ctx.beginPath();
+    ctx.ellipse(sx, horizon - 2, w * 0.38, h * 0.07, 0, 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
-    const sun = ctx.createRadialGradient(sx, sy, 8, sx, sy, w * 0.42);
-    sun.addColorStop(0, pal.sun);
-    sun.addColorStop(0.18, pal.sunSoft);
-    sun.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = sun;
-    ctx.fillRect(0, 0, w, horizon + 2);
 
     // distant hills
     ctx.fillStyle = pal.hillFar;

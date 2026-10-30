@@ -30,7 +30,7 @@ export class PavilionScene {
   private disposed = false;
   private t0 = performance.now();
   private duck: THREE.Group;
-  private sun: THREE.Mesh;
+  private sun: THREE.Object3D;
   private sunLight: THREE.DirectionalLight;
   private hemi: THREE.HemisphereLight;
   private water: THREE.Group;
@@ -38,7 +38,7 @@ export class PavilionScene {
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
   private glow: THREE.Mesh;
-  private glowBase = 1.05; // v51b: clear 国风 sunset wash over 江面
+  private glowBase = 1.0; // v52: flat horizon band (sphere removed)
   private glowRefl!: THREE.Mesh;
   private horizonBand!: THREE.Mesh;
   private warm = true;
@@ -123,22 +123,19 @@ export class PavilionScene {
     this.markers.set("yanzhen", makeGeese());
     this.scene.add(this.markers.get("yanzhen")!);
 
-    this.sun = new THREE.Mesh(
-      new THREE.SphereGeometry(0.7, 24, 24),
-      new THREE.MeshBasicMaterial({ color: 0xfff0d0, fog: false }),
-    );
+    // v52: invisible marker only — NO SphereGeometry sun ball (用户: 落霞咋是个球)
+    this.sun = new THREE.Object3D();
     this.sun.position.copy(MARK.luoxia);
     this.scene.add(this.sun);
     void skyBand;
-    // v36: fixed Mesh plane (not Sprite) so side/back orbits no longer see a billboard washing the frame white
-    // v51b: glow IN FRONT of far hills (z=-34) so warm band is not occluded; fuller texture color
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(58, 24), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c8, transparent: true, opacity: 0.98, depthWrite: false, side: THREE.DoubleSide, fog: false }));
-    this.glow.position.set(-14, 9.2, -25); this.glow.lookAt(0, 4.2, 2); this.glow.renderOrder = -1;
-    // thin hot horizon ribbon just above mid ridge
-    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(48, 7), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xfff0d0, transparent: true, opacity: 0.85, depthWrite: false, side: THREE.DoubleSide, fog: false }));
-    this.horizonBand.position.set(-12, 5.4, -22); this.horizonBand.lookAt(0, 3.5, 4); this.horizonBand.renderOrder = -1;
-    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(42, 48), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.55, depthWrite: false, fog: false }));
-    this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-7, 0.06, -8); this.glowRefl.renderOrder = 2;
+    // v52: wide flat 国风 dusk wash — vermilion→gold ribbon along horizon, not an orb
+    // v52c: bands BEHIND far hills (z<-34) so terrain never clips them into a sun-disc silhouette
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(110, 16), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd8b0, transparent: true, opacity: 0.95, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false }));
+    this.glow.position.set(0, 8.5, -42); this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
+    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(110, 5), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.9, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false }));
+    this.horizonBand.position.set(0, 5.8, -40); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2;
+    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(56, 36), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.42, depthWrite: false, fog: false }));
+    this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-4, 0.06, -10); this.glowRefl.renderOrder = 2;
     this.scene.add(this.glowRefl, this.glow, this.horizonBand);
 
     const pool = new THREE.Mesh(
@@ -156,8 +153,10 @@ export class PavilionScene {
 
     this.mist = particles(260, new THREE.Box3(new THREE.Vector3(-34, 0.15, -30), new THREE.Vector3(30, 1.4, -9)), 0xe8d0b8, 2.4, 0.055, "mist");
     this.scene.add(this.mist.points);
-    loadHdri(this.renderer, this.scene, "qwantani_dusk_2_puresky", true);
-    this.scene.environmentIntensity = 0.38; // v51b: let painted 落霞 read over dusk HDRI
+    // v52: HDRI for lighting only — dusk puresky sun disc was the "落霞球"
+    loadHdri(this.renderer, this.scene, "qwantani_dusk_2_puresky", false);
+    this.scene.background = new THREE.Color(0x1e1834);
+    this.scene.environmentIntensity = 0.42; // painted horizon band carries 落霞
     this.post = makePost(this.renderer, this.scene, this.camera, 0.28, 0.97);
     this.flight = new Flight(this.camera, this.controls.target);
     this.resize();
@@ -322,7 +321,7 @@ export class PavilionScene {
     }
     this.warm = pal.warm;
     const gm = this.glow.material as THREE.MeshBasicMaterial;
-    if (this.warm) gm.color.set(0xfff0d8); else gm.color.set(pal.glow).lerp(new THREE.Color(0xffffff), 0.25);
+    if (this.warm) gm.color.set(0xffd9a8); else gm.color.set(pal.glow).lerp(new THREE.Color(0xffffff), 0.2);
     (this.glowRefl.material as THREE.MeshBasicMaterial).color.copy(gm.color);
     (this.horizonBand.material as THREE.MeshBasicMaterial).color.copy(gm.color).lerp(new THREE.Color(0xffffff), 0.15);
     this.look.copy(MARK[this.focus]);
@@ -365,7 +364,7 @@ function makeWater(): THREE.Group {
     nt.wrapS = nt.wrapT = THREE.RepeatWrapping;
     const w = new Water(new THREE.PlaneGeometry(100, 100), {
       textureWidth: 1024, textureHeight: 1024, waterNormals: nt,
-      sunDirection: MARK.luoxia.clone().normalize(), sunColor: 0xffe0b0,
+      sunDirection: new THREE.Vector3(-0.55, 0.15, -0.8).normalize(), sunColor: 0xffc090,
       waterColor: 0x1a3040, distortionScale: 1.05, alpha: 1, fog: false,
     });
     w.rotation.x = -Math.PI / 2;
@@ -465,8 +464,8 @@ export function makeHills(): THREE.Group {
   // 层叠山脊（远淡近浓），替代早期的压扁球体，避免“积木感”
   const g = new THREE.Group();
   const layers: { z: number; base: number; amp: number; color: number; seed: number; gap?: [number, number] }[] = [
-    { z: -34, base: 2.6, amp: 3.4, color: 0x5a4a5c, seed: 1.7 },
-    { z: -27, base: 1.8, amp: 2.8, color: 0x463a4c, seed: 4.1 },
+    { z: -34, base: 2.2, amp: 2.6, color: 0x6a3a3c, seed: 1.7 }, // v52c: lower flatter + warmer ridge (no ball silhouette)
+    { z: -27, base: 1.5, amp: 2.2, color: 0x4a3038, seed: 4.1 },
     { z: -20, base: 0.9, amp: 2.0, color: 0x30283a, seed: 7.3, gap: [-13, 2] },
     { z: -14, base: 0.4, amp: 1.5, color: 0x1e1a26, seed: 9.9, gap: [-16, 11] },
   ];
@@ -492,7 +491,12 @@ export function makeHills(): THREE.Group {
     shape.closePath();
     const m = new THREE.Mesh(
       new THREE.ShapeGeometry(shape, 1),
-      new THREE.MeshStandardMaterial({ color: L.color, roughness: 0.95, metalness: 0, side: THREE.DoubleSide }),
+      new THREE.MeshStandardMaterial({
+        color: L.color, roughness: 0.95, metalness: 0, side: THREE.DoubleSide,
+        // v52c: far ridge catches vermilion dusk (band, not a point sun)
+        emissive: L.z <= -30 ? 0x4a1818 : 0x000000,
+        emissiveIntensity: L.z <= -30 ? 0.35 : 0,
+      }),
     );
     m.position.z = L.z;
     m.castShadow = L.z > -22;
@@ -854,19 +858,20 @@ function makeRiverbank(): THREE.Group {
   return g;
 }
 
-/** v33 落霞: painted like a 国画 evening wash — warm gold at the horizon through vermilion and rose to a mauve that dissolves
- *  into the sky; long 横抹 cloud strokes lit orange/gold from below; a distant 孤鹜 brushed in. All edges feather out. */
+/** v52 落霞: horizontal 国风 dusk band — gold→vermilion wash along horizon; NO circular sun core/orb. */
 function luoxiaSky(): THREE.Texture {
   const W = 1024, H = 320, c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d")!;
   const v = x.createLinearGradient(0, H, 0, 0);
-  // v51b: thicker gold horizon band → vermilion → rose → mauve dissolve
-  v.addColorStop(0, "rgba(255,240,170,1)"); v.addColorStop(0.08, "rgba(255,200,100,1)"); v.addColorStop(0.18, "rgba(255,145,60,1)");
-  v.addColorStop(0.32, "rgba(240,85,50,0.95)"); v.addColorStop(0.5, "rgba(200,70,100,0.55)"); v.addColorStop(0.72, "rgba(120,65,130,0.25)"); v.addColorStop(1, "rgba(65,55,105,0)");
+  // flat ribbon: thick gold at bottom → vermilion → rose → mauve dissolve (no ball hotspot)
+  v.addColorStop(0, "rgba(255,236,160,1)"); v.addColorStop(0.1, "rgba(255,195,95,1)"); v.addColorStop(0.22, "rgba(250,130,55,0.98)");
+  v.addColorStop(0.38, "rgba(220,70,55,0.88)"); v.addColorStop(0.55, "rgba(175,60,95,0.48)"); v.addColorStop(0.75, "rgba(100,60,120,0.18)"); v.addColorStop(1, "rgba(55,50,95,0)");
   x.fillStyle = v; x.fillRect(0, 0, W, H);
-  // hotter core where the sun sets (left of centre)
-  const r = x.createRadialGradient(W * 0.4, H * 0.94, 6, W * 0.4, H * 0.94, W * 0.52);
-  r.addColorStop(0, "rgba(255,240,190,1)"); r.addColorStop(0.3, "rgba(255,175,90,0.62)"); r.addColorStop(1, "rgba(255,120,60,0)");
-  x.fillStyle = r; x.fillRect(0, 0, W, H);
+  // v52b: wide soft gold ribbon only — no ellipse/orb core
+  x.save(); x.filter = "blur(12px)";
+  const eg = x.createLinearGradient(0, H * 0.55, 0, H);
+  eg.addColorStop(0, "rgba(255,190,100,0)"); eg.addColorStop(0.5, "rgba(255,200,120,0.55)"); eg.addColorStop(1, "rgba(255,230,165,0.8)");
+  x.fillStyle = eg; x.fillRect(W * 0.02, H * 0.55, W * 0.96, H * 0.45);
+  x.restore();
   let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
   // cloud strokes: dusky rose body, bright under-lit lower edge — denser for 国画 presence
   for (let i = 0; i < 28; i++) {
