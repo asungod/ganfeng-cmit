@@ -587,7 +587,7 @@ function faceCam(rig: { root: THREE.Group; turn: THREE.Group }, maxYaw: number):
   // v39b: NEVER tip flat (elev*0.92→1.15 laid figures on the ground = beige slabs).
   // Hide board tops only near nadir (birdseye); mid-high/side keep dark cardboard edge.
   // Soft lean ≤0.34 so 工笔 faces stay readable without tipping flat.
-  const hi = elev > 0.38; // v42g: hide rim sooner on mid/high
+  const hi = elev > 0.55; // v50b: keep cardboard edge on mid/oblique; hide only near nadir
   if ((rig as { _edgeHide?: boolean })._edgeHide !== hi) {
     (rig as { _edgeHide?: boolean })._edgeHide = hi;
     rig.root.traverse((o) => { if (o.userData?.paperEdge) o.visible = !hi; });

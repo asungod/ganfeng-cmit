@@ -234,6 +234,16 @@ export class TempleScene {
     const sroof = curvedRoof(11, 8, 2.0, roofTile, gold, true);
     sroof.position.y = 6.55; // v37c: more headroom so high polar never clips 生旦净
     stage.add(sroof);
+    // v50b: soft hanging banners under 戏台 eaves (muted crimson, never harsh yellow)
+    const softBan = new THREE.MeshStandardMaterial({
+      color: 0x5a2018, roughness: 0.98, metalness: 0, side: THREE.DoubleSide, transparent: true, opacity: 0.7,
+    });
+    for (const bx of [-2.6, 0, 2.6]) {
+      const ban = wbox(0.55, 1.35, 0.02, softBan);
+      ban.position.set(bx, 5.35, -2.35);
+      ban.rotation.z = (bx === 0 ? 0 : bx > 0 ? 0.05 : -0.05);
+      stage.add(ban);
+    }
     // performers — apron-forward, depth-staggered so side/oblique still reads faces
     const robe = [0xb8202a, 0x1e5aa0, 0xd8a820];
     for (let i = 0; i < 3; i++) {

@@ -38,7 +38,7 @@ export class PavilionScene {
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
   private glow: THREE.Mesh;
-  private glowBase = 0.55; // v50: stronger 落霞 wash for hero / orbit
+  private glowBase = 0.72; // v50b: hotter 落霞 presence
   private glowRefl!: THREE.Mesh;
   private warm = true;
   private ray = new THREE.Raycaster();
@@ -64,7 +64,7 @@ export class PavilionScene {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.scene = new THREE.Scene();
-    this.fog = new THREE.FogExp2(0x8a6a68, 0.009);
+    this.fog = new THREE.FogExp2(0x9a6a58, 0.0075); // v50b: warmer, thinner so 落霞 reads
     this.scene.fog = this.fog;
     this.scene.background = new THREE.Color(0x1a1d38);
 
@@ -130,8 +130,8 @@ export class PavilionScene {
     this.scene.add(this.sun);
     void skyBand;
     // v36: fixed Mesh plane (not Sprite) so side/back orbits no longer see a billboard washing the frame white
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(44, 16), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd0a8, transparent: true, opacity: 0.78, depthWrite: false, side: THREE.DoubleSide, fog: false }));
-    this.glow.position.set(-22, 10.5, -46); this.glow.lookAt(0, 5.5, 0); this.glow.renderOrder = -1;
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(48, 18), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd8b0, transparent: true, opacity: 0.88, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+    this.glow.position.set(-20, 8.8, -42); this.glow.lookAt(0, 4.5, 0); this.glow.renderOrder = -1;
     this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(26, 32), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.32, depthWrite: false, fog: false }));
     this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-11, 0.1, -18); this.glowRefl.renderOrder = 2;
     this.scene.add(this.glowRefl, this.glow);
@@ -158,8 +158,8 @@ export class PavilionScene {
     this.resize();
     this.applyMood();
     // hero composition: pavilion right, setting sun left over the river
-    this.camera.position.set(-10.2, 2.55, 6.2); // v50: hero — larger 阁 + river + 落霞
-    this.controls.target.set(1.6, 1.8, -12.2);
+    this.camera.position.set(-11.6, 2.15, 7.4); // v50b: left/low — 落霞 band + 江面 + 阁
+    this.controls.target.set(0.4, 1.55, -11.5);
     this.started = true;
     this.loop();
   }
@@ -258,8 +258,8 @@ export class PavilionScene {
         const tg = this.controls.target, cp = this.camera.position;
         const ax = this.glow.position.x - tg.x, az = this.glow.position.z - tg.z, bx = tg.x - cp.x, bz = tg.z - cp.z;
         const f = Math.max(0, (ax * bx + az * bz) / (Math.hypot(ax, az) * Math.hypot(bx, bz) + 1e-6));
-        const gm = this.glow.material as THREE.MeshBasicMaterial; const ff = Math.max(0, (f - 0.22) / 0.78); gm.opacity = this.glowBase * (1 - el * 0.85) * Math.pow(ff, 2.6); this.glow.visible = gm.opacity > 0.03;
-        (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.22 : 0.1) * Math.max(0, 1 - el * 1.6) * Math.pow(ff, 2.2);
+        const gm = this.glow.material as THREE.MeshBasicMaterial; const ff = Math.max(0, (f - 0.12) / 0.88); gm.opacity = this.glowBase * (1 - el * 0.8) * Math.pow(ff, 1.6); this.glow.visible = gm.opacity > 0.025;
+        (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.3 : 0.12) * Math.max(0, 1 - el * 1.5) * Math.pow(ff, 1.5);
       }
     }
     this.post.render();
@@ -331,7 +331,7 @@ export class PavilionScene {
 }
 
 function palette(mood: MoodId, focus: ImageId) {
-  const dusk = { zenith: 0x1a1d38, haze: 0x8a5a48, sky: 0.68, sun: 0xffc890, glow: 0xff8a42, hill: 0x2a1a22, water: 0x5a7088, key: 3.0 }; // v50
+  const dusk = { zenith: 0x1c1a36, haze: 0xa06850, sky: 0.72, sun: 0xffd0a0, glow: 0xff9448, hill: 0x2a1820, water: 0x4a6880, key: 3.2 }; // v50b
   if (mood === "sanyan") return { zenith: 0x2a3348, haze: 0x8a8a94, sky: 0.8, sun: 0xd8c0a0, glow: 0x88aacc, hill: 0x3d4450, water: 0x5a7080, key: 2.2 };
   if (mood === "yuzhou") return { zenith: 0x1c2438, haze: 0x8a5a52, sky: 0.65, sun: 0xe0905a, glow: 0xc06030, hill: 0x241818, water: 0x4a5a70, key: 2.4 };
   if (mood === "yanzhen") return { zenith: 0x14182a, haze: 0x4a4458, sky: 0.4, sun: 0xb86a55, glow: 0x884030, hill: 0x1a1216, water: 0x34405a, key: 1.6 };
