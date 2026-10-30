@@ -268,7 +268,7 @@ export class TempleScene {
     const rimA = new THREE.DirectionalLight(0xbcd0ff, 1.0); rimA.position.set(-6, 6, 16); rimA.target.position.set(0, 2, 10); S.add(rimA, rimA.target);
     const rimB = new THREE.DirectionalLight(0xffe2c0, 0.7); rimB.position.set(6, 5, -2); rimB.target.position.set(0, 1, 5); S.add(rimB, rimB.target);
     // v50: stronger face fill so daytime 看戏机位 reads 工笔 faces
-    const faceFill = new THREE.PointLight(0xffe6cc, 2.2, 16, 1.5); faceFill.position.set(0, 3.4, 7.2); S.add(faceFill);
+    const faceFill = new THREE.PointLight(0xffe6cc, 1.1, 14, 1.8); faceFill.position.set(0, 3.4, 7.2); S.add(faceFill); // v53r4: less wall circle
 
     // 宣德炉 bronze censer on the axis (v23)
     // v24: smaller 宣德炉, closer to the hall so 台上望众 doesn't hide the courtyard
@@ -391,9 +391,9 @@ export class TempleScene {
       if (slot === "yewan") this.scene.background = new THREE.Color(0x0b0d16);
     }
     this.scene.backgroundIntensity = c.bg;
-    for (const l of this.lamps) l.intensity = c.lamp * 2.5;
+    for (const l of this.lamps) l.intensity = c.lamp * 1.2; // v53r4: daytime wall orbs
     for (const m of this.lampMeshes) (m.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.3 + c.lamp * 0.6;
-    this.post.bloom.strength = slot === "yewan" ? 0.4 : 0.12; // v53r3
+    this.post.bloom.strength = slot === "yewan" ? 0.35 : 0.06; // v53r4
     this.procession.visible = act === "kaichao";
     this.audience.visible = act === "xiban";
     this.smoke.material.opacity = act === "kaichao" ? 0.16 : 0.09;

@@ -154,7 +154,7 @@ export class PorcelainVitrine {
     this.rim.position.set(-2.9, 2.55, -2.8);
     this.fill = new THREE.PointLight(0xc5d0da, 1.05, 11, 2); // v53r3: less cream blowout
     this.fill.position.set(-1.55, 1.15, 2.7);
-    this.well = new THREE.PointLight(0xfff1d8, 1.05, 3.2, 2);
+    this.well = new THREE.PointLight(0xfff1d8, 0.55, 3.2, 2); // v53r4: less hot spot on cream
     this.well.position.set(0, 1.7, 0);
     this.scene.add(this.amb, hemi, this.key, this.key.target, this.rim, this.fill, this.well);
 
@@ -924,7 +924,7 @@ function bleedPass(ctx: CanvasRenderingContext2D, C: Cobalt): void {
   ctx.save();
   ctx.globalCompositeOperation = "multiply";
   ctx.filter = "blur(3.2px)";
-  ctx.globalAlpha = 0.34; // v53r2 stronger bleed
+  ctx.globalAlpha = 0.42; // v53r4
   ctx.fillStyle = C.wash;
   ctx.fillRect(0, 0, TEX, TEX);
   ctx.filter = "none";

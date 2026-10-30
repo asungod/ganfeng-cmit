@@ -130,10 +130,10 @@ export class PavilionScene {
     void skyBand;
     // v52: wide flat 国风 dusk wash — vermilion→gold ribbon along horizon, not an orb
     // v52c: bands BEHIND far hills (z<-34) so terrain never clips them into a sun-disc silhouette
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(220, 5.6), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffc898, transparent: true, opacity: 0.72, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false })); // v53r3: behind pavilion softer
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(220, 5.6), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffc898, transparent: true, opacity: 0.7, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r4: depth so band sits behind pavilion
     this.glow.position.set(0, 5.35, -58); // v53r3: further behind so band not over pavilion
     this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
-    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(180, 4), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.9, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false }));
+    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(180, 4), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.75, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r4
     this.horizonBand.position.set(0, 5.0, -55); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2; // v53r3
     this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(56, 36), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.42, depthWrite: false, fog: false }));
     this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-4, 0.06, -10); this.glowRefl.renderOrder = 2;

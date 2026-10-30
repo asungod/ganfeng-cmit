@@ -787,7 +787,7 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
   const arms: Rig["arms"] = [];
   // v51b: watching crowd — denser sit/lean/clap/point (not all identical idle/拱手)
   const raw = Math.floor(seed / 3) % 8;
-  const mode = watching ? [6, 6, 6, 6, 6, 6, 6, 6][raw] : raw; // v53r3: all sit-watch
+  const mode = watching ? [6, 7, 6, 6, 7, 6, 6, 7][raw] : raw; // v53r4: sit majority + lean variety
   // v25: cloth-like 拱手/clap sleeves — wide hanging folds, not tube-to-tube
   const thickArm = mode === 1 || mode === 3;
   for (const s of [-1, 1]) {
@@ -899,8 +899,8 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
       set(A, 0.08, -0.4); set(B, 0.08, -0.4);
       head.rotation.z = Math.sin(t * 0.6) * 0.14;
     } else if (mode === 6) { // v52 sit-watch — plant on stool, stronger squat
-      body.position.y = -0.62 + Math.sin(t * 1.1) * 0.003; // v53r3 deeper squat
-      body.scale.y += (0.82 - body.scale.y) * 0.25; // hips on low stool
+      body.position.y = -0.28 + Math.sin(t * 1.1) * 0.003; // v53r4: sit without burying legs (was bust-on-base)
+      body.scale.y += (0.9 - body.scale.y) * 0.25; // hips on low stool
       set(A, -0.7 + Math.sin(t * 0.7) * 0.03, -1.65, 0.48);
       set(B, -0.62 + Math.sin(t * 0.9) * 0.03, -1.58, 0.48);
       head.position.y = 1.4;

@@ -13,7 +13,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
   overview: { eye: [10, 14, 12], look: [0, 1.4, -1.0] }, // v41r3: open bays face camera more
   heping: { eye: [9, 4.2, 22], look: [0, 2.2, 6] },
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
-  tianjing: { eye: [0.15, 1.55, 2.2], look: [0.1, 7.8, 2.05], fov: 70 }, // v53r3: classic 天井仰望 — open sky between eaves, jars at feet
+  tianjing: { eye: [5.6, 4.2, 2.15], look: [-0.8, 3.4, 2.0], fov: 58 }, // v53r4: from 巷道 across mid 天井 — sky strip + jars/folk + both eaves
   zutang: { eye: [0.0, 2.9, 3.55], look: [0, 1.5, -1.45], fov: 62 }, // v42g: slightly further mid 天井 — altar+桌, thin posts
   zhengwu: { eye: [0.0, 2.95, -3.85], look: [0, 1.45, -6.65], fov: 58 }, // v42g: mid rear 天井 — clear of 祖堂 side ends, 八仙桌 reads
   hengwu: { eye: [-5.2, 1.7, 3.5], look: [-7.5, 1.3, -2.0], fov: 55 }, // v38: follow wing out to x±9.4
@@ -102,7 +102,7 @@ export class WeiwuScene {
     const tile = qingwaMat([3, 2]); // v23: 小青瓦
     const ridge = new THREE.MeshStandardMaterial({ color: 0x3e3e44, roughness: 0.7 });
     const wood = phMat("dark_wooden_planks", [1, 1]);
-    const lac = phMat("lacquered_cherry_wood", [1, 1], { color: 0x9a3a26 });
+    const lac = phMat("lacquered_cherry_wood", [1, 1], { color: 0x6a4030 }); // v53r4: mid 红木 pillars not scarlet
     const stone = phMat("stone_tiles", [1, 1], { color: 0xb0a898 });
     const ground = phMat("stone_tiles", [18, 18], { color: 0x8a8884 }); // v24: cool grey stone yard (was warm brown mud)
 
@@ -574,7 +574,7 @@ export class WeiwuScene {
     this.camera.fov = p.fov ?? 42; this.camera.updateProjectionMatrix();
     this.controls.minDistance = r === "overview" ? 16 : 0.05; // v41: allow closer hall read
     this.controls.maxPolarAngle = r === "overview" ? Math.PI * 0.495 : Math.PI * 0.92;
-    this.controls.minPolarAngle = r === "overview" ? Math.PI * 0.22 : Math.PI * 0.2; // v40: block pure nadir sticks
+    this.controls.minPolarAngle = r === "overview" ? Math.PI * 0.22 : (r === "tianjing" ? Math.PI * 0.08 : Math.PI * 0.2); // v53r4: 天井 may look up
   }
 
   resize(): void {
@@ -709,15 +709,15 @@ function makeFurniture(wood: THREE.Material, lac: THREE.Material) {
   const brick = new THREE.MeshStandardMaterial({ color: 0x8a6a58, roughness: 0.95 });
   const iron = new THREE.MeshStandardMaterial({ color: 0x1e1c1a, roughness: 0.5, metalness: 0.6 });
   const pot = new THREE.MeshStandardMaterial({ color: 0x4a3426, roughness: 0.35 });
-  // v53r3: mid 红木 brown — kill noon scarlet/magenta on 八仙桌
-  const grain = woodGrainMap("#7a5238", "#3e2418");
+  // v53r4: mid 红木 — hue toward brown (noon sample was still R>>G)
+  const grain = woodGrainMap("#6a4a34", "#342018");
   const rose = (lac as THREE.MeshStandardMaterial).clone();
-  rose.map = grain; rose.color = new THREE.Color(0x5e3c28); rose.roughness = 0.96; rose.metalness = 0;
-  rose.envMapIntensity = 0.06;
+  rose.map = grain; rose.color = new THREE.Color(0x4e3a28); rose.roughness = 0.97; rose.metalness = 0;
+  rose.envMapIntensity = 0.04;
   const L = rose;
   const apron = (lac as THREE.MeshStandardMaterial).clone();
-  apron.map = grain; apron.color = new THREE.Color(0x3e2416); apron.roughness = 0.97; apron.metalness = 0;
-  apron.envMapIntensity = 0.05;
+  apron.map = grain; apron.color = new THREE.Color(0x342016); apron.roughness = 0.98; apron.metalness = 0;
+  apron.envMapIntensity = 0.03;
   const A = apron;
   const addHoof = (g: THREE.Group, x: number, z: number, m: THREE.Material) => {
     g.add(box(0.12, 0.045, 0.12, m, x, 0.03, z));
