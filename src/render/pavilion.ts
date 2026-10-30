@@ -130,8 +130,9 @@ export class PavilionScene {
     void skyBand;
     // v52: wide flat 国风 dusk wash — vermilion→gold ribbon along horizon, not an orb
     // v52c: bands BEHIND far hills (z<-34) so terrain never clips them into a sun-disc silhouette
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(180, 10), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd8b0, transparent: true, opacity: 0.95, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false })); // v52g: full-horizon ribbon
-    this.glow.position.set(0, 5.2, -42); // v52e: sit on horizon this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(200, 7.2), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd8b0, transparent: true, opacity: 0.92, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false })); // v53r1: thinner band
+    this.glow.position.set(0, 4.95, -42);
+    this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
     this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(180, 4), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.9, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false }));
     this.horizonBand.position.set(0, 4.6, -40); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2;
     this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(56, 36), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.42, depthWrite: false, fog: false }));
@@ -157,7 +158,7 @@ export class PavilionScene {
     loadHdri(this.renderer, this.scene, "qwantani_dusk_2_puresky", false);
     this.scene.background = new THREE.Color(0x2a2040); // v52d: soft dusk violet, not void
     this.scene.environmentIntensity = 0.42; // painted horizon band carries 落霞
-    this.post = makePost(this.renderer, this.scene, this.camera, 0.28, 0.97);
+    this.post = makePost(this.renderer, this.scene, this.camera, 0.18, 0.98); // v53r1: less pill halo
     this.flight = new Flight(this.camera, this.controls.target);
     this.resize();
     this.applyMood();
@@ -894,9 +895,10 @@ function luoxiaSky(): THREE.Texture {
   x.fillStyle = h; x.fillRect(0, 0, W, H);
   const t = x.createLinearGradient(0, 0, 0, H); t.addColorStop(0, "rgba(0,0,0,0)"); t.addColorStop(0.3, "rgba(0,0,0,1)"); t.addColorStop(1, "rgba(0,0,0,1)");
   x.fillStyle = t; x.fillRect(0, 0, W, H);
-  // v52f: soft foot fade so band meets hills without hard shelf
+  // v53r1: reset composite before foot wash (was destination-in punching holes)
+  x.globalCompositeOperation = "source-over";
   const foot = x.createLinearGradient(0, H, 0, H * 0.55);
-  foot.addColorStop(0, "rgba(42,32,64,0.95)"); foot.addColorStop(0.55, "rgba(42,32,64,0.25)"); foot.addColorStop(1, "rgba(42,32,64,0)");
+  foot.addColorStop(0, "rgba(42,32,64,0.55)"); foot.addColorStop(0.55, "rgba(42,32,64,0.12)"); foot.addColorStop(1, "rgba(42,32,64,0)");
   x.fillStyle = foot; x.fillRect(0, 0, W, H);
   const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; return tex;
 }

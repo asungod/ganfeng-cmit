@@ -13,7 +13,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
   overview: { eye: [10, 14, 12], look: [0, 1.4, -1.0] }, // v41r3: open bays face camera more
   heping: { eye: [9, 4.2, 22], look: [0, 2.2, 6] },
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
-  tianjing: { eye: [0.0, 2.85, 3.35], look: [0, 1.5, -1.2], fov: 64 }, // v42f: mid 天井 axial — open zutang bay + altar, thin posts bookend
+  tianjing: { eye: [3.2, 4.15, 4.6], look: [-0.4, 3.6, -1.8], fov: 62 }, // v53r1: open 天井 — sky + jars/folk/walls, NOT altar
   zutang: { eye: [0.0, 2.9, 3.55], look: [0, 1.5, -1.45], fov: 62 }, // v42g: slightly further mid 天井 — altar+桌, thin posts
   zhengwu: { eye: [0.0, 2.95, -3.85], look: [0, 1.45, -6.65], fov: 58 }, // v42g: mid rear 天井 — clear of 祖堂 side ends, 八仙桌 reads
   hengwu: { eye: [-5.2, 1.7, 3.5], look: [-7.5, 1.3, -2.0], fov: 55 }, // v38: follow wing out to x±9.4
@@ -335,7 +335,7 @@ export class WeiwuScene {
         for (const sx of [-1.7, 1.7]) this.addLantern(hg, new THREE.Vector3(sx, 3.3, depth / 2 - 0.9));
       }
       // v34: warm interior fill so halls read at every hour
-      const fl = new THREE.PointLight(0xffc890, 1, 7.5, 1.5); fl.position.set(0, 3.2, 0.2); hg.add(fl); this.fills.push({ l: fl, k: name === "zutang" ? 1.7 : 1.15 }); // v52
+      const fl = new THREE.PointLight(0xffc890, 1, 7.5, 1.5); fl.position.set(0, 3.2, 0.2); hg.add(fl); this.fills.push({ l: fl, k: name === "zutang" ? 1.2 : 1.05 }); // v53r1: cut fill bloom ball on 神主墙
       if (!this.skyFill && name === "zutang") {
         // v52: noon courtyard skylight into 祖堂 (Directional through open front)
         this.skyFill = new THREE.DirectionalLight(0xfff2dc, 0);
@@ -555,11 +555,11 @@ export class WeiwuScene {
     this.fireflies.points.visible = h === "night"; // v36: dusk no longer shows fireflies (peach blobs on 横屋 floor)
     const hz = { dawn: 0xa8a0a4, noon: 0xb8c4d0, dusk: 0x5e5458, night: 0x0c0f18 }[h];
     (this.haze.material as THREE.MeshBasicMaterial).color.set(hz);
-    const fk = { dawn: 1.2, noon: 2.4, dusk: 2.2, night: 3.2 }[h]; // v52g noon punch
+    const fk = { dawn: 1.2, noon: 1.85, dusk: 2.0, night: 3.2 }[h]; // v53r1: less noon scarlet punch
     for (const f of this.fills) f.l.intensity = fk * f.k;
     if (this.skyFill) this.skyFill.intensity = { dawn: 0.35, noon: 1.55, dusk: 0.25, night: 0 }[h];
     for (const m of this.winMats) m.emissiveIntensity = { dawn: 0.1, noon: 0.45, dusk: 0.5, night: 1.1 }[h]; // v52g
-    this.post.bloom.strength = h === "night" ? 0.75 : 0.28;
+    this.post.bloom.strength = h === "night" ? 0.7 : 0.16; // v53r1: noon bloom was round glow on 祖堂 wall
   }
 
   setRoom(r: RoomId | "overview", instant = false): void {
@@ -608,7 +608,7 @@ export class WeiwuScene {
       const k = Math.max(0, d.dot(sd)); const f = this.hourId === "night" ? 0 : k * k;
       this.renderer.toneMappingExposure = c.exp * (1 - 0.3 * f);
       this.scene.backgroundIntensity = this.hourId === "night" ? 0.5 : (this.hourId === "dusk" ? 0.45 : 1) - 0.4 * f;
-      this.post.bloom.strength = (this.hourId === "night" ? 0.75 : 0.28) * (1 - 0.7 * f);
+      this.post.bloom.strength = (this.hourId === "night" ? 0.7 : 0.16) * (1 - 0.7 * f); // v53r1
     }
     this.post.render();
   };
@@ -709,15 +709,15 @@ function makeFurniture(wood: THREE.Material, lac: THREE.Material) {
   const brick = new THREE.MeshStandardMaterial({ color: 0x8a6a58, roughness: 0.95 });
   const iron = new THREE.MeshStandardMaterial({ color: 0x1e1c1a, roughness: 0.5, metalness: 0.6 });
   const pot = new THREE.MeshStandardMaterial({ color: 0x4a3426, roughness: 0.35 });
-  // v47: mid 红木 — not scarlet 0xb85432, not near-black 0x4e3422; readable noon+dusk
-  const grain = woodGrainMap("#c87850", "#7a3a28");
+  // v53r1: mid 红木 browner (noon was reading scarlet ~RGB152,67,52)
+  const grain = woodGrainMap("#a86a48", "#5e3220");
   const rose = (lac as THREE.MeshStandardMaterial).clone();
-  rose.map = grain; rose.color = new THREE.Color(0x8f4e36); rose.roughness = 0.9; rose.metalness = 0.01;
-  rose.envMapIntensity = 0.18;
+  rose.map = grain; rose.color = new THREE.Color(0x7a4a32); rose.roughness = 0.92; rose.metalness = 0.01;
+  rose.envMapIntensity = 0.14;
   const L = rose;
   const apron = (lac as THREE.MeshStandardMaterial).clone();
-  apron.map = grain; apron.color = new THREE.Color(0x62301f); apron.roughness = 0.94; apron.metalness = 0.01;
-  apron.envMapIntensity = 0.14;
+  apron.map = grain; apron.color = new THREE.Color(0x55301e); apron.roughness = 0.95; apron.metalness = 0.01;
+  apron.envMapIntensity = 0.12;
   const A = apron;
   const addHoof = (g: THREE.Group, x: number, z: number, m: THREE.Material) => {
     g.add(box(0.12, 0.045, 0.12, m, x, 0.03, z));

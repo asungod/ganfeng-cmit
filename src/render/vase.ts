@@ -25,7 +25,7 @@ export class PorcelainVitrine {
   private amb: THREE.AmbientLight;
   private well: THREE.PointLight;
   private look: { shape: ShapeId; glaze: GlazeId; era: EraId } = { shape: "meiping", glaze: "qinghua", era: "ming" };
-  craft = { cobalt: 0.7, points: 8, crack: 0.35 };
+  craft = { cobalt: 0.86, points: 8, crack: 0.35 }; // v53r1: stronger 青花 read
   private wantWire = false;
   private buildGen = 0;
   private buildTimers: number[] = [];
@@ -890,7 +890,7 @@ function cobaltOf(era: EraId): Cobalt {
     case "yuan":
       return { deep: "#0f1528", mid: "#1b2850", wash: "#2c3c66", iron: true };
     case "ming":
-      return { deep: "#111830", mid: "#1d2c62", wash: "#33457a", iron: false };
+      return { deep: "#0a1228", mid: "#152454", wash: "#2a3c70", iron: false }; // v53r1 deeper cobalt
     case "qing":
       return { deep: "#121d3c", mid: "#24386c", wash: "#3c5288", iron: false };
     case "song":
@@ -924,12 +924,12 @@ function bleedPass(ctx: CanvasRenderingContext2D, C: Cobalt): void {
   ctx.save();
   ctx.globalCompositeOperation = "multiply";
   ctx.filter = "blur(3.2px)";
-  ctx.globalAlpha = 0.18;
+  ctx.globalAlpha = 0.26; // v53r1
   ctx.fillStyle = C.wash;
   ctx.fillRect(0, 0, TEX, TEX);
   ctx.filter = "none";
   ctx.globalCompositeOperation = "source-over";
-  ctx.globalAlpha = 0.12;
+  ctx.globalAlpha = 0.16;
   ctx.filter = "blur(6px)";
   ctx.strokeStyle = C.deep;
   ctx.lineWidth = 14;
