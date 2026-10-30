@@ -3,7 +3,7 @@ import type { Citation, QAItem } from "./types";
 export const guideCitations: Citation[] = [
   {
     id: "honest-api",
-    title: "本展的生成边界",
+    title: "本展会生成什么——以及不会生成什么",
     source: "赣风 · 开源边界与诚实声明",
     excerpt: "无付费 API，无 GPU。所谓生成是精选静帧、程序材质与可见管线。问展只根据内容包作答。",
     note: "本展自述，不是馆方官方释文。",
@@ -24,7 +24,7 @@ export const guideQA: QAItem[] = [
     id: "q-chatgpt",
     question: "这是 ChatGPT 套壳吗？用了网上的大模型吗？",
     answer:
-      "不是。三条线的画面是程序场景，问展先用浏览器里的小检索模型在题库里找出处，找不到就拒绝。不调用付费接口，也不把游客的话送去外部大模型。",
+      "不是。三条线的画面是程序场景；问展用浏览器内的小检索模型在题库里找带出处的答案，找不到就拒绝。不调用付费接口，也不把游客的话送去外部大模型。",
     citationIds: ["honest-api"],
     keywords: ["ChatGPT", "套壳", "大模型", "API", "收费", "GPT", "通义"],
   },
