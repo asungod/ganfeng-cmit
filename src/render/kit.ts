@@ -438,7 +438,8 @@ export function makeBamboo(seed = 1, n = 9): THREE.Group {
 
 export function makeFigure(color: number, seed = 1, scale = 1, role: "robed" | "performer" | "crowd" = "robed"): THREE.Group {
   // v24: painted 工笔/年画/皮影 cut-out figures
-  return role === "performer" ? makeOperaActor(color, seed, scale) : makeVillager(color, seed, scale);
+  // v51: crowd = watching variety (sit/lean denser)
+  return role === "performer" ? makeOperaActor(color, seed, scale) : makeVillager(color, seed, scale, role === "crowd");
 }
 
 // v30: continuous incense wisps — soft vertical ribbons (not point sprites)

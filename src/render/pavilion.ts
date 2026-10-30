@@ -38,8 +38,9 @@ export class PavilionScene {
   private waterOrig: Float32Array;
   private fog: THREE.FogExp2;
   private glow: THREE.Mesh;
-  private glowBase = 0.72; // v50b: hotter 落霞 presence
+  private glowBase = 1.05; // v51b: clear 国风 sunset wash over 江面
   private glowRefl!: THREE.Mesh;
+  private horizonBand!: THREE.Mesh;
   private warm = true;
   private ray = new THREE.Raycaster();
   private occ: Record<string, boolean> = {};
@@ -58,13 +59,13 @@ export class PavilionScene {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower() ? 1 : 1.5));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.62; // v50: slightly brighter dusk so 阁 silhouette + 落霞 read
+    this.renderer.toneMappingExposure = 0.7; // v51: clearer dusk gradient + 阁 silhouette
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.scene = new THREE.Scene();
-    this.fog = new THREE.FogExp2(0x9a6a58, 0.0075); // v50b: warmer, thinner so 落霞 reads
+    this.fog = new THREE.FogExp2(0xb0744a, 0.006); // v51: warmer thinner — 江面 catch not muddied
     this.scene.fog = this.fog;
     this.scene.background = new THREE.Color(0x1a1d38);
 
@@ -81,10 +82,10 @@ export class PavilionScene {
     this.controls.maxPolarAngle = Math.PI * 0.62; // v29: allow a low 江面 eye (clamped above the water in loop)
     this.controls.target.copy(this.look);
 
-    this.hemi = new THREE.HemisphereLight(0xffc8a0, 0x1a1418, 0.85);
+    this.hemi = new THREE.HemisphereLight(0xffd0a8, 0x1a1418, 0.95);
     this.scene.add(this.hemi);
 
-    this.sunLight = new THREE.DirectionalLight(0xffd8a8, 3.5); // v50
+    this.sunLight = new THREE.DirectionalLight(0xffe2b0, 3.9); // v51
     this.sunLight.position.copy(MARK.luoxia);
     this.sunLight.castShadow = true;
     this.sunLight.shadow.mapSize.set(shadowSize(), shadowSize());
@@ -130,11 +131,15 @@ export class PavilionScene {
     this.scene.add(this.sun);
     void skyBand;
     // v36: fixed Mesh plane (not Sprite) so side/back orbits no longer see a billboard washing the frame white
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(48, 18), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd8b0, transparent: true, opacity: 0.88, depthWrite: false, side: THREE.DoubleSide, fog: false }));
-    this.glow.position.set(-20, 8.8, -42); this.glow.lookAt(0, 4.5, 0); this.glow.renderOrder = -1;
-    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(26, 32), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.32, depthWrite: false, fog: false }));
-    this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-11, 0.1, -18); this.glowRefl.renderOrder = 2;
-    this.scene.add(this.glowRefl, this.glow);
+    // v51b: glow IN FRONT of far hills (z=-34) so warm band is not occluded; fuller texture color
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(58, 24), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c8, transparent: true, opacity: 0.98, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+    this.glow.position.set(-14, 9.2, -25); this.glow.lookAt(0, 4.2, 2); this.glow.renderOrder = -1;
+    // thin hot horizon ribbon just above mid ridge
+    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(48, 7), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xfff0d0, transparent: true, opacity: 0.85, depthWrite: false, side: THREE.DoubleSide, fog: false }));
+    this.horizonBand.position.set(-12, 5.4, -22); this.horizonBand.lookAt(0, 3.5, 4); this.horizonBand.renderOrder = -1;
+    this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(42, 48), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.55, depthWrite: false, fog: false }));
+    this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-7, 0.06, -8); this.glowRefl.renderOrder = 2;
+    this.scene.add(this.glowRefl, this.glow, this.horizonBand);
 
     const pool = new THREE.Mesh(
       new THREE.CircleGeometry(1.8, 32),
@@ -152,14 +157,14 @@ export class PavilionScene {
     this.mist = particles(260, new THREE.Box3(new THREE.Vector3(-34, 0.15, -30), new THREE.Vector3(30, 1.4, -9)), 0xe8d0b8, 2.4, 0.055, "mist");
     this.scene.add(this.mist.points);
     loadHdri(this.renderer, this.scene, "qwantani_dusk_2_puresky", true);
-    this.scene.environmentIntensity = 0.55;
+    this.scene.environmentIntensity = 0.38; // v51b: let painted 落霞 read over dusk HDRI
     this.post = makePost(this.renderer, this.scene, this.camera, 0.28, 0.97);
     this.flight = new Flight(this.camera, this.controls.target);
     this.resize();
     this.applyMood();
     // hero composition: pavilion right, setting sun left over the river
-    this.camera.position.set(-11.6, 2.15, 7.4); // v50b: left/low — 落霞 band + 江面 + 阁
-    this.controls.target.set(0.4, 1.55, -11.5);
+    this.camera.position.set(-11.8, 2.05, 7.6); // v51: left/low — warmer band + river catch + 阁
+    this.controls.target.set(0.3, 1.45, -11.2);
     this.started = true;
     this.loop();
   }
@@ -248,7 +253,7 @@ export class PavilionScene {
       const rw2 = this.water.userData.reflective as Water | undefined;
       if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.distortionScale.value = 1.2 * (1 - el * 0.8);
       if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.reflK.value = Math.max(0.08, 1 - el * 1.4); // v31: weaker mirror at high angles (no silver streaks)
-      if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.sunColor.value.setRGB(1, 0.85, 0.66).multiplyScalar(Math.max(0, 1 - el * 1.6)); // v30: no specular blowouts top-down
+      if (rw2) (rw2.material as THREE.ShaderMaterial).uniforms.sunColor.value.setRGB(1, 0.9, 0.68).multiplyScalar(Math.max(0.42, 1 - el * 1.2)); // v51b: clearer low-eye river catch
       { // v36: 江雾 only when camera stays on the near bank — past the pavilion it washed orbits white
         const zGate = Math.min(1, Math.max(0, (this.camera.position.z + 2) / 8));
         this.mist.material.opacity = 0.055 * Math.max(0, 1 - el * 1.6) * zGate; // v42: soft bank mist
@@ -258,8 +263,14 @@ export class PavilionScene {
         const tg = this.controls.target, cp = this.camera.position;
         const ax = this.glow.position.x - tg.x, az = this.glow.position.z - tg.z, bx = tg.x - cp.x, bz = tg.z - cp.z;
         const f = Math.max(0, (ax * bx + az * bz) / (Math.hypot(ax, az) * Math.hypot(bx, bz) + 1e-6));
-        const gm = this.glow.material as THREE.MeshBasicMaterial; const ff = Math.max(0, (f - 0.12) / 0.88); gm.opacity = this.glowBase * (1 - el * 0.8) * Math.pow(ff, 1.6); this.glow.visible = gm.opacity > 0.025;
-        (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.3 : 0.12) * Math.max(0, 1 - el * 1.5) * Math.pow(ff, 1.5);
+        const ff = Math.max(0, (f - 0.05) / 0.95);
+        const skyOp = this.glowBase * (1 - el * 0.55) * Math.pow(ff, 1.1);
+        const gm = this.glow.material as THREE.MeshBasicMaterial;
+        gm.opacity = skyOp; this.glow.visible = skyOp > 0.025;
+        const hb = this.horizonBand.material as THREE.MeshBasicMaterial;
+        hb.opacity = skyOp * 0.9; this.horizonBand.visible = hb.opacity > 0.02;
+        // v51b: lift low-eye 江面 catch light
+        (this.glowRefl.material as THREE.MeshBasicMaterial).opacity = (this.warm ? 0.62 : 0.16) * Math.max(0.32, 1 - el * 1.15) * Math.pow(ff, 1.05);
       }
     }
     this.post.render();
@@ -306,13 +317,14 @@ export class PavilionScene {
     this.sunLight.intensity = pal.key;
     {
       const wmat = (this.water.children[0] as THREE.Mesh).material as THREE.MeshStandardMaterial & THREE.ShaderMaterial;
-      if (wmat.uniforms?.waterColor) wmat.uniforms.waterColor.value.set(pal.water).multiplyScalar(0.3);
+      if (wmat.uniforms?.waterColor) wmat.uniforms.waterColor.value.set(pal.water).multiplyScalar(0.42);
       else wmat.color.set(pal.water);
     }
-    this.warm = pal.glow === 0xff7a3a;
+    this.warm = pal.warm;
     const gm = this.glow.material as THREE.MeshBasicMaterial;
-    if (this.warm) gm.color.set(0xffd0b0); else gm.color.set(pal.glow).lerp(new THREE.Color(0xffffff), 0.25);
+    if (this.warm) gm.color.set(0xfff0d8); else gm.color.set(pal.glow).lerp(new THREE.Color(0xffffff), 0.25);
     (this.glowRefl.material as THREE.MeshBasicMaterial).color.copy(gm.color);
+    (this.horizonBand.material as THREE.MeshBasicMaterial).color.copy(gm.color).lerp(new THREE.Color(0xffffff), 0.15);
     this.look.copy(MARK[this.focus]);
     if (this.focus === "qiushui" || this.focus === "hantan") this.look.y = 0.4;
     if (this.focus === "changtian") this.look.set(2, 5.5, -8);
@@ -331,11 +343,12 @@ export class PavilionScene {
 }
 
 function palette(mood: MoodId, focus: ImageId) {
-  const dusk = { zenith: 0x1c1a36, haze: 0xa06850, sky: 0.72, sun: 0xffd0a0, glow: 0xff9448, hill: 0x2a1820, water: 0x4a6880, key: 3.2 }; // v50b
-  if (mood === "sanyan") return { zenith: 0x2a3348, haze: 0x8a8a94, sky: 0.8, sun: 0xd8c0a0, glow: 0x88aacc, hill: 0x3d4450, water: 0x5a7080, key: 2.2 };
-  if (mood === "yuzhou") return { zenith: 0x1c2438, haze: 0x8a5a52, sky: 0.65, sun: 0xe0905a, glow: 0xc06030, hill: 0x241818, water: 0x4a5a70, key: 2.4 };
-  if (mood === "yanzhen") return { zenith: 0x14182a, haze: 0x4a4458, sky: 0.4, sun: 0xb86a55, glow: 0x884030, hill: 0x1a1216, water: 0x34405a, key: 1.6 };
-  if (focus === "changtian") return { ...dusk, zenith: 0x2a3a58, water: 0x4a78a0 };
+  // v51: warm flag (was stuck on obsolete 0xff7a3a) — dusk river catch / 落霞 tint depend on it
+  const dusk = { zenith: 0x1c1a36, haze: 0xa06842, sky: 0.62, sun: 0xffd8a8, glow: 0xff9448, hill: 0x22141c, water: 0x4a7090, key: 3.4, warm: true };
+  if (mood === "sanyan") return { zenith: 0x2a3348, haze: 0x8a8a94, sky: 0.8, sun: 0xd8c0a0, glow: 0x88aacc, hill: 0x3d4450, water: 0x5a7080, key: 2.2, warm: false };
+  if (mood === "yuzhou") return { zenith: 0x1c2438, haze: 0x8a5a52, sky: 0.65, sun: 0xe0905a, glow: 0xc06030, hill: 0x241818, water: 0x4a5a70, key: 2.4, warm: true };
+  if (mood === "yanzhen") return { zenith: 0x14182a, haze: 0x4a4458, sky: 0.4, sun: 0xb86a55, glow: 0x884030, hill: 0x1a1216, water: 0x34405a, key: 1.6, warm: true };
+  if (focus === "changtian") return { ...dusk, zenith: 0x2a3a58, water: 0x5a88a8 };
   return dusk;
 }
 
@@ -846,13 +859,13 @@ function makeRiverbank(): THREE.Group {
 function luoxiaSky(): THREE.Texture {
   const W = 1024, H = 320, c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d")!;
   const v = x.createLinearGradient(0, H, 0, 0);
-  // v50: hotter gold → vermilion → rose → mauve (国画 evening wash, more contrast)
-  v.addColorStop(0, "rgba(255,210,120,1)"); v.addColorStop(0.14, "rgba(255,150,70,0.95)"); v.addColorStop(0.32, "rgba(236,90,70,0.78)");
-  v.addColorStop(0.52, "rgba(190,80,110,0.48)"); v.addColorStop(0.74, "rgba(120,70,130,0.2)"); v.addColorStop(1, "rgba(70,60,110,0)");
+  // v51b: thicker gold horizon band → vermilion → rose → mauve dissolve
+  v.addColorStop(0, "rgba(255,240,170,1)"); v.addColorStop(0.08, "rgba(255,200,100,1)"); v.addColorStop(0.18, "rgba(255,145,60,1)");
+  v.addColorStop(0.32, "rgba(240,85,50,0.95)"); v.addColorStop(0.5, "rgba(200,70,100,0.55)"); v.addColorStop(0.72, "rgba(120,65,130,0.25)"); v.addColorStop(1, "rgba(65,55,105,0)");
   x.fillStyle = v; x.fillRect(0, 0, W, H);
   // hotter core where the sun sets (left of centre)
-  const r = x.createRadialGradient(W * 0.4, H * 0.92, 8, W * 0.4, H * 0.92, W * 0.48);
-  r.addColorStop(0, "rgba(255,236,180,0.95)"); r.addColorStop(0.35, "rgba(255,170,90,0.5)"); r.addColorStop(1, "rgba(255,120,60,0)");
+  const r = x.createRadialGradient(W * 0.4, H * 0.94, 6, W * 0.4, H * 0.94, W * 0.52);
+  r.addColorStop(0, "rgba(255,240,190,1)"); r.addColorStop(0.3, "rgba(255,175,90,0.62)"); r.addColorStop(1, "rgba(255,120,60,0)");
   x.fillStyle = r; x.fillRect(0, 0, W, H);
   let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
   // cloud strokes: dusky rose body, bright under-lit lower edge — denser for 国画 presence
@@ -882,13 +895,18 @@ function luoxiaSky(): THREE.Texture {
 function luoxiaRefl(): THREE.Texture {
   const W = 256, H = 512, c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d")!;
   let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  for (let i = 0; i < 260; i++) {
+  // soft warm wash under the sunset (lifts dark abstract 江面 at low eye)
+  const wash = x.createLinearGradient(0, 0, 0, H);
+  wash.addColorStop(0, "rgba(255,190,110,0.78)"); wash.addColorStop(0.35, "rgba(255,150,75,0.4)"); wash.addColorStop(0.7, "rgba(255,130,65,0.18)"); wash.addColorStop(1, "rgba(255,120,60,0)");
+  x.fillStyle = wash; x.fillRect(W * 0.15, 0, W * 0.7, H);
+  // v51: denser broken ripple dashes, brighter far + some near-bank catch
+  for (let i = 0; i < 340; i++) {
     const y = rnd() * H, far = 1 - y / H; // top of texture = far
-    const spread = W * (0.12 + (1 - far) * 0.3), cx = W / 2 + (rnd() - 0.5) * spread * 2;
-    const a = Math.pow(far, 1.3) * (0.35 + rnd() * 0.5) * (1 - Math.abs(cx - W / 2) / (spread * 1.2));
+    const spread = W * (0.14 + (1 - far) * 0.34), cx = W / 2 + (rnd() - 0.5) * spread * 2;
+    const a = (Math.pow(far, 0.95) * 0.55 + 0.12) * (0.4 + rnd() * 0.55) * (1 - Math.abs(cx - W / 2) / (spread * 1.25));
     if (a <= 0) continue;
-    x.fillStyle = `rgba(255,${150 + rnd() * 70},${90 + rnd() * 40},${a})`;
-    x.fillRect(cx - (6 + rnd() * 26) / 2, y, 6 + rnd() * 26, 1.5 + rnd() * 2.5);
+    x.fillStyle = `rgba(255,${155 + rnd() * 75},${95 + rnd() * 45},${Math.min(0.95, a)})`;
+    x.fillRect(cx - (7 + rnd() * 30) / 2, y, 7 + rnd() * 30, 1.6 + rnd() * 2.8);
   }
   x.globalCompositeOperation = "destination-in";
   const g = x.createLinearGradient(0, 0, W, 0); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(0.5, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)");

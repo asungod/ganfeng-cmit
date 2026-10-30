@@ -315,14 +315,30 @@ export class TempleScene {
     }
     S.add(this.procession);
     // audience facing the stage — keep clear of stage apron / roof drip line
+    // v51: seed i*3+2 cycles pose modes 0..7 (sit/lean/clap/…); yaw toward stage center
     const crowdColors = [0x2e4a6a, 0x6a3a2a, 0x3a5a4a, 0x7a6040, 0x4a3a5a, 0x8a7a60, 0x5a2a2a, 0x3a4048];
     for (let i = 0; i < 28; i++) {
       const row = Math.floor(i / 7), col = i % 7;
-      const f = makeFigure(crowdColors[i % crowdColors.length], i * 3 + 11, 0.92 + (i % 5) * 0.02, "crowd");
+      const seed = i * 3 + 2; // mode = floor(seed/3)%8 = i%8 — even mix of sit/lean/idle/…
+      const sc = (row === 0 ? 1.0 : 0.94) + (i % 5) * 0.02; // front row slightly larger for mid-shot faces
+      const f = makeFigure(crowdColors[i % crowdColors.length], seed, sc, "crowd");
       // v37: start further from stage (was 6.5) so high-angle never clips heads through 戏台 eaves
-      f.position.set(-4.8 + col * 1.6 + (row % 2) * 0.5 + Math.sin(i * 7.1) * 0.3, 0, 4.8 - row * 1.2 + Math.cos(i * 3.3) * 0.2);
-      f.rotation.y = (i % 7 - 3) * 0.04;
+      const x = -4.8 + col * 1.6 + (row % 2) * 0.5 + Math.sin(i * 7.1) * 0.3;
+      const z = 4.8 - row * 1.2 + Math.cos(i * 3.3) * 0.2;
+      f.position.set(x, 0, z);
+      // face stage center (0, ·, 11.5) with small individual offset — not a flat idle grid
+      f.rotation.y = Math.atan2(-x * 0.4, 11.5 - z) + (col - 3) * 0.045 + ((i % 3) - 1) * 0.05;
       this.audience.add(f);
+      // v51b: low stool under sit-watch poses (watching map: raw i%8 → sit when 0 or 4)
+      if (i % 8 === 0 || i % 8 === 4) {
+        const stool = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.26, 0.28, 0.32, 8),
+          new THREE.MeshStandardMaterial({ color: 0x4a3020, roughness: 0.92, metalness: 0 }),
+        );
+        stool.position.set(x, 0.16, z + 0.05);
+        stool.castShadow = true;
+        this.audience.add(stool);
+      }
     }
     S.add(this.audience);
     // ancient camphor trees behind the hall + pines outside the walls

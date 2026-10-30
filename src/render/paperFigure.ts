@@ -578,7 +578,7 @@ function faceCam(rig: { root: THREE.Group; turn: THREE.Group }, maxYaw: number):
   const v = rig.root.worldToLocal(camW.clone());
   let yaw = Math.atan2(v.x, v.z);
   if (Math.abs(yaw) > Math.PI * 0.75) yaw = yaw - Math.sign(yaw) * Math.PI;
-  void maxYaw;
+  yaw = Math.max(-maxYaw, Math.min(maxYaw, yaw)); // v51: clamp — crowd keeps stage facing, slight peek to cam
   let d = yaw - rig.turn.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
   rig.turn.rotation.y += d * 0.22; // v50: snappier face-cam so oblique 看戏 still shows faces
   const rootW = rig.root.getWorldPosition(new THREE.Vector3());
@@ -672,7 +672,7 @@ const SKINS = ["#efcfae", "#e4bc96", "#f2d6ba", "#d8a982"];
 const CLOTH = ["#3f5f86", "#5a6e78", "#7a4a38", "#4a6a56", "#8a6a42", "#6a5a7a", "#9a3a32", "#46505a", "#7a7f5a"];
 const WOMAN = ["#c85a6a", "#d88a50", "#5a8aa0", "#8a5a8a", "#6a9a7a", "#b84a3a"];
 
-export function makeVillager(color: number, seed: number, scale: number): THREE.Group {
+export function makeVillager(color: number, seed: number, scale: number, watching = false): THREE.Group {
   const r = rng(seed * 13 + 5);
   const types: VType[] = ["gown", "jacket", "farmer", "woman", "elder", "woman", "child", "jacket", "gown", "woman"];
   const type = types[seed % types.length];
@@ -783,7 +783,9 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
   head.add(hp.g);
 
   const arms: Rig["arms"] = [];
-  const mode = Math.floor(seed / 3) % 6; // 0 idle 1 clap 2 fan 3 拱手 4 point 5 chat/nod
+  // v51b: watching crowd — denser sit/lean/clap/point (not all identical idle/拱手)
+  const raw = Math.floor(seed / 3) % 8;
+  const mode = watching ? [6, 7, 1, 4, 6, 0, 7, 2][raw] : raw; // sit lean clap point sit idle lean fan
   // v25: cloth-like 拱手/clap sleeves — wide hanging folds, not tube-to-tube
   const thickArm = mode === 1 || mode === 3;
   for (const s of [-1, 1]) {
@@ -864,27 +866,57 @@ export function makeVillager(color: number, seed: number, scale: number): THREE.
   // fs = forearm foreshortening (皮影 trick: a forearm pointing at the viewer is drawn shorter)
   const set = (a: typeof A, up: number, lo: number, fs = 1) => { a.up.rotation.z = a.s * up; a.lo.rotation.z = lo; a.lo.scale.y += (fs - a.lo.scale.y) * 0.2; };
   const anim = (t0: number) => {
-    faceCam(rig, 0.55);
+    // v51: villagers peek toward cam (≤0.38) so stage-facing crowd still readable mid/overview
+    faceCam(rig, watching ? 0.32 : 0.38);
     const t = t0 * sp + ph;
-    body.position.y = Math.sin(t * 1.3) * 0.004;
-    head.rotation.z = Math.sin(t * 0.37) * 0.05;
     head.position.x = Math.sin(t * 0.23) * 0.006;
+    if (mode !== 6) body.scale.y += (1 - body.scale.y) * 0.25;
     if (mode === 1) { // clapping in bursts
+      body.position.y = Math.sin(t * 1.3) * 0.004;
       const burst = Math.sin(t * 0.35) > 0.5 ? Math.abs(Math.sin(t * 8)) : 0.5;
       set(A, -0.28 + v1, -1.75 - burst * 0.2 + Math.sin(t * 1.1) * 0.04, 0.5); set(B, -0.28 - v1, -1.75 - burst * 0.2 + Math.sin(t * 1.3) * 0.04, 0.5);
       head.position.y = 1.4 + burst * 0.008;
+      head.rotation.z = Math.sin(t * 0.37) * 0.05;
     } else if (mode === 2) { // fanning
+      body.position.y = Math.sin(t * 1.3) * 0.004;
       set(A, 0.08, -0.3); set(B, -0.15 + Math.sin(t * 5) * 0.05, -2.45 + Math.sin(t * 5) * 0.22, 0.62);
+      head.rotation.z = Math.sin(t * 0.37) * 0.05;
     } else if (mode === 3) { // 拱手 with a small bow
+      body.position.y = Math.sin(t * 1.3) * 0.004;
       const bw = Math.sin(t * 0.5); set(A, -0.28 + v1 + bw * 0.03, -1.8 + bw * 0.08, 0.48); set(B, -0.3 - v1 + bw * 0.03, -1.78 + bw * 0.08, 0.48);
       const bow = Math.max(0, Math.sin(t * 0.5)) ** 4; head.position.y = 1.4 - bow * 0.02; body.rotation.z = 0;
+      head.rotation.z = Math.sin(t * 0.37) * 0.05;
     } else if (mode === 4) { // pointing at the stage, then lowering
+      body.position.y = Math.sin(t * 1.3) * 0.004;
       const k = sm(0.2, 0.4, (t % 9) / 9) * (1 - sm(0.7, 0.9, (t % 9) / 9));
       set(A, 0.1, -0.15); set(B, 0.2 + k * 1.9, k * 0.3);
+      head.rotation.z = 0.04 + Math.sin(t * 0.5) * 0.04; // chin slightly toward stage
     } else if (mode === 5) { // turning to chat with a neighbour
+      body.position.y = Math.sin(t * 1.3) * 0.004;
       set(A, 0.08, -0.4); set(B, 0.08, -0.4);
-      head.rotation.z = Math.sin(t * 0.6) * 0.12;
-    } else { set(A, 0.06 + Math.sin(t) * 0.02, -0.12); set(B, 0.06, -0.12); }
+      head.rotation.z = Math.sin(t * 0.6) * 0.14;
+    } else if (mode === 6) { // v51 sit-watch — clearly lower, hands on knees, chin to stage
+      body.position.y = -0.58 + Math.sin(t * 1.1) * 0.003;
+      body.scale.y += (0.9 - body.scale.y) * 0.25; // slight squat squash
+      set(A, -0.7 + Math.sin(t * 0.7) * 0.03, -1.65, 0.48);
+      set(B, -0.62 + Math.sin(t * 0.9) * 0.03, -1.58, 0.48);
+      head.position.y = 1.4;
+      head.rotation.z = 0.07 + Math.sin(t * 0.45) * 0.05;
+    } else if (mode === 7) { // v51 lean-watch — forward lean, arms soft toward stage
+      body.position.y = Math.sin(t * 1.3) * 0.004;
+      set(A, -0.22 + Math.sin(t * 0.8) * 0.04, -0.95, 0.65);
+      set(B, -0.08 + Math.sin(t * 0.7) * 0.03, -0.55, 0.8);
+      head.position.y = 1.4;
+      head.rotation.z = 0.08 + Math.sin(t * 0.5) * 0.04;
+      // extra forward lean on top of elev tip (still capped under billboard flat)
+      const leanT = Math.min(0.4, Math.max(rig.turn.rotation.x, 0.16));
+      rig.turn.rotation.x += (leanT - rig.turn.rotation.x) * 0.18;
+    } else { // idle watch — soft sway, slight asymmetric head tip toward stage
+      body.position.y = Math.sin(t * 1.3) * 0.004;
+      set(A, 0.05 + Math.sin(t) * 0.025, -0.18 + Math.sin(t * 0.6) * 0.04);
+      set(B, 0.04 + Math.sin(t * 0.9) * 0.02, -0.15);
+      head.rotation.z = (seed % 3 - 1) * 0.04 + Math.sin(t * 0.37) * 0.05;
+    }
   };
   anim(0);
   root.userData.anim = anim;
