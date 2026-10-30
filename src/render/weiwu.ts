@@ -13,7 +13,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
   overview: { eye: [10, 14, 12], look: [0, 1.4, -1.0] }, // v41r3: open bays face camera more
   heping: { eye: [9, 4.2, 22], look: [0, 2.2, 6] },
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
-  tianjing: { eye: [1.8, 4.35, 3.55], look: [0.15, 3.55, -1.4], fov: 56 }, // v53r9: higher mid-court — open sky + jars, less eave lantern
+  tianjing: { eye: [4.9, 4.05, 2.55], look: [-0.7, 3.35, 1.15], fov: 58 }, // v53r10: restore cross-court 巷道→天井 — open sky + jars/folk (r9 looked into 祖堂门)
   zutang: { eye: [0.0, 2.9, 3.55], look: [0, 1.5, -1.45], fov: 62 }, // v42g: slightly further mid 天井 — altar+桌, thin posts
   zhengwu: { eye: [0.0, 2.95, -3.85], look: [0, 1.45, -6.65], fov: 58 }, // v42g: mid rear 天井 — clear of 祖堂 side ends, 八仙桌 reads
   hengwu: { eye: [-5.2, 1.7, 3.5], look: [-7.5, 1.3, -2.0], fov: 55 }, // v38: follow wing out to x±9.4
@@ -103,7 +103,7 @@ export class WeiwuScene {
     const tile = qingwaMat([3, 2]); // v23: 小青瓦
     const ridge = new THREE.MeshStandardMaterial({ color: 0x3e3e44, roughness: 0.7 });
     const wood = phMat("dark_wooden_planks", [1, 1]);
-    const lac = phMat("lacquered_cherry_wood", [1, 1], { color: 0x6a4832 }); // v53r8: pillars browner mid 红木
+    const lac = phMat("lacquered_cherry_wood", [1, 1], { color: 0x6e4c34 }); // v53r10: pillars browner mid 红木
     const stone = phMat("stone_tiles", [1, 1], { color: 0xb0a898 });
     const ground = phMat("stone_tiles", [18, 18], { color: 0x8a8884 }); // v24: cool grey stone yard (was warm brown mud)
 
@@ -302,7 +302,7 @@ export class WeiwuScene {
           const cp = new THREE.Mesh(new THREE.BoxGeometry(0.35, 2.2, 0.05), new THREE.MeshStandardMaterial({ color: 0xa81e18, roughness: 0.6 }));
           cp.position.set(sx * 1.8, 2.3, -depth / 2 + 0.22);
           hg.add(cp);
-          const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.3, 8), new THREE.MeshStandardMaterial({ color: 0xc8201a, emissive: 0xff6a20, emissiveIntensity: 0.35 /* v53r3 */ }));
+          const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.3, 8), new THREE.MeshStandardMaterial({ color: 0xc8201a, emissive: 0xff6a20, emissiveIntensity: 0.12 /* v53r10: less noon candle bloom */ }));
           candle.position.set(sx * 1.3, 1.4, -depth / 2 + 0.95);
           hg.add(candle);
           const flame = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffd080 }));
@@ -336,7 +336,7 @@ export class WeiwuScene {
         for (const sx of [-1.7, 1.7]) this.addLantern(hg, new THREE.Vector3(sx, 3.3, depth / 2 - 0.9));
       }
       // v34: warm interior fill so halls read at every hour
-      const fl = new THREE.PointLight(0xffc890, 1, 7.5, 1.5); fl.position.set(0, 3.2, 0.2); hg.add(fl); this.fills.push({ l: fl, k: name === "zutang" ? 1.2 : 1.05 }); // v53r1: cut fill bloom ball on 神主墙
+      const fl = new THREE.PointLight(0xffd8b0, 1, 6.2, 1.8); fl.position.set(0, 2.55, 0.55); hg.add(fl); this.fills.push({ l: fl, k: name === "zutang" ? 0.62 : 0.95 }); // v53r10: pull fill off 神主墙 — kill noon orb
       if (!this.skyFill && name === "zutang") {
         // v52: noon courtyard skylight into 祖堂 (Directional through open front)
         this.skyFill = new THREE.DirectionalLight(0xfff2dc, 0);
@@ -558,9 +558,9 @@ export class WeiwuScene {
     this.fireflies.points.visible = h === "night"; // v36: dusk no longer shows fireflies (peach blobs on 横屋 floor)
     const hz = { dawn: 0xa8a0a4, noon: 0xb8c4d0, dusk: 0x5e5458, night: 0x0c0f18 }[h];
     (this.haze.material as THREE.MeshBasicMaterial).color.set(hz);
-    const fk = { dawn: 1.15, noon: 1.35, dusk: 1.9, night: 3.2 }[h]; // v53r9: less noon fill bloom ball on 神主墙
+    const fk = { dawn: 1.1, noon: 1.15, dusk: 1.9, night: 3.2 }[h]; // v53r10: further cut noon fill on 神主墙
     for (const f of this.fills) f.l.intensity = fk * f.k;
-    if (this.skyFill) this.skyFill.intensity = { dawn: 0.3, noon: 1.05, dusk: 0.22, night: 0 }[h]; // v53r3: less noon wash on 红木
+    if (this.skyFill) this.skyFill.intensity = { dawn: 0.25, noon: 0.55, dusk: 0.22, night: 0 }[h]; // v53r10: softer noon skylight — no altar halo
     for (const m of this.winMats) m.emissiveIntensity = { dawn: 0.08, noon: 0.16, dusk: 0.5, night: 1.1 }[h]; // v53r9: kill noon lattice glow orb
     this.post.bloom.strength = h === "night" ? 0.7 : (h === "dusk" ? 0.12 : 0.04); // v53r9: noon almost no round bloom
   }

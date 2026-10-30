@@ -83,7 +83,7 @@ export class TempleScene {
     const stone = phMat("stone_tiles", [1, 1], { color: 0xd0cabe });
     const paving = phMat("stone_tiles", [14, 14], { color: 0xe0dad0 });
     const redWall = phMat("red_plaster_weathered", [1, 1], { color: 0xc04a3a });
-    const lac = phMat("lacquered_cherry_wood", [1, 2], { color: 0x6a4030 }); // v53r5: mid 红木 brown (match weiwu, not scarlet)
+    const lac = phMat("lacquered_cherry_wood", [1, 2], { color: 0x6e4832 }); // v53r10: browner mid 红木 (match weiwu)
     const wood = phMat("dark_wooden_planks", [1, 1], { color: 0x7a4a34 });
     const tile = new THREE.MeshStandardMaterial({ color: 0x2e3a36, roughness: 0.5, metalness: 0.2, side: THREE.DoubleSide });
     const roofTile = qingwaMat([1, 1]); roofTile.side = THREE.DoubleSide; roofTile.color.set(0x9aa8a4); // v29: 筒瓦 texture on roofs (was flat grey)
@@ -326,17 +326,17 @@ export class TempleScene {
       // v37: start further from stage (was 6.5) so high-angle never clips heads through 戏台 eaves
       const x = -4.8 + col * 1.6 + (row % 2) * 0.5 + Math.sin(i * 7.1) * 0.3;
       const z = 4.8 - row * 1.2 + Math.cos(i * 3.3) * 0.2;
-      f.position.set(x, 0.10, z); // v53r8: plant hips closer to stool top — less float
+      f.position.set(x, 0.04, z); // v53r10: plant hips on stool — kill float gap
       // v52: yaw firmly at stage apron (z=11.5); tiny personal offset only
       f.rotation.y = Math.atan2(-x, 11.5 - z) + (col - 3) * 0.025;
       this.audience.add(f);
       // v53r1: stools under sit+lean (modes 6,7 dominate watching map)
       if (i % 8 === 0 || i % 8 === 4 || i % 8 === 1 || i % 8 === 5 || i % 8 === 6) {
         const stool = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.28, 0.30, 0.30, 8),
+          new THREE.CylinderGeometry(0.26, 0.28, 0.26, 8),
           new THREE.MeshStandardMaterial({ color: 0x6a4a32, roughness: 0.92, metalness: 0.04 }),
         );
-        stool.position.set(x, 0.12, z + 0.02); // v53r8: browner stool, hips sit flush
+        stool.position.set(x, 0.13, z + 0.02); // v53r10: shorter stool under planted hips
         stool.castShadow = true;
         this.audience.add(stool);
       }

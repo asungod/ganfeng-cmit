@@ -899,9 +899,9 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
       set(A, 0.08, -0.4); set(B, 0.08, -0.4);
       head.rotation.z = Math.sin(t * 0.6) * 0.14;
     } else if (mode === 6) { // v52 sit-watch — plant on stool, stronger squat
-      body.position.y = -0.30 + Math.sin(t * 1.1) * 0.003; // v53r8: seated watch — gentle pitch only
-      body.scale.y += (0.88 - body.scale.y) * 0.28;
-      body.rotation.x += (0.16 - body.rotation.x) * 0.28; // chin tip toward stage, not deep bow
+      body.position.y = -0.34 + Math.sin(t * 1.1) * 0.003; // v53r10: hips meet stool — no float
+      body.scale.y += (0.86 - body.scale.y) * 0.28;
+      body.rotation.x += (0.14 - body.rotation.x) * 0.28; // seated watch, not deep bow
       set(A, -0.9 + Math.sin(t * 0.7) * 0.03, -1.7, 0.6);
       set(B, -0.82 + Math.sin(t * 0.9) * 0.03, -1.62, 0.6);
       head.position.y = 1.4;

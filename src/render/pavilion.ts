@@ -510,8 +510,8 @@ export function makePavilion(): THREE.Group {
   const g = new THREE.Group();
   const stone = phMat("stone_tiles", [2, 2], { color: 0x9a948a });
   const stoneDark = phMat("stone_tiles", [3, 3], { color: 0x6a645c });
-  const wood = phMat("dark_wooden_planks", [1, 1], { color: 0x5a3a2c }); // v50: darker body = sharper dusk silhouette
-  const dan = phMat("lacquered_cherry_wood", [1, 2], { color: 0x6a4030 }); // v53r5: mid 红木 brown not scarlet
+  const wood = phMat("dark_wooden_planks", [1, 1], { color: 0x664830 }); // v53r10: browner mid 红木 body (was near-black)
+  const dan = phMat("lacquered_cherry_wood", [1, 2], { color: 0x6e4832 }); // v53r10: mid 红木 brown not scarlet
   const gold = mat(0xd4b06a, 0.38, 0.42); // v50: brighter 金线 eaves
   const tile = new THREE.MeshStandardMaterial({ color: 0x24302c, roughness: 0.48, metalness: 0.22, side: THREE.DoubleSide });
 
@@ -876,7 +876,7 @@ function luoxiaSky(): THREE.Texture {
   let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
   // v53r5: flat horizontal 横抹 only — no ellipse sausages that read as pills
   for (let i = 0; i < 5; i++) {
-    const cy = H * (0.42 + rnd() * 0.32), cx = W * (0.1 + rnd() * 0.8), len = W * (0.28 + rnd() * 0.4), th = 4 + rnd() * 7;
+    const cy = H * (0.48 + rnd() * 0.28), cx = W * (0.1 + rnd() * 0.8), len = W * (0.32 + rnd() * 0.38), th = 2.5 + rnd() * 4; // v53r10 thinner strokes
     const near = 1 - Math.abs(cx / W - 0.45) * 1.2;
     x.save(); x.filter = "blur(6px)";
     x.fillStyle = `rgba(${110 + near * 35},${55 + near * 18},${85},${0.14 + rnd() * 0.1})`;
