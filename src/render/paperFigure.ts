@@ -787,7 +787,7 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
   const arms: Rig["arms"] = [];
   // v51b: watching crowd — denser sit/lean/clap/point (not all identical idle/拱手)
   const raw = Math.floor(seed / 3) % 8;
-  const mode = watching ? [6, 7, 6, 7, 6, 4, 7, 1][raw] : raw; // v53r1: sit/lean majority toward stage
+  const mode = watching ? [6, 6, 7, 6, 7, 6, 7, 6][raw] : raw; // v53r2: sit/lean only — no idle/拱手 in audience
   // v25: cloth-like 拱手/clap sleeves — wide hanging folds, not tube-to-tube
   const thickArm = mode === 1 || mode === 3;
   for (const s of [-1, 1]) {

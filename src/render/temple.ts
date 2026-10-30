@@ -19,7 +19,7 @@ const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, n
   // judge views: actors from the front row, crowd faces from the stage apron
   // v25: further back, aim stage-right so trio clears left ws-panel
   kanxi: { eye: [2.15, 3.35, 1.4], look: [2.15, 2.85, 11.6] }, // v42: pull back from stage apron
-  guanzhong: { eye: [0.55, 2.55, 9.6], look: [0.1, 1.05, 4.2] }, // v52: aim mid crowd faces
+  guanzhong: { eye: [-3.8, 2.35, 7.4], look: [0.6, 1.2, 5.1] }, // v53r2: 3/4 faces, less stage-apron wood fill
 };
 
 export class TempleScene {
@@ -325,7 +325,7 @@ export class TempleScene {
       // v37: start further from stage (was 6.5) so high-angle never clips heads through 戏台 eaves
       const x = -4.8 + col * 1.6 + (row % 2) * 0.5 + Math.sin(i * 7.1) * 0.3;
       const z = 4.8 - row * 1.2 + Math.cos(i * 3.3) * 0.2;
-      f.position.set(x, -0.08, z); // v53r1: plant harder
+      f.position.set(x, -0.02, z); // v53r2: less underground clip on sit hips
       // v52: yaw firmly at stage apron (z=11.5); tiny personal offset only
       f.rotation.y = Math.atan2(-x, 11.5 - z) + (col - 3) * 0.025;
       this.audience.add(f);

@@ -130,7 +130,7 @@ export class PavilionScene {
     void skyBand;
     // v52: wide flat 国风 dusk wash — vermilion→gold ribbon along horizon, not an orb
     // v52c: bands BEHIND far hills (z<-34) so terrain never clips them into a sun-disc silhouette
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(200, 7.2), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd8b0, transparent: true, opacity: 0.92, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false })); // v53r1: thinner band
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(200, 6.4), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd0a8, transparent: true, opacity: 0.82, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false })); // v53r2: softer thinner band
     this.glow.position.set(0, 4.95, -42);
     this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
     this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(180, 4), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.9, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false }));
@@ -158,7 +158,7 @@ export class PavilionScene {
     loadHdri(this.renderer, this.scene, "qwantani_dusk_2_puresky", false);
     this.scene.background = new THREE.Color(0x2a2040); // v52d: soft dusk violet, not void
     this.scene.environmentIntensity = 0.42; // painted horizon band carries 落霞
-    this.post = makePost(this.renderer, this.scene, this.camera, 0.18, 0.98); // v53r1: less pill halo
+    this.post = makePost(this.renderer, this.scene, this.camera, 0.12, 0.92); // v53r2: cut halo further
     this.flight = new Flight(this.camera, this.controls.target);
     this.resize();
     this.applyMood();
@@ -874,15 +874,15 @@ function luoxiaSky(): THREE.Texture {
   x.fillStyle = eg; x.fillRect(W * 0.02, H * 0.55, W * 0.96, H * 0.45);
   x.restore();
   let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  // v52d: fewer softer 横抹 strokes — less streaky "digital sausage" bands
-  for (let i = 0; i < 14; i++) {
+  // v53r2: even fewer softer 横抹 — hero still read as streaky sausage
+  for (let i = 0; i < 7; i++) {
     const cy = H * (0.35 + rnd() * 0.45), cx = W * (0.08 + rnd() * 0.84), len = W * (0.22 + rnd() * 0.38), th = 10 + rnd() * 18;
     const near = 1 - Math.abs(cx / W - 0.45) * 1.2;
     x.save(); x.filter = "blur(8px)";
-    x.fillStyle = `rgba(${100 + near * 40},${50 + near * 20},${90},${0.28 + rnd() * 0.22})`;
+    x.fillStyle = `rgba(${100 + near * 40},${50 + near * 20},${90},${0.16 + rnd() * 0.14})`; // v53r2
     x.beginPath(); x.ellipse(cx, cy, len / 2, th, (rnd() - 0.5) * 0.02, 0, Math.PI * 2); x.fill();
     x.filter = "blur(5px)";
-    x.fillStyle = `rgba(255,${130 + near * 70},${70 + near * 40},${0.35 + near * 0.2})`;
+    x.fillStyle = `rgba(255,${130 + near * 70},${70 + near * 40},${0.22 + near * 0.12})`; // v53r2
     x.beginPath(); x.ellipse(cx + len * 0.03, cy + th * 0.55, len * 0.4, th * 0.35, 0, 0, Math.PI * 2); x.fill();
     x.restore();
   }

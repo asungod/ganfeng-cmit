@@ -13,7 +13,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
   overview: { eye: [10, 14, 12], look: [0, 1.4, -1.0] }, // v41r3: open bays face camera more
   heping: { eye: [9, 4.2, 22], look: [0, 2.2, 6] },
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
-  tianjing: { eye: [3.2, 4.15, 4.6], look: [-0.4, 3.6, -1.8], fov: 62 }, // v53r1: open 天井 — sky + jars/folk/walls, NOT altar
+  tianjing: { eye: [0.2, 5.55, 2.65], look: [0.15, 1.55, 1.55], fov: 58 }, // v53r2: mid 天井 bird — sky strip + jars/folk/pavement, not side wall
   zutang: { eye: [0.0, 2.9, 3.55], look: [0, 1.5, -1.45], fov: 62 }, // v42g: slightly further mid 天井 — altar+桌, thin posts
   zhengwu: { eye: [0.0, 2.95, -3.85], look: [0, 1.45, -6.65], fov: 58 }, // v42g: mid rear 天井 — clear of 祖堂 side ends, 八仙桌 reads
   hengwu: { eye: [-5.2, 1.7, 3.5], look: [-7.5, 1.3, -2.0], fov: 55 }, // v38: follow wing out to x±9.4
@@ -555,7 +555,7 @@ export class WeiwuScene {
     this.fireflies.points.visible = h === "night"; // v36: dusk no longer shows fireflies (peach blobs on 横屋 floor)
     const hz = { dawn: 0xa8a0a4, noon: 0xb8c4d0, dusk: 0x5e5458, night: 0x0c0f18 }[h];
     (this.haze.material as THREE.MeshBasicMaterial).color.set(hz);
-    const fk = { dawn: 1.2, noon: 1.85, dusk: 2.0, night: 3.2 }[h]; // v53r1: less noon scarlet punch
+    const fk = { dawn: 1.15, noon: 1.55, dusk: 1.9, night: 3.2 }[h]; // v53r2: cooler noon punch on 红木
     for (const f of this.fills) f.l.intensity = fk * f.k;
     if (this.skyFill) this.skyFill.intensity = { dawn: 0.35, noon: 1.55, dusk: 0.25, night: 0 }[h];
     for (const m of this.winMats) m.emissiveIntensity = { dawn: 0.1, noon: 0.45, dusk: 0.5, night: 1.1 }[h]; // v52g
@@ -709,15 +709,15 @@ function makeFurniture(wood: THREE.Material, lac: THREE.Material) {
   const brick = new THREE.MeshStandardMaterial({ color: 0x8a6a58, roughness: 0.95 });
   const iron = new THREE.MeshStandardMaterial({ color: 0x1e1c1a, roughness: 0.5, metalness: 0.6 });
   const pot = new THREE.MeshStandardMaterial({ color: 0x4a3426, roughness: 0.35 });
-  // v53r1: mid 红木 browner (noon was reading scarlet ~RGB152,67,52)
-  const grain = woodGrainMap("#a86a48", "#5e3220");
+  // v53r2: mid 红木 — further desat (正屋 noon still scarlet)
+  const grain = woodGrainMap("#946040", "#4e2a1a");
   const rose = (lac as THREE.MeshStandardMaterial).clone();
-  rose.map = grain; rose.color = new THREE.Color(0x7a4a32); rose.roughness = 0.92; rose.metalness = 0.01;
-  rose.envMapIntensity = 0.14;
+  rose.map = grain; rose.color = new THREE.Color(0x6e4530); rose.roughness = 0.94; rose.metalness = 0.01;
+  rose.envMapIntensity = 0.1;
   const L = rose;
   const apron = (lac as THREE.MeshStandardMaterial).clone();
-  apron.map = grain; apron.color = new THREE.Color(0x55301e); apron.roughness = 0.95; apron.metalness = 0.01;
-  apron.envMapIntensity = 0.12;
+  apron.map = grain; apron.color = new THREE.Color(0x4a2a1a); apron.roughness = 0.96; apron.metalness = 0.01;
+  apron.envMapIntensity = 0.08;
   const A = apron;
   const addHoof = (g: THREE.Group, x: number, z: number, m: THREE.Material) => {
     g.add(box(0.12, 0.045, 0.12, m, x, 0.03, z));

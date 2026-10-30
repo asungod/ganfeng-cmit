@@ -25,7 +25,7 @@ export class PorcelainVitrine {
   private amb: THREE.AmbientLight;
   private well: THREE.PointLight;
   private look: { shape: ShapeId; glaze: GlazeId; era: EraId } = { shape: "meiping", glaze: "qinghua", era: "ming" };
-  craft = { cobalt: 0.86, points: 8, crack: 0.35 }; // v53r1: stronger 青花 read
+  craft = { cobalt: 0.93, points: 8, crack: 0.35 }; // v53r2: deeper 青花 vs cream body
   private wantWire = false;
   private buildGen = 0;
   private buildTimers: number[] = [];
@@ -788,7 +788,7 @@ function makeGlazeMaps(
   const rng = mulberry32(hashSeed(shape, glaze, era));
   paintGlaze(ctx, glaze, shape, era, rng);
   if (glaze === "qinghua" && cobalt < 0.98) {
-    ctx.fillStyle = `rgba(247, 241, 228, ${Math.max(0, 1 - cobalt) * 0.3})`; // v30: lighter wash keeps cobalt deep
+    ctx.fillStyle = `rgba(247, 241, 228, ${Math.max(0, 1 - cobalt) * 0.18})`; // v30: lighter wash keeps cobalt deep
     ctx.fillRect(0, 0, TEX, TEX);
   }
   const crackSeed = hashSeed(shape, glaze, era) ^ 0xc9e4d9f1;
@@ -890,7 +890,7 @@ function cobaltOf(era: EraId): Cobalt {
     case "yuan":
       return { deep: "#0f1528", mid: "#1b2850", wash: "#2c3c66", iron: true };
     case "ming":
-      return { deep: "#0a1228", mid: "#152454", wash: "#2a3c70", iron: false }; // v53r1 deeper cobalt
+      return { deep: "#071018", mid: "#0e1c40", wash: "#1e3260", iron: false }; // v53r2 inkier ming
     case "qing":
       return { deep: "#121d3c", mid: "#24386c", wash: "#3c5288", iron: false };
     case "song":
@@ -924,7 +924,7 @@ function bleedPass(ctx: CanvasRenderingContext2D, C: Cobalt): void {
   ctx.save();
   ctx.globalCompositeOperation = "multiply";
   ctx.filter = "blur(3.2px)";
-  ctx.globalAlpha = 0.26; // v53r1
+  ctx.globalAlpha = 0.34; // v53r2 stronger bleed
   ctx.fillStyle = C.wash;
   ctx.fillRect(0, 0, TEX, TEX);
   ctx.filter = "none";
