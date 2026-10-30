@@ -59,14 +59,14 @@ export class PorcelainVitrine {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.setClearColor(0x050505, 1);
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.96;
+    this.renderer.toneMappingExposure = 1.05; // v52: read form + glaze
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.scene = new THREE.Scene();
     this.scene.background = museumGradient();
-    this.scene.environmentIntensity = 0.22;
+    this.scene.environmentIntensity = 0.38; // v52: deeper glaze reflections
 
     this.camera = new THREE.PerspectiveCamera(30, 1, 0.08, 40);
     this.camera.position.set(1.28, 2.92, 2.08);
@@ -127,8 +127,8 @@ export class PorcelainVitrine {
 
     addGlassCase(this.scene);
 
-    this.amb = new THREE.AmbientLight(0x6a7b8c, 0.12);
-    const hemi = new THREE.HemisphereLight(0x8a9aaa, 0x121010, 0.22);
+    this.amb = new THREE.AmbientLight(0x7a8b9c, 0.18);
+    const hemi = new THREE.HemisphereLight(0x9aabbb, 0x181410, 0.32); // v52: soft museum fill
     this.key = new THREE.SpotLight(0xffd4a8, 34, 18, 0.48, 0.38, 1.65);
     this.key.position.set(2.05, 3.72, 2.05);
     this.key.castShadow = true;
@@ -142,7 +142,7 @@ export class PorcelainVitrine {
     this.key.target.position.set(0, 0.55, 0);
     this.rim = new THREE.DirectionalLight(0x8aa4c0, 1.55);
     this.rim.position.set(-2.9, 2.55, -2.8);
-    this.fill = new THREE.PointLight(0xc5d0da, 1.15, 11, 2);
+    this.fill = new THREE.PointLight(0xc5d0da, 1.55, 11, 2); // v52
     this.fill.position.set(-1.55, 1.15, 2.7);
     this.well = new THREE.PointLight(0xfff1d8, 1.05, 3.2, 2);
     this.well.position.set(0, 1.7, 0);
@@ -680,7 +680,7 @@ function glazeMaterial(
     normalScale: new THREE.Vector2(0.14, 0.14),
     metalness: 0,
     flatShading: false,
-    envMapIntensity: 0.55,
+    envMapIntensity: 0.78, // v52 depth
   };
   switch (glaze) {
     case "qinghua":
@@ -694,7 +694,7 @@ function glazeMaterial(
         clearcoatNormalMap: maps.normalMap,
         clearcoatNormalScale: new THREE.Vector2(0.06, 0.06),
         ior: 1.52,
-        envMapIntensity: 0.42,
+        envMapIntensity: 0.85, // v52 qinghua depth
       });
     case "yingqing":
       return new THREE.MeshPhysicalMaterial({

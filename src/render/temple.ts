@@ -326,16 +326,16 @@ export class TempleScene {
       const x = -4.8 + col * 1.6 + (row % 2) * 0.5 + Math.sin(i * 7.1) * 0.3;
       const z = 4.8 - row * 1.2 + Math.cos(i * 3.3) * 0.2;
       f.position.set(x, 0, z);
-      // face stage center (0, ·, 11.5) with small individual offset — not a flat idle grid
-      f.rotation.y = Math.atan2(-x * 0.4, 11.5 - z) + (col - 3) * 0.045 + ((i % 3) - 1) * 0.05;
+      // v52: yaw firmly at stage apron (z=11.5); tiny personal offset only
+      f.rotation.y = Math.atan2(-x, 11.5 - z) + (col - 3) * 0.03 + ((i % 5) - 2) * 0.02;
       this.audience.add(f);
-      // v51b: low stool under sit-watch poses (watching map: raw i%8 → sit when 0 or 4)
-      if (i % 8 === 0 || i % 8 === 4) {
+      // stools for sit modes (watching map raw%8 → modes 0,4 sit) + neighbors share benches
+      if (i % 8 === 0 || i % 8 === 4 || i % 8 === 1) {
         const stool = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.26, 0.28, 0.32, 8),
-          new THREE.MeshStandardMaterial({ color: 0x4a3020, roughness: 0.92, metalness: 0 }),
+          new THREE.CylinderGeometry(0.24, 0.27, 0.28, 8),
+          new THREE.MeshStandardMaterial({ color: 0x5a3a28, roughness: 0.9, metalness: 0.05 }),
         );
-        stool.position.set(x, 0.16, z + 0.05);
+        stool.position.set(x, 0.14, z + 0.04);
         stool.castShadow = true;
         this.audience.add(stool);
       }

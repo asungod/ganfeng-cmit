@@ -19,14 +19,27 @@ export class LobbyScene {
     this.renderer = makeRenderer(canvas, 0.75);
     this.renderer.shadowMap.enabled = false;
     this.scene.fog = new THREE.FogExp2(0x6a4a50, 0.016);
-    this.scene.background = new THREE.Color(0x1a1418);
-    loadHdri(this.renderer, this.scene, "qwantani_dusk_2_puresky", true);
-    this.scene.environmentIntensity = 0.5;
-    this.scene.backgroundIntensity = 0.6;
-    this.scene.add(new THREE.HemisphereLight(0xffc8a0, 0x1a1418, 0.6));
-    const sun = new THREE.DirectionalLight(0xffb070, 2.2);
+    this.scene.background = new THREE.Color(0x241830);
+    // v52: env only — dusk HDRI sun disc looked like 落霞球 behind cards
+    loadHdri(this.renderer, this.scene, "qwantani_dusk_2_puresky", false);
+    this.scene.environmentIntensity = 0.55;
+    this.scene.backgroundIntensity = 1;
+    this.scene.add(new THREE.HemisphereLight(0xffc8a0, 0x1a1418, 0.7));
+    const sun = new THREE.DirectionalLight(0xffb070, 2.0);
     sun.position.set(-20, 6, -30);
     this.scene.add(sun);
+    // flat vermilion→gold horizon wash behind pavilion (no orb)
+    {
+      const c = document.createElement("canvas"); c.width = 512; c.height = 128;
+      const x = c.getContext("2d")!;
+      const g = x.createLinearGradient(0, 128, 0, 0);
+      g.addColorStop(0, "rgba(255,220,140,0.95)"); g.addColorStop(0.35, "rgba(240,100,55,0.85)");
+      g.addColorStop(0.7, "rgba(140,50,90,0.35)"); g.addColorStop(1, "rgba(40,30,70,0)");
+      x.fillStyle = g; x.fillRect(0, 0, 512, 128);
+      const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+      const band = new THREE.Mesh(new THREE.PlaneGeometry(160, 28), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.9, depthWrite: false, fog: false, depthTest: false }));
+      band.position.set(-8, 10, -48); band.renderOrder = -2; this.scene.add(band);
+    }
     this.water = new THREE.Mesh(
       new THREE.PlaneGeometry(300, 300, 1, 1),
       new THREE.MeshStandardMaterial({ color: 0x4a5060, roughness: 0.08, metalness: 0.9, envMapIntensity: 1.3 }),

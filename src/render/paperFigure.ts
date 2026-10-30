@@ -867,7 +867,7 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
   const set = (a: typeof A, up: number, lo: number, fs = 1) => { a.up.rotation.z = a.s * up; a.lo.rotation.z = lo; a.lo.scale.y += (fs - a.lo.scale.y) * 0.2; };
   const anim = (t0: number) => {
     // v51: villagers peek toward cam (≤0.38) so stage-facing crowd still readable mid/overview
-    faceCam(rig, watching ? 0.32 : 0.38);
+    faceCam(rig, watching ? 0.22 : 0.38); // v52: less cam peek — keep stage facing
     const t = t0 * sp + ph;
     head.position.x = Math.sin(t * 0.23) * 0.006;
     if (mode !== 6) body.scale.y += (1 - body.scale.y) * 0.25;
@@ -895,9 +895,9 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
       body.position.y = Math.sin(t * 1.3) * 0.004;
       set(A, 0.08, -0.4); set(B, 0.08, -0.4);
       head.rotation.z = Math.sin(t * 0.6) * 0.14;
-    } else if (mode === 6) { // v51 sit-watch — clearly lower, hands on knees, chin to stage
-      body.position.y = -0.58 + Math.sin(t * 1.1) * 0.003;
-      body.scale.y += (0.9 - body.scale.y) * 0.25; // slight squat squash
+    } else if (mode === 6) { // v52 sit-watch — plant on stool, stronger squat
+      body.position.y = -0.62 + Math.sin(t * 1.1) * 0.003;
+      body.scale.y += (0.86 - body.scale.y) * 0.25; // clearer sit squash
       set(A, -0.7 + Math.sin(t * 0.7) * 0.03, -1.65, 0.48);
       set(B, -0.62 + Math.sin(t * 0.9) * 0.03, -1.58, 0.48);
       head.position.y = 1.4;

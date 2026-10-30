@@ -130,10 +130,10 @@ export class PavilionScene {
     void skyBand;
     // v52: wide flat 国风 dusk wash — vermilion→gold ribbon along horizon, not an orb
     // v52c: bands BEHIND far hills (z<-34) so terrain never clips them into a sun-disc silhouette
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(110, 16), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd8b0, transparent: true, opacity: 0.95, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false }));
-    this.glow.position.set(0, 8.5, -42); this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
-    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(110, 5), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.9, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false }));
-    this.horizonBand.position.set(0, 5.8, -40); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2;
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(140, 11), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffd8b0, transparent: true, opacity: 0.92, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false })); // v52e: flatter ribbon
+    this.glow.position.set(0, 5.2, -42); // v52e: sit on horizon this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
+    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(140, 4.2), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.88, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: false }));
+    this.horizonBand.position.set(0, 4.6, -40); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2;
     this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(56, 36), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.42, depthWrite: false, fog: false }));
     this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-4, 0.06, -10); this.glowRefl.renderOrder = 2;
     this.scene.add(this.glowRefl, this.glow, this.horizonBand);
@@ -155,7 +155,7 @@ export class PavilionScene {
     this.scene.add(this.mist.points);
     // v52: HDRI for lighting only — dusk puresky sun disc was the "落霞球"
     loadHdri(this.renderer, this.scene, "qwantani_dusk_2_puresky", false);
-    this.scene.background = new THREE.Color(0x1e1834);
+    this.scene.background = new THREE.Color(0x2a2040); // v52d: soft dusk violet, not void
     this.scene.environmentIntensity = 0.42; // painted horizon band carries 落霞
     this.post = makePost(this.renderer, this.scene, this.camera, 0.28, 0.97);
     this.flight = new Flight(this.camera, this.controls.target);
@@ -873,16 +873,16 @@ function luoxiaSky(): THREE.Texture {
   x.fillStyle = eg; x.fillRect(W * 0.02, H * 0.55, W * 0.96, H * 0.45);
   x.restore();
   let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  // cloud strokes: dusky rose body, bright under-lit lower edge — denser for 国画 presence
-  for (let i = 0; i < 28; i++) {
-    const cy = H * (0.28 + rnd() * 0.55), cx = W * (0.06 + rnd() * 0.88), len = W * (0.14 + rnd() * 0.3), th = 8 + rnd() * 14;
-    const near = 1 - Math.abs(cx / W - 0.4) * 1.5;
-    x.save(); x.filter = "blur(4.5px)";
-    x.fillStyle = `rgba(${110 + near * 50},${60 + near * 25},${95},${0.55 + rnd() * 0.3})`;
-    x.beginPath(); x.ellipse(cx, cy, len / 2, th, (rnd() - 0.5) * 0.03, 0, Math.PI * 2); x.fill();
-    x.filter = "blur(2px)";
-    x.fillStyle = `rgba(255,${140 + near * 80},${80 + near * 50},${0.7 + near * 0.3})`;
-    x.beginPath(); x.ellipse(cx + len * 0.04, cy + th * 0.7, len * 0.44, th * 0.42, 0, 0, Math.PI * 2); x.fill();
+  // v52d: fewer softer 横抹 strokes — less streaky "digital sausage" bands
+  for (let i = 0; i < 14; i++) {
+    const cy = H * (0.35 + rnd() * 0.45), cx = W * (0.08 + rnd() * 0.84), len = W * (0.22 + rnd() * 0.38), th = 10 + rnd() * 18;
+    const near = 1 - Math.abs(cx / W - 0.45) * 1.2;
+    x.save(); x.filter = "blur(8px)";
+    x.fillStyle = `rgba(${100 + near * 40},${50 + near * 20},${90},${0.28 + rnd() * 0.22})`;
+    x.beginPath(); x.ellipse(cx, cy, len / 2, th, (rnd() - 0.5) * 0.02, 0, Math.PI * 2); x.fill();
+    x.filter = "blur(5px)";
+    x.fillStyle = `rgba(255,${130 + near * 70},${70 + near * 40},${0.35 + near * 0.2})`;
+    x.beginPath(); x.ellipse(cx + len * 0.03, cy + th * 0.55, len * 0.4, th * 0.35, 0, 0, Math.PI * 2); x.fill();
     x.restore();
   }
   // a distant 孤鹜 brushed against the glow
