@@ -139,7 +139,7 @@ export class PorcelainVitrine {
 
     this.amb = new THREE.AmbientLight(0x7a8b9c, 0.18);
     const hemi = new THREE.HemisphereLight(0x9aabbb, 0x181410, 0.32); // v52: soft museum fill
-    this.key = new THREE.SpotLight(0xe8dce8, 30, 18, 0.48, 0.38, 1.65); // v53r5: cooler key for 青花
+    this.key = new THREE.SpotLight(0xdce4f0, 26, 18, 0.46, 0.4, 1.7); // v53r7: cooler/softer key — cobalt stays inkier
     this.key.position.set(2.05, 3.72, 2.05);
     this.key.castShadow = true;
     this.key.shadow.mapSize.set(2048, 2048);

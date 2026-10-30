@@ -255,7 +255,7 @@ export class TempleScene {
       stage.add(f);
     }
     // v50: soft warm fill — enough to open the box, no circular glare on 守旧
-    const stFill = new THREE.PointLight(0xffd2a0, 1.1, 7, 2.2); stFill.position.set(0, 4.6, 0.6); stage.add(stFill); // v53r5: cut back-wall orbs
+    const stFill = new THREE.PointLight(0xffd2a0, 0.7, 5.5, 2.4); stFill.position.set(0, 4.2, 0.4); stage.add(stFill); // v53r7: tighter stage fill, less wall bounce
     const stFill2 = new THREE.PointLight(0xffc890, 0.55, 5.5, 2.2); stFill2.position.set(3.0, 3.6, -0.6); stage.add(stFill2);
     const stFill3 = new THREE.PointLight(0xffc890, 0.55, 5.5, 2.2); stFill3.position.set(-3.0, 3.6, -0.6); stage.add(stFill3);
     stage.position.set(0, 0, 11.5);
@@ -268,7 +268,7 @@ export class TempleScene {
     const rimA = new THREE.DirectionalLight(0xbcd0ff, 1.0); rimA.position.set(-6, 6, 16); rimA.target.position.set(0, 2, 10); S.add(rimA, rimA.target);
     const rimB = new THREE.DirectionalLight(0xffe2c0, 0.7); rimB.position.set(6, 5, -2); rimB.target.position.set(0, 1, 5); S.add(rimB, rimB.target);
     // v50: stronger face fill so daytime 看戏机位 reads 工笔 faces
-    const faceFill = new THREE.PointLight(0xffe6cc, 0.7, 12, 2.0); faceFill.position.set(0, 3.2, 6.5); S.add(faceFill); // v53r5: further cut courtyard circle
+    const faceFill = new THREE.PointLight(0xffe6cc, 0.32, 9, 2.4); faceFill.position.set(0, 3.2, 6.5); S.add(faceFill); // v53r7: cut courtyard wall circles
 
     // 宣德炉 bronze censer on the axis (v23)
     // v24: smaller 宣德炉, closer to the hall so 台上望众 doesn't hide the courtyard
@@ -392,8 +392,8 @@ export class TempleScene {
     }
     this.scene.backgroundIntensity = c.bg;
     for (const l of this.lamps) l.intensity = c.lamp * 1.2; // v53r4: daytime wall orbs
-    for (const m of this.lampMeshes) (m.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.3 + c.lamp * 0.6;
-    this.post.bloom.strength = slot === "yewan" ? 0.35 : 0.06; // v53r4
+    for (const m of this.lampMeshes) (m.material as THREE.MeshStandardMaterial).emissiveIntensity = (slot === "yewan" ? 0.35 : 0.04) + c.lamp * 0.55; // v53r7: daytime lanterns nearly dark — kill wall orbs
+    this.post.bloom.strength = slot === "yewan" ? 0.35 : 0.02; // v53r7: daytime almost no bloom circles
     this.procession.visible = act === "kaichao";
     this.audience.visible = act === "xiban";
     this.smoke.material.opacity = act === "kaichao" ? 0.1 : 0.05; // v53r6: less chalk plume

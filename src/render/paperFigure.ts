@@ -899,9 +899,9 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
       set(A, 0.08, -0.4); set(B, 0.08, -0.4);
       head.rotation.z = Math.sin(t * 0.6) * 0.14;
     } else if (mode === 6) { // v52 sit-watch — plant on stool, stronger squat
-      body.position.y = -0.42 + Math.sin(t * 1.1) * 0.003; // v53r6: sit + forward pitch (paper cards need lean to read seated)
-      body.scale.y += (0.8 - body.scale.y) * 0.28;
-      body.rotation.x += (0.42 - body.rotation.x) * 0.28; // chin toward stage, hips back on stool
+      body.position.y = -0.36 + Math.sin(t * 1.1) * 0.003; // v53r7: sit plant — less deep bow than r6
+      body.scale.y += (0.84 - body.scale.y) * 0.28;
+      body.rotation.x += (0.26 - body.rotation.x) * 0.28; // seated watch, not kowtow
       set(A, -0.9 + Math.sin(t * 0.7) * 0.03, -1.7, 0.6);
       set(B, -0.82 + Math.sin(t * 0.9) * 0.03, -1.62, 0.6);
       head.position.y = 1.4;

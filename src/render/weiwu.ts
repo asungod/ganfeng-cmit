@@ -13,7 +13,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
   overview: { eye: [10, 14, 12], look: [0, 1.4, -1.0] }, // v41r3: open bays face camera more
   heping: { eye: [9, 4.2, 22], look: [0, 2.2, 6] },
   menlou: { eye: [3.2, 1.8, 16.5], look: [0, 3.0, 9] },
-  tianjing: { eye: [0.2, 2.1, 2.55], look: [0.05, 6.2, 1.2], fov: 62 }, // v53r6: mid-court open-sky between eaves (r5 bird clipped roof underside)
+  tianjing: { eye: [5.4, 3.95, 2.35], look: [-1.0, 3.35, 1.55], fov: 60 }, // v53r7: restore cross-court 巷道→天井 — sky strip + both eaves + jars (r6 look-up only hit roof)
   zutang: { eye: [0.0, 2.9, 3.55], look: [0, 1.5, -1.45], fov: 62 }, // v42g: slightly further mid 天井 — altar+桌, thin posts
   zhengwu: { eye: [0.0, 2.95, -3.85], look: [0, 1.45, -6.65], fov: 58 }, // v42g: mid rear 天井 — clear of 祖堂 side ends, 八仙桌 reads
   hengwu: { eye: [-5.2, 1.7, 3.5], look: [-7.5, 1.3, -2.0], fov: 55 }, // v38: follow wing out to x±9.4
@@ -23,7 +23,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
 
 const HOURS: Record<HourId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; lamp: number }> = {
   dawn: { sun: [-30, 9, 18], col: 0xffc7a0, I: 2.2, hemi: 0.35, env: 0.6, exp: 0.95, fog: 0xb7b0b4, hdri: "qwantani_puresky", lamp: 0.2 },
-  noon: { sun: [12, 40, 14], col: 0xfff2dc, I: 3.85, hemi: 1.0, env: 1.2, exp: 1.12, fog: 0xc8d2dc, hdri: "qwantani_puresky", lamp: 0.28 }, // v53r6: noon hall fill
+  noon: { sun: [12, 40, 14], col: 0xfff2dc, I: 3.95, hemi: 1.05, env: 1.22, exp: 1.14, fog: 0xc8d2dc, hdri: "qwantani_puresky", lamp: 0.14 }, // v53r7: brighter noon hall, cut lamp orbs
   dusk: { sun: [34, 9, 10], col: 0xf0dcc8, I: 2.55, hemi: 0.95, env: 1.0, exp: 1.12, fog: 0x8a8078, hdri: "qwantani_sunset_puresky", lamp: 0.55 },
   night: { sun: [-14, 30, -10], col: 0x8aa4ff, I: 0.35, hemi: 0.12, env: 0.25, exp: 1.15, fog: 0x10131e, hdri: "qwantani_night_puresky", lamp: 2.6 },
 };
@@ -559,7 +559,7 @@ export class WeiwuScene {
     for (const f of this.fills) f.l.intensity = fk * f.k;
     if (this.skyFill) this.skyFill.intensity = { dawn: 0.3, noon: 1.05, dusk: 0.22, night: 0 }[h]; // v53r3: less noon wash on 红木
     for (const m of this.winMats) m.emissiveIntensity = { dawn: 0.1, noon: 0.45, dusk: 0.5, night: 1.1 }[h]; // v52g
-    this.post.bloom.strength = h === "night" ? 0.7 : 0.16; // v53r1: noon bloom was round glow on 祖堂 wall
+    this.post.bloom.strength = h === "night" ? 0.7 : 0.10; // v53r7: cut noon round glow on 祖堂/lantern
   }
 
   setRoom(r: RoomId | "overview", instant = false): void {
@@ -608,7 +608,7 @@ export class WeiwuScene {
       const k = Math.max(0, d.dot(sd)); const f = this.hourId === "night" ? 0 : k * k;
       this.renderer.toneMappingExposure = c.exp * (1 - 0.3 * f);
       this.scene.backgroundIntensity = this.hourId === "night" ? 0.5 : (this.hourId === "dusk" ? 0.45 : 1) - 0.4 * f;
-      this.post.bloom.strength = (this.hourId === "night" ? 0.7 : 0.16) * (1 - 0.7 * f); // v53r1
+      this.post.bloom.strength = (this.hourId === "night" ? 0.7 : 0.10) * (1 - 0.7 * f); // v53r7
     }
     this.post.render();
   };
