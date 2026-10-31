@@ -12,7 +12,7 @@ export class Ambience {
   private kind: Kind = "off";
   private operaBuf: AudioBuffer | null = null;
   private operaLoad: Promise<AudioBuffer> | null = null;
-  muted = true;
+  muted = false;
 
   async unlock(): Promise<void> {
     if (!this.ctx) this.ctx = new AudioContext();
@@ -60,6 +60,12 @@ export class Ambience {
       await this.set(this.kind);
     }
     return this.muted;
+  }
+
+  /** Call once after a user gesture so autoplay-blocked AudioContext can start. */
+  async afterUserGesture(): Promise<void> {
+    await this.unlock();
+    if (!this.muted && this.kind !== "off") await this.set(this.kind);
   }
 
   stop(): void {

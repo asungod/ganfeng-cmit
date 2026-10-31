@@ -66,8 +66,10 @@ function paintGuideBtn(btn: HTMLButtonElement): void {
 function paintChrome(bar: HTMLElement): void {
   const mute = bar.querySelector("[data-mute]") as HTMLButtonElement | null;
   const langBtn = bar.querySelector("[data-lang]") as HTMLButtonElement | null;
-  if (mute && !mute.classList.contains("is-on")) mute.textContent = t("chrome.muteOff");
-  if (mute?.classList.contains("is-on")) mute.textContent = t("chrome.muteOn");
+  if (mute) {
+    mute.textContent = ambience.muted ? t("chrome.muteOff") : t("chrome.muteOn");
+    mute.classList.toggle("is-on", !ambience.muted);
+  }
   const guideBtn = bar.querySelector("[data-guide]") as HTMLButtonElement | null;
   if (guideBtn) paintGuideBtn(guideBtn);
   if (langBtn) {
@@ -84,7 +86,7 @@ function ensureChrome(): void {
   bar.innerHTML = `
     <div class="chrome-btns">
       <button type="button" class="mute" data-lang title="">EN</button>
-      <button type="button" class="mute" data-mute>${t("chrome.muteOff")}</button>
+      <button type="button" class="mute is-on" data-mute>${t("chrome.muteOn")}</button>
       <button type="button" class="mute" data-guide>${t("chrome.guideOff")}</button>
     </div>
   `;
@@ -126,6 +128,20 @@ function ensureChrome(): void {
   onLang(() => paintChrome(bar));
 }
 
+
+/** Browsers block AudioContext until a gesture; unlock once then re-apply current bed. */
+function armAmbienceGesture(): void {
+  const once = () => {
+    window.removeEventListener("pointerdown", once, true);
+    window.removeEventListener("keydown", once, true);
+    window.removeEventListener("touchstart", once, true);
+    void ambience.afterUserGesture();
+  };
+  window.addEventListener("pointerdown", once, true);
+  window.addEventListener("keydown", once, true);
+  window.addEventListener("touchstart", once, true);
+}
+
 window.addEventListener("hashchange", () => mount(parseRoute(location.hash)));
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape") location.hash = "#/";
@@ -137,6 +153,7 @@ window.addEventListener("keydown", (e) => {
 
 boot();
 ensureChrome();
+armAmbienceGesture();
 mountEngineHud();
 mount(parseRoute(location.hash));
 if (getLang() === "en") startEnContent();
