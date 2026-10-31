@@ -1,0 +1,21 @@
+万寿宫戏台声景 · Audio credits
+==============================
+
+stage-luogu.mp3
+  Source: beijing-opera-7.wav by xserra
+  URL: https://freesound.org/people/xserra/sounds/162035/
+  License: Creative Commons Attribution 4.0 (CC-BY 4.0)
+  https://creativecommons.org/licenses/by/4.0/
+  Note: Fragment of a Beijing Opera (percussion + suona) recorded at the
+  Temple Theatre Beijing Opera House, 2012. Used here as looping stage
+  ambience for 西山万寿宫「戏班演出」. 戏曲场面锣鼓（京剧戏台录音片段，CC-BY）·
+  非某部赣剧唱段.
+
+stage-luogu-b.mp3
+  Source: beijing-opera-2.wav by xserra
+  URL: https://freesound.org/people/xserra/sounds/162034/
+  License: Creative Commons Attribution 4.0 (CC-BY 4.0)
+  Note: Fragment with jinghu / dizi / pipa + percussion; spare loop.
+
+Files re-encoded with ffmpeg (loudnorm + ~112 kbps MP3) for web delivery;
+musical content unchanged aside from level/fade.

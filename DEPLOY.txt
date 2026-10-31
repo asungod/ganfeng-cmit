@@ -2,4 +2,4 @@
 Repo: asungod/ganfeng-cmit
 Branch: main (site root)
 Review video: /review/
-Built from cmit-ganfeng tip a60dd60 — fix mute/guide stop + menlou bamboo non-cross
+Built from cmit-ganfeng tip 8c45c38 — 万寿宫戏班 CC-BY 戏曲场面锣鼓声景
