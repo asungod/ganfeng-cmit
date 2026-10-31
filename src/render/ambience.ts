@@ -1,12 +1,17 @@
-type Kind = "museum" | "river" | "earth" | "off";
+type Kind = "museum" | "river" | "earth" | "opera" | "off";
 
 const MASTER_GAIN = 0.07;
+/** Relative gain for decoded opera loops into master (procedural beds use ~0.25–0.4). */
+const OPERA_GAIN = 0.55;
+const OPERA_URL = "./audio/opera/stage-luogu.mp3";
 
 export class Ambience {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private nodes: AudioNode[] = [];
   private kind: Kind = "off";
+  private operaBuf: AudioBuffer | null = null;
+  private operaLoad: Promise<AudioBuffer> | null = null;
   muted = true;
 
   async unlock(): Promise<void> {
@@ -40,6 +45,8 @@ export class Ambience {
     } else if (kind === "earth") {
       this.noise(ctx, master, 400, 0.28);
       this.hum(ctx, master, 48, 0.3);
+    } else if (kind === "opera") {
+      await this.playOpera(ctx, master);
     }
   }
 
@@ -110,6 +117,46 @@ export class Ambience {
     g.connect(dest);
     src.start();
     this.nodes.push(src, filter, g);
+  }
+
+  private async loadOpera(ctx: AudioContext): Promise<AudioBuffer> {
+    if (this.operaBuf) return this.operaBuf;
+    if (!this.operaLoad) {
+      this.operaLoad = (async () => {
+        const res = await fetch(OPERA_URL);
+        if (!res.ok) throw new Error(`opera audio HTTP ${res.status}`);
+        const raw = await res.arrayBuffer();
+        const buf = await ctx.decodeAudioData(raw.slice(0));
+        this.operaBuf = buf;
+        return buf;
+      })().catch((err) => {
+        this.operaLoad = null;
+        throw err;
+      });
+    }
+    return this.operaLoad;
+  }
+
+  private async playOpera(ctx: AudioContext, dest: GainNode): Promise<void> {
+    try {
+      const buf = await this.loadOpera(ctx);
+      // If mute/kind changed while decoding, do not start.
+      if (this.muted || this.kind !== "opera") return;
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.loop = true;
+      const g = ctx.createGain();
+      g.gain.value = OPERA_GAIN;
+      src.connect(g);
+      g.connect(dest);
+      src.start();
+      this.nodes.push(src, g);
+    } catch (err) {
+      console.warn("ambience opera: load failed, falling back to soft hum", err);
+      if (this.muted || this.kind !== "opera") return;
+      this.hum(ctx, dest, 110, 0.22);
+      this.noise(ctx, dest, 1200, 0.12);
+    }
   }
 }
 

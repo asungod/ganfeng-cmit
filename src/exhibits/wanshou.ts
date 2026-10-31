@@ -8,6 +8,7 @@ import { bindDemoDetailToggle } from "../app/demoDetail";
 import { wanshouRule } from "../data/evidenceRules";
 import { preloadGltfKit } from "../render/gltfKit";
 import { TempleScene } from "../render/temple";
+import { ambience } from "../render/ambience";
 import { acts, actCompat, preferredSlot, slotByAct, slots, type ActId, type SlotId } from "../data/wanshou";
 
 export function mountWanshou(root: HTMLElement): () => void {
@@ -67,6 +68,16 @@ export function mountWanshou(root: HTMLElement): () => void {
   window.addEventListener("resize", onResize);
   bindDemoDetailToggle(root);
 
+
+  let ambKind: "opera" | "museum" | null = null;
+  function syncAmbience(): void {
+    // 戏班演出：戏曲场面锣鼓循环；开朝等其余活动：轻量庙宇环境声；离开时 stop。
+    const next = act === "xiban" ? "opera" : "museum";
+    if (next === ambKind) return;
+    ambKind = next;
+    void ambience.set(next);
+  }
+
   function render(): void {
     const demo = document.body.classList.contains("is-demo-detail");
     $("[data-acts]").innerHTML = acts
@@ -101,6 +112,7 @@ export function mountWanshou(root: HTMLElement): () => void {
       (a, b) => `${nameA(a)} × ${nameS(b)}`,
     );
     scene?.set(act, slot);
+    syncAmbience();
     const audit = root.querySelector("[data-audit]") as HTMLDetailsElement | null;
     const fold = root.querySelector("[data-matrix-fold]") as HTMLDetailsElement | null;
     const c = actCompat(act, slot);
@@ -174,5 +186,6 @@ export function mountWanshou(root: HTMLElement): () => void {
     root.removeEventListener("click", onClick);
     window.removeEventListener("resize", onResize);
     scene?.dispose();
+    ambience.stop();
   };
 }

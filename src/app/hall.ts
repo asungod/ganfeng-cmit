@@ -90,8 +90,9 @@ export function mountHall(root: HTMLElement): () => void {
             <li><b>${L("三条矩阵", "Three matrices")}</b>${L(" — 瓷语：点格改规则；阁序：意象钉回原句；客家：时辰×房间约束动线。LatheGeometry 实时生成（segs 160）。", " — Porcelain: edit cells. Preface: motifs pin to Wang Bo's lines. Hakka: hour × room walks. Live LatheGeometry (160 segs).")}</li>
             <li><b>${L("出处", "Sources")}</b>${L(" — 独立出处卡片。三线内容、矩阵、引用条与动线为原创。", " — Separate citation cards. Route content, matrices, citation strips, and walks are original.")}</li>
           </ul>
-          <h3 class="about-credits-h">${L("素材致谢（CC0）", "Asset credits (CC0)")}</h3>
+          <h3 class="about-credits-h">${L("素材致谢", "Asset credits")}</h3>
           <ul class="about-credits" data-credits></ul>
+          <p class="about-audio" data-no-tr>${L("戏曲场面锣鼓（京剧戏台录音片段，CC-BY）· 非某部赣剧唱段 — beijing-opera-7 / beijing-opera-2 by xserra · Freesound · CC-BY 4.0 · 万寿宫戏台声景。", "Stage opera percussion (Beijing-opera theatre fragment, CC-BY) — not a 赣剧 aria — beijing-opera-7 / beijing-opera-2 by xserra · Freesound · CC-BY 4.0 · Wanshou stage bed.")}</p>
           <p class="about-lic" data-no-tr>${L("资料为示例，非馆方官方释文。代码许可见仓库说明。", "Sample materials, not official museum text. See the repository for licences.")}</p>
           <button type="button" class="text-btn" data-close data-no-tr>${L("关闭", "Close")}</button>
         </div>

@@ -1,6 +1,6 @@
 # 第三方资源与许可清单（赣风 · 可对话的数字展）
 
-整理日期：2026-10-31（对齐 HEAD b3c1061 · 含 Poly Haven/Kenney/Quaternius CC0）。下表只列**随作品分发或运行时用到**的第三方资源；版本以 package-lock.json 为准。
+整理日期：2026-10-31（对齐 HEAD tip · 含 Poly Haven/Kenney/Quaternius CC0 + Freesound 戏曲场面锣鼓 CC-BY）。下表只列**随作品分发或运行时用到**的第三方资源；版本以 package-lock.json 为准。
 
 ## 一、运行时随包分发
 
@@ -46,6 +46,19 @@ All from Poly Haven, CC0 1.0 (public domain; no attribution required, credited a
 建筑、人物、香烟、灯笼、水面、山体等几何均为本项目程序生成，未使用第三方三维模型。
 Architecture, incense smoke, lanterns, water, hills and 阁序 birds are project-authored. Trees/bamboo and 万寿宫 people use Quaternius + Kenney CC0 glTF (listed above); procedural fallbacks remain if assets fail to load.
 
+
+## 一·补二、音频素材 / Audio（2026-10-31 新增）
+
+可公开再分发的完整赣剧／采茶戏／弋阳腔商用唱段录音极少；本展万寿宫「戏班演出」声景改用 **Freesound 上明确 CC-BY 4.0 授权的京剧戏台场面录音片段**（锣鼓 + 唢呐／京胡等），作戏台背景乐循环。**不是某部赣剧唱段**，亦非唱腔复原。随包位置：`public/audio/opera/`（约 1.1 MB）。
+No clearly redistributable full 赣剧/采茶戏 commercial vocal recording was available under CC0/CC-BY; the Wanshou 「戏班演出」 bed uses clearly licensed Beijing-opera **stage percussion (+ suona/jinghu)** field fragments from Freesound (CC-BY 4.0), looped as stage ambience — **not a 赣剧 aria**. Shipped in `public/audio/opera/` (~1.1 MB).
+
+| 素材 Asset | 作者 Author | 用途 Use | 许可 License | 来源 URL |
+|---|---|---|---|---|
+| beijing-opera-7.wav → `stage-luogu.mp3` | xserra | 万寿宫戏台声景主循环（锣鼓+唢呐场面） | CC-BY 4.0 | https://freesound.org/people/xserra/sounds/162035/ |
+| beijing-opera-2.wav → `stage-luogu-b.mp3` | xserra | 备用戏台循环（京胡/笛子/琵琶+锣鼓场面） | CC-BY 4.0 | https://freesound.org/people/xserra/sounds/162034/ |
+
+署名说明（CC-BY）：「戏曲场面锣鼓（京剧戏台录音片段，CC-BY）· 非某部赣剧唱段」— beijing-opera-7 / beijing-opera-2 by xserra, Freesound, CC-BY 4.0；本展仅作万寿宫戏台背景乐。
+
 ## 二、仅开发/构建时使用（不进运行包）
 
 | 资源 | 版本 | 用途 | 许可 |
@@ -59,7 +72,7 @@ Architecture, incense smoke, lanterns, water, hills and 阁序 birds are project
 
 - 《滕王阁序》（王勃，唐）、《天工开物》（宋应星，明）：原文属公有领域，引自维基文库。
 - 瓷器与围屋的事实性说明：引自故宫博物院、中国非物质文化遗产网、龙南市人民政府、文化和旅游部、光明日报、生态中国网、维基百科等公开页面，只摘录短句，并标明出处与访问日期。完整列表见 `src/data/sources.ts`（离线包内审计面板可查）。
-- 作品**没有使用**文物照片、第三方三维模型、第三方音频或视频素材：器型是程序生成的（three.js LatheGeometry），釉面是程序绘制的画布纹理，围屋平面是自绘 SVG 示意图。
+- 作品**没有使用**文物照片或第三方视频素材；三维贴图／植被／人物见上表 CC0；音频仅见上表 Freesound CC-BY 戏台场面锣鼓（非赣剧唱段）。器型是程序生成的（three.js LatheGeometry），釉面是程序绘制的画布纹理，围屋平面是自绘 SVG 示意图。
 
 ## 四、AI 工具（详见《AI 工具使用情况说明》）
 
@@ -69,7 +82,7 @@ Architecture, incense smoke, lanterns, water, hills and 阁序 birds are project
 ---
 ## English summary — Third-party resources and licenses
 Work title in English: **Ganfeng: A Conversational Digital Exhibition**.
-Bundled at runtime: three.js 0.170.0 (MIT); Transformers.js 4.2.0 (Apache-2.0); onnxruntime-web / onnxruntime-common (MIT); BAAI/bge-small-zh-v1.5, ONNX q8 build by Xenova (MIT; used for embedding retrieval only, never generates text); Ma Shan Zheng, Noto Serif SC, Noto Sans SC (SIL OFL 1.1, subset); Go standard library for the self-written portable server (BSD-3-Clause). Build-time only: Vite 5.4.21 (MIT), TypeScript 5.9.3 (Apache-2.0), @types/three (MIT), fontTools + brotli (MIT). Text sources: see the source-verification table (09); classical texts used are public domain (no copyright applies because of their age). No artifact photos, third-party 3D models, or third-party audio/video are used.
+Bundled at runtime: three.js 0.170.0 (MIT); Transformers.js 4.2.0 (Apache-2.0); onnxruntime-web / onnxruntime-common (MIT); BAAI/bge-small-zh-v1.5, ONNX q8 build by Xenova (MIT; used for embedding retrieval only, never generates text); Ma Shan Zheng, Noto Serif SC, Noto Sans SC (SIL OFL 1.1, subset); Go standard library for the self-written portable server (BSD-3-Clause). Build-time only: Vite 5.4.21 (MIT), TypeScript 5.9.3 (Apache-2.0), @types/three (MIT), fontTools + brotli (MIT). Text sources: see the source-verification table (09); classical texts used are public domain (no copyright applies because of their age). No artifact photos or third-party video. 3D textures/vegetation/people: CC0 as listed. Audio: Freesound CC-BY Beijing-opera stage percussion fragments for the Wanshou stage bed only (not a 赣剧 aria).
 
 ## 本项目自制/衍生资源（v18–v19）
 
