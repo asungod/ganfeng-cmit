@@ -12,7 +12,8 @@ export class Guide {
   toggle(): boolean {
     this.enabled = !this.enabled;
     if (!this.enabled) {
-      window.speechSynthesis?.cancel();
+      this.hardCancel();
+      if (this.lineEl) this.lineEl.textContent = "";
     } else {
       this.warm();
       const t = this.lineEl?.textContent?.trim();
@@ -22,7 +23,7 @@ export class Guide {
   }
 
   stop(): void {
-    window.speechSynthesis?.cancel();
+    this.hardCancel();
     if (this.lineEl) this.lineEl.textContent = "";
   }
 
@@ -37,7 +38,7 @@ export class Guide {
     if (this.lineEl) this.lineEl.textContent = clean;
     const synth = window.speechSynthesis;
     if (!synth) return;
-    synth.cancel();
+    this.hardCancel();
     this.warm();
     const u = new SpeechSynthesisUtterance(clean);
     u.lang = "zh-CN";
@@ -46,6 +47,30 @@ export class Guide {
     u.volume = 1;
     if (this.voice) u.voice = this.voice;
     synth.speak(u);
+  }
+
+  /** Chromium/WebKit often keep speaking after a single cancel; pause+double-cancel clears the queue. */
+  private hardCancel(): void {
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+    try {
+      synth.cancel();
+    } catch {
+      /* ignore */
+    }
+    try {
+      if (synth.speaking || synth.pending) {
+        synth.pause();
+        synth.cancel();
+      }
+    } catch {
+      /* ignore */
+    }
+    try {
+      synth.cancel();
+    } catch {
+      /* ignore */
+    }
   }
 
   private warm(): void {

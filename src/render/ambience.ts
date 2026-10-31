@@ -1,5 +1,7 @@
 type Kind = "museum" | "river" | "earth" | "off";
 
+const MASTER_GAIN = 0.07;
+
 export class Ambience {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
@@ -12,7 +14,7 @@ export class Ambience {
     if (this.ctx.state === "suspended") await this.ctx.resume();
     if (!this.master) {
       this.master = this.ctx.createGain();
-      this.master.gain.value = 0.07;
+      this.master.gain.value = this.muted ? 0 : MASTER_GAIN;
       this.master.connect(this.ctx.destination);
     }
   }
@@ -20,10 +22,16 @@ export class Ambience {
   async set(kind: Kind): Promise<void> {
     this.kind = kind;
     this.clear();
-    if (this.muted || kind === "off") return;
+    if (this.muted || kind === "off") {
+      // Keep silence reliable even if a hall calls set() while muted.
+      if (this.master) this.master.gain.value = 0;
+      if (this.muted && this.ctx?.state === "running") void this.ctx.suspend();
+      return;
+    }
     await this.unlock();
     const ctx = this.ctx!;
     const master = this.master!;
+    master.gain.value = MASTER_GAIN;
     if (kind === "museum") {
       this.hum(ctx, master, 92, 0.4);
     } else if (kind === "river") {
@@ -37,19 +45,34 @@ export class Ambience {
 
   async toggleMute(): Promise<boolean> {
     this.muted = !this.muted;
-    if (this.muted) this.clear();
-    else await this.set(this.kind);
+    if (this.muted) {
+      this.clear();
+      if (this.master) this.master.gain.value = 0;
+      if (this.ctx?.state === "running") void this.ctx.suspend();
+    } else {
+      await this.set(this.kind);
+    }
     return this.muted;
   }
 
   stop(): void {
     this.clear();
     this.kind = "off";
+    if (this.master) this.master.gain.value = 0;
   }
 
+  /** Stop oscillators / BufferSources, then disconnect. disconnect alone leaves them running. */
   private clear(): void {
     for (const n of this.nodes) {
       try {
+        const maybe = n as AudioScheduledSourceNode;
+        if (typeof maybe.stop === "function") {
+          try {
+            maybe.stop();
+          } catch {
+            /* already stopped */
+          }
+        }
         n.disconnect();
       } catch {
         /* ignore */

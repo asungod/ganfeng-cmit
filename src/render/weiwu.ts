@@ -489,12 +489,12 @@ export class WeiwuScene {
       t.position.set(x, 0, z);
       S.add(t);
     }
-    // v25: midground 墨竹 only — frames approach, keeps 门楼 face clear (no cam-foreground clumps)
+    // v39: midground 墨竹 — fewer stalks, wider flank so menlou cam does not read crossed culms
     for (const [x, z, n, sc] of [
-      [-4.5, 12.2, 5, 0.82], [7.6, 12.0, 5, 0.82],
-      [-5.5, 10.2, 4, 0.75], [8.2, 10.0, 4, 0.75],
-      // v38: keep bamboo outside 巷道 so birdseye gap hall↔横屋 stays readable
-      [-12.2, 3.5, 5, 0.72], [12.2, 3.8, 5, 0.72],
+      [-6.2, 12.4, 4, 0.78], [8.8, 12.2, 4, 0.78],
+      [-7.0, 10.0, 3, 0.7], [9.4, 9.8, 3, 0.7],
+      // keep bamboo outside 巷道 so birdseye gap hall↔横屋 stays readable
+      [-12.2, 3.5, 4, 0.7], [12.2, 3.8, 4, 0.7],
     ] as [number, number, number, number][]) {
       const b = makeBamboo(Math.abs(x * 5 + z) | 0, n);
       b.position.set(x, 0, z);

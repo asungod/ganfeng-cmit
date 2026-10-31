@@ -178,21 +178,59 @@ export function paintedTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "cam
   return g;
 }
 
-/** 墨竹 clump */
+/** Soft fan of nearly-parallel cards — no X-cross (门楼 approach must not read as 竹子交叉). */
+function fanCards(map: THREE.Texture, w: number, h: number, n = 2, glow = 0.26): THREE.Group {
+  const g = new THREE.Group();
+  const m = new THREE.MeshStandardMaterial({
+    map, alphaTest: 0.22, transparent: true, opacity: 0.98, side: THREE.DoubleSide,
+    roughness: 0.95, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: glow, depthWrite: true,
+  });
+  const dm = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map, alphaTest: 0.28 });
+  const count = Math.max(1, Math.min(n, 3));
+  for (let i = 0; i < count; i++) {
+    const geo = new THREE.PlaneGeometry(w, h); geo.translate(0, h / 2, 0);
+    const p = new THREE.Mesh(geo, m);
+    // Small yaw fan (~±10°) + tiny depth offset — volume without crossed stalks
+    const t = count === 1 ? 0 : (i / (count - 1)) * 2 - 1;
+    p.rotation.y = t * 0.18;
+    p.rotation.x = t * 0.04;
+    p.position.set(t * 0.06, 0, t * 0.12);
+    p.scale.set(1 - Math.abs(t) * 0.04, 1 - Math.abs(t) * 0.02, 1);
+    p.customDepthMaterial = dm;
+    g.add(p);
+  }
+  // Soft outer silhouette (not a crossing fill card)
+  const soft = document.createElement("canvas"); soft.width = soft.height = 64;
+  const sx = soft.getContext("2d")!;
+  const gr = sx.createRadialGradient(32, 30, 2, 32, 28, 31);
+  gr.addColorStop(0, "rgba(36,55,32,0.55)"); gr.addColorStop(0.5, "rgba(28,44,26,0.28)"); gr.addColorStop(1, "rgba(18,28,16,0)");
+  sx.fillStyle = gr; sx.fillRect(0, 0, 64, 64);
+  const st = new THREE.CanvasTexture(soft); st.colorSpace = THREE.SRGBColorSpace;
+  const sm = new THREE.SpriteMaterial({ map: st, transparent: true, depthWrite: false, opacity: 0.65 });
+  const sil = new THREE.Sprite(sm); sil.position.y = h * 0.55; sil.scale.set(w * 1.1, h * 0.85, 1); g.add(sil);
+  return g;
+}
+
+/** 墨竹 clump — painted culms do not cross; 3D cards use fanCards (not crossed X). */
 export function paintedBamboo(seed = 1, n = 9): THREE.Group {
   const r = rng(seed * 17 + 3);
   const W = 3.2, H = 7.5, ppm = low() ? 50 : 100;
-  const tex = paint(`bamboo-${seed % 3}`, W, H, ppm, (x) => {
-    const cnt = Math.min(n, 9);
+  // v39 cache key: non-crossing stalk layout
+  const tex = paint(`bamboo-v39-${seed % 3}`, W, H, ppm, (x) => {
+    const cnt = Math.min(n, 7);
     for (let i = 0; i < cnt; i++) {
-      const bx = (r() - 0.5) * 1.4, lean = (r() - 0.5) * 0.25, h = 5 + r() * 2.2;
+      // Even spacing + gentle same-side lean so culms never cross in the ink painting
+      const t = cnt === 1 ? 0 : (i / (cnt - 1)) * 2 - 1;
+      const bx = t * 1.05 + (r() - 0.5) * 0.08;
+      const lean = t * 0.06 + (r() - 0.5) * 0.03; // outward fan, not opposing crosses
+      const h = 5.2 + r() * 1.8;
       const col = i % 3 ? "#4a6a3a" : "#2e4628";
       for (let y = 0; y < h; y += 0.55) { // culm segments with 竹节 knots
         const x0 = bx + lean * y, x1 = bx + lean * (y + 0.5);
         x.strokeStyle = col; x.lineWidth = 0.07 - y * 0.005; x.beginPath(); x.moveTo(x0, y); x.lineTo(x1, y + 0.5); x.stroke();
         x.strokeStyle = INK; x.lineWidth = 0.02; x.beginPath(); x.moveTo(x1 - 0.05, y + 0.52); x.lineTo(x1 + 0.05, y + 0.53); x.stroke();
         if (y > 2.2 && r() < 0.55) { // leaf groups (个/介 字叶)
-          const s = r() < 0.5 ? -1 : 1;
+          const s = t >= 0 ? 1 : -1; // leaves open outward with the fan
           for (let k = 0; k < 3 + Math.floor(r() * 3); k++) {
             const a = s * (0.6 + r() * 1.2) - Math.PI / 2 + Math.PI, L = 0.45 + r() * 0.3;
             const ex = x1 + Math.sin(a) * L, ey = y + 0.5 - Math.cos(a) * L * 0.6;
@@ -203,7 +241,8 @@ export function paintedBamboo(seed = 1, n = 9): THREE.Group {
       }
     }
   });
-  const g = crossed(tex, W, H, low() ? 3 : 4, 0.26);
+  const g = fanCards(tex, W, H, low() ? 2 : 2, 0.26);
+  g.rotation.y = (seed % 5) * 0.12; // slight variety without spinning into an X
   return g;
 }
 
