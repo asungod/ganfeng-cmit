@@ -2,4 +2,4 @@
 Repo: asungod/ganfeng-cmit
 Branch: main (site root)
 Review video: /review/
-Built from cmit-ganfeng tip a60dd60 + review-web.mp4
+Built from cmit-ganfeng tip a60dd60 — fix mute/guide stop + menlou bamboo non-cross
