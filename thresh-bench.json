@@ -1,0 +1,1353 @@
+{
+  "measured": true,
+  "note": "实测 n=58 金标问 · BGE载入 1599ms · 召回=金标槽命中/金标槽总数 · 精确=阈值上预测正确/预测总数 · 选用 0.4",
+  "loadMs": 1599,
+  "n": 58,
+  "timestamp": "2026-09-04 17:50 CST",
+  "pickThreshold": 0.4,
+  "thresholds": [
+    0.2,
+    0.24,
+    0.28,
+    0.32,
+    0.35,
+    0.4
+  ],
+  "rows": [
+    {
+      "threshold": 0.2,
+      "recall": "89.3%",
+      "precision": "77.1%",
+      "reason": "召回 89.3% · 精确 77.1%",
+      "hitGold": 108,
+      "totalGold": 121,
+      "hitPred": 108,
+      "totalPred": 140,
+      "recallRaw": 0.8925619834710744,
+      "precisionRaw": 0.7714285714285715
+    },
+    {
+      "threshold": 0.24,
+      "recall": "89.3%",
+      "precision": "77.1%",
+      "reason": "召回 89.3% · 精确 77.1%",
+      "hitGold": 108,
+      "totalGold": 121,
+      "hitPred": 108,
+      "totalPred": 140,
+      "recallRaw": 0.8925619834710744,
+      "precisionRaw": 0.7714285714285715
+    },
+    {
+      "threshold": 0.28,
+      "recall": "89.3%",
+      "precision": "77.1%",
+      "reason": "召回 89.3% · 精确 77.1%",
+      "hitGold": 108,
+      "totalGold": 121,
+      "hitPred": 108,
+      "totalPred": 140,
+      "recallRaw": 0.8925619834710744,
+      "precisionRaw": 0.7714285714285715
+    },
+    {
+      "threshold": 0.32,
+      "recall": "89.3%",
+      "precision": "78.3%",
+      "reason": "召回 89.3% · 精确 78.3%",
+      "hitGold": 108,
+      "totalGold": 121,
+      "hitPred": 108,
+      "totalPred": 138,
+      "recallRaw": 0.8925619834710744,
+      "precisionRaw": 0.782608695652174
+    },
+    {
+      "threshold": 0.35,
+      "recall": "89.3%",
+      "precision": "79.4%",
+      "reason": "召回 89.3% · 精确 79.4%",
+      "hitGold": 108,
+      "totalGold": 121,
+      "hitPred": 108,
+      "totalPred": 136,
+      "recallRaw": 0.8925619834710744,
+      "precisionRaw": 0.7941176470588235
+    },
+    {
+      "threshold": 0.4,
+      "recall": "87.6%",
+      "precision": "82.8%",
+      "reason": "代码默认 / F1 最优（召回 87.6% · 精确 82.8%）",
+      "hitGold": 106,
+      "totalGold": 121,
+      "hitPred": 106,
+      "totalPred": 128,
+      "recallRaw": 0.8760330578512396,
+      "precisionRaw": 0.828125
+    }
+  ],
+  "details": [
+    {
+      "q": "宋代的青白瓷瓶子",
+      "line": "ciyu",
+      "gold": {
+        "era": "song",
+        "glaze": "yingqing",
+        "shape": "meiping"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "song",
+          "score": 0.6680478183025481
+        },
+        "glaze": {
+          "id": "yingqing",
+          "score": 0.6370849462586373
+        },
+        "shape": {
+          "id": "meiping",
+          "score": 0.530363846204164
+        }
+      },
+      "ms": 17
+    },
+    {
+      "q": "明代青花梅瓶",
+      "line": "ciyu",
+      "gold": {
+        "era": "ming",
+        "glaze": "qinghua",
+        "shape": "meiping"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "yuan",
+          "score": 0.6097758177627429
+        },
+        "glaze": {
+          "id": "yingqing",
+          "score": 0.5054633703807987
+        },
+        "shape": {
+          "id": "meiping",
+          "score": 0.5493064724240172
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "元代青花瓷器",
+      "line": "ciyu",
+      "gold": {
+        "era": "yuan",
+        "glaze": "qinghua"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "yuan",
+          "score": 0.7106899671260427
+        },
+        "glaze": {
+          "id": "yingqing",
+          "score": 0.5722067890627153
+        },
+        "shape": {
+          "id": "gu",
+          "score": 0.40815594942123806
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "清代粉彩盘子",
+      "line": "ciyu",
+      "gold": {
+        "era": "qing",
+        "glaze": "fencai",
+        "shape": "dish"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "qing",
+          "score": 0.70549811457904
+        },
+        "glaze": {
+          "id": "fencai",
+          "score": 0.5720279444174428
+        },
+        "shape": {
+          "id": "dish",
+          "score": 0.36936702055290177
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "祭红釉玉壶春瓶",
+      "line": "ciyu",
+      "gold": {
+        "glaze": "jihong",
+        "shape": "yuhuchun"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "song",
+          "score": 0.4604373037230861
+        },
+        "glaze": {
+          "id": "jihong",
+          "score": 0.5501522360520502
+        },
+        "shape": {
+          "id": "yuhuchun",
+          "score": 0.6452708943004396
+        }
+      },
+      "ms": 15
+    },
+    {
+      "q": "影青斗笠碗",
+      "line": "ciyu",
+      "gold": {
+        "glaze": "yingqing",
+        "shape": "bowl"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "yuan",
+          "score": 0.47397528208415407
+        },
+        "glaze": {
+          "id": "yingqing",
+          "score": 0.515274588527276
+        },
+        "shape": {
+          "id": "bowl",
+          "score": 0.5950322979354322
+        }
+      },
+      "ms": 15
+    },
+    {
+      "q": "五彩花觚",
+      "line": "ciyu",
+      "gold": {
+        "glaze": "wucai",
+        "shape": "gu"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "yuan",
+          "score": 0.43736824335220614
+        },
+        "glaze": {
+          "id": "wucai",
+          "score": 0.5881828253421191
+        },
+        "shape": {
+          "id": "gu",
+          "score": 0.4666118133310903
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "明代祭红梅瓶",
+      "line": "ciyu",
+      "gold": {
+        "era": "ming",
+        "glaze": "jihong",
+        "shape": "meiping"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "ming",
+          "score": 0.4969585440852602
+        },
+        "glaze": {
+          "id": "jihong",
+          "score": 0.4908284141620089
+        },
+        "shape": {
+          "id": "meiping",
+          "score": 0.5512348673520016
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "清代五彩折沿盘",
+      "line": "ciyu",
+      "gold": {
+        "era": "qing",
+        "glaze": "wucai",
+        "shape": "dish"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "qing",
+          "score": 0.5403569635833063
+        },
+        "glaze": {
+          "id": "wucai",
+          "score": 0.54877814830958
+        },
+        "shape": {
+          "id": "dish",
+          "score": 0.5876605715691812
+        }
+      },
+      "ms": 18
+    },
+    {
+      "q": "青白釉梅瓶",
+      "line": "ciyu",
+      "gold": {
+        "glaze": "yingqing",
+        "shape": "meiping"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "song",
+          "score": 0.5239642889460789
+        },
+        "glaze": {
+          "id": "yingqing",
+          "score": 0.5921330302144456
+        },
+        "shape": {
+          "id": "meiping",
+          "score": 0.5914830282995323
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "粉彩玉壶春瓶",
+      "line": "ciyu",
+      "gold": {
+        "glaze": "fencai",
+        "shape": "yuhuchun"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "qing",
+          "score": 0.5004303182966537
+        },
+        "glaze": {
+          "id": "fencai",
+          "score": 0.59159538337524
+        },
+        "shape": {
+          "id": "yuhuchun",
+          "score": 0.6295602817602259
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "青花斗笠碗",
+      "line": "ciyu",
+      "gold": {
+        "glaze": "qinghua",
+        "shape": "bowl"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "yuan",
+          "score": 0.5298699928109216
+        },
+        "glaze": {
+          "id": "qinghua",
+          "score": 0.4745646853660414
+        },
+        "shape": {
+          "id": "bowl",
+          "score": 0.6153653875139461
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "宋朝的影青碗",
+      "line": "ciyu",
+      "gold": {
+        "era": "song",
+        "glaze": "yingqing",
+        "shape": "bowl"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "yuan",
+          "score": 0.5342946261715702
+        },
+        "glaze": {
+          "id": "yingqing",
+          "score": 0.5397958579941617
+        },
+        "shape": {
+          "id": "bowl",
+          "score": 0.37766813733673765
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "明朝青花盘子",
+      "line": "ciyu",
+      "gold": {
+        "era": "ming",
+        "glaze": "qinghua",
+        "shape": "dish"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "yuan",
+          "score": 0.5648532834634086
+        },
+        "glaze": {
+          "id": "yingqing",
+          "score": 0.49074154102162004
+        },
+        "shape": {
+          "id": "dish",
+          "score": 0.40230351244927315
+        }
+      },
+      "ms": 17
+    },
+    {
+      "q": "清粉彩花觚",
+      "line": "ciyu",
+      "gold": {
+        "era": "qing",
+        "glaze": "fencai",
+        "shape": "gu"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "qing",
+          "score": 0.5869574100928957
+        },
+        "glaze": {
+          "id": "fencai",
+          "score": 0.5285933046306805
+        },
+        "shape": {
+          "id": "gu",
+          "score": 0.4850734612657679
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "宋代有没有粉彩",
+      "line": "ciyu",
+      "gold": {
+        "era": "song",
+        "glaze": "fencai"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "qing",
+          "score": 0.6036502814596696
+        },
+        "glaze": {
+          "id": "fencai",
+          "score": 0.57079597087459
+        },
+        "shape": {
+          "id": "gu",
+          "score": 0.3479503297616055
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "元代影青玉壶春",
+      "line": "ciyu",
+      "gold": {
+        "era": "yuan",
+        "glaze": "yingqing",
+        "shape": "yuhuchun"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "yuan",
+          "score": 0.6798635663783421
+        },
+        "glaze": {
+          "id": "yingqing",
+          "score": 0.5555235294789819
+        },
+        "shape": {
+          "id": "yuhuchun",
+          "score": 0.5025856422500957
+        }
+      },
+      "ms": 17
+    },
+    {
+      "q": "宋代祭红釉",
+      "line": "ciyu",
+      "gold": {
+        "era": "song",
+        "glaze": "jihong"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "song",
+          "score": 0.5342941421210913
+        },
+        "glaze": {
+          "id": "jihong",
+          "score": 0.5649428380777205
+        },
+        "shape": {
+          "id": "meiping",
+          "score": 0.3564781247255798
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "元代有粉彩吗",
+      "line": "ciyu",
+      "gold": {
+        "era": "yuan",
+        "glaze": "fencai"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "qing",
+          "score": 0.5865191734102345
+        },
+        "glaze": {
+          "id": "fencai",
+          "score": 0.5875020653438987
+        },
+        "shape": {
+          "id": "gu",
+          "score": 0.3672643031371605
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "想看一只祭红瓶子",
+      "line": "ciyu",
+      "gold": {
+        "glaze": "jihong",
+        "shape": "meiping"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "yuan",
+          "score": 0.37243476416872384
+        },
+        "glaze": {
+          "id": "jihong",
+          "score": 0.527954197683447
+        },
+        "shape": {
+          "id": "meiping",
+          "score": 0.5548197247051956
+        }
+      },
+      "ms": 17
+    },
+    {
+      "q": "有没有影青盘子",
+      "line": "ciyu",
+      "gold": {
+        "glaze": "yingqing",
+        "shape": "dish"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "yuan",
+          "score": 0.4556418944351909
+        },
+        "glaze": {
+          "id": "yingqing",
+          "score": 0.533729356298016
+        },
+        "shape": {
+          "id": "dish",
+          "score": 0.42456112017172604
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "花觚五彩",
+      "line": "ciyu",
+      "gold": {
+        "glaze": "wucai",
+        "shape": "gu"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "yuan",
+          "score": 0.4680881703919929
+        },
+        "glaze": {
+          "id": "wucai",
+          "score": 0.5597398669965821
+        },
+        "shape": {
+          "id": "gu",
+          "score": 0.5574054132930487
+        }
+      },
+      "ms": 15
+    },
+    {
+      "q": "景德镇的宋代梅瓶",
+      "line": "ciyu",
+      "gold": {
+        "era": "song",
+        "shape": "meiping"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "song",
+          "score": 0.6381831970551953
+        },
+        "glaze": {
+          "id": "yingqing",
+          "score": 0.3741015384388978
+        },
+        "shape": {
+          "id": "meiping",
+          "score": 0.554228368731706
+        }
+      },
+      "ms": 17
+    },
+    {
+      "q": "青白瓷玉壶春",
+      "line": "ciyu",
+      "gold": {
+        "glaze": "yingqing",
+        "shape": "yuhuchun"
+      },
+      "via": "bge",
+      "best": {
+        "era": {
+          "id": "song",
+          "score": 0.6030976901347663
+        },
+        "glaze": {
+          "id": "yingqing",
+          "score": 0.6783096675286675
+        },
+        "shape": {
+          "id": "yuhuchun",
+          "score": 0.5944942167761051
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "落霞孤鹜的意境",
+      "line": "gexu",
+      "gold": {
+        "mood": "luoxia",
+        "focus": "luoxia"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "luoxia",
+          "score": 0.7467016176154035
+        },
+        "focus": {
+          "id": "guwu",
+          "score": 0.6394020001853562
+        }
+      },
+      "ms": 17
+    },
+    {
+      "q": "渔舟唱晚",
+      "line": "gexu",
+      "gold": {
+        "mood": "yuzhou",
+        "focus": "yuzhou"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "yuzhou",
+          "score": 0.7173622663499906
+        },
+        "focus": {
+          "id": "yuzhou",
+          "score": 0.5965788733476792
+        }
+      },
+      "ms": 15
+    },
+    {
+      "q": "雁阵惊寒",
+      "line": "gexu",
+      "gold": {
+        "mood": "yanzhen",
+        "focus": "yanzhen"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "yanzhen",
+          "score": 0.7218562185093698
+        },
+        "focus": {
+          "id": "yanzhen",
+          "score": 0.6087507199179975
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "点一下落霞",
+      "line": "gexu",
+      "gold": {
+        "mood": "luoxia",
+        "focus": "luoxia"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "luoxia",
+          "score": 0.5998603477833794
+        },
+        "focus": {
+          "id": "luoxia",
+          "score": 0.6733372469965435
+        }
+      },
+      "ms": 15
+    },
+    {
+      "q": "孤鹜与落霞",
+      "line": "gexu",
+      "gold": {
+        "mood": "luoxia",
+        "focus": "guwu"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "luoxia",
+          "score": 0.7662196953804814
+        },
+        "focus": {
+          "id": "guwu",
+          "score": 0.6740249845656805
+        }
+      },
+      "ms": 15
+    },
+    {
+      "q": "九月三秋寒潭",
+      "line": "gexu",
+      "gold": {
+        "mood": "sanyan",
+        "focus": "hantan"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "sanyan",
+          "score": 0.6385061444652407
+        },
+        "focus": {
+          "id": "hantan",
+          "score": 0.6148032321437734
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "飞阁流丹",
+      "line": "gexu",
+      "gold": {
+        "focus": "feige"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "luoxia",
+          "score": 0.40565789030329025
+        },
+        "focus": {
+          "id": "feige",
+          "score": 0.6052151946342375
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "彭蠡之滨渔舟",
+      "line": "gexu",
+      "gold": {
+        "mood": "yuzhou",
+        "focus": "yuzhou"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "yuzhou",
+          "score": 0.4792907962379327
+        },
+        "focus": {
+          "id": "yuzhou",
+          "score": 0.6155286683743921
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "想看雁阵意象",
+      "line": "gexu",
+      "gold": {
+        "mood": "yanzhen",
+        "focus": "yanzhen"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "yanzhen",
+          "score": 0.5466410967172316
+        },
+        "focus": {
+          "id": "yanzhen",
+          "score": 0.6011419257549341
+        }
+      },
+      "ms": 17
+    },
+    {
+      "q": "长天一色",
+      "line": "gexu",
+      "gold": {
+        "focus": "changtian"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "luoxia",
+          "score": 0.3060819417874162
+        },
+        "focus": {
+          "id": "changtian",
+          "score": 0.5719589613741953
+        }
+      },
+      "ms": 15
+    },
+    {
+      "q": "寒潭清澈",
+      "line": "gexu",
+      "gold": {
+        "mood": "sanyan",
+        "focus": "hantan"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "luoxia",
+          "score": 0.3648045716174802
+        },
+        "focus": {
+          "id": "hantan",
+          "score": 0.6581397247132694
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "落霞与孤鹜齐飞",
+      "line": "gexu",
+      "gold": {
+        "mood": "luoxia",
+        "focus": "guwu"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "luoxia",
+          "score": 0.742557668610196
+        },
+        "focus": {
+          "id": "guwu",
+          "score": 0.6138094222135835
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "渔舟情境配雁阵",
+      "line": "gexu",
+      "gold": {
+        "mood": "yuzhou",
+        "focus": "yanzhen"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "yuzhou",
+          "score": 0.5501021436086353
+        },
+        "focus": {
+          "id": "yuzhou",
+          "score": 0.6157010924412298
+        }
+      },
+      "ms": 16
+    },
+    {
+      "q": "秋水共长天一色",
+      "line": "gexu",
+      "gold": {
+        "mood": "luoxia",
+        "focus": "qiushui"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "sanyan",
+          "score": 0.43099625440750833
+        },
+        "focus": {
+          "id": "qiushui",
+          "score": 0.6027600511397544
+        }
+      },
+      "ms": 21
+    },
+    {
+      "q": "唱晚的渔舟",
+      "line": "gexu",
+      "gold": {
+        "mood": "yuzhou",
+        "focus": "yuzhou"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "yuzhou",
+          "score": 0.7052465621826871
+        },
+        "focus": {
+          "id": "yuzhou",
+          "score": 0.5848523011618127
+        }
+      },
+      "ms": 15
+    },
+    {
+      "q": "惊寒的雁阵",
+      "line": "gexu",
+      "gold": {
+        "mood": "yanzhen",
+        "focus": "yanzhen"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "yanzhen",
+          "score": 0.708672014288205
+        },
+        "focus": {
+          "id": "yanzhen",
+          "score": 0.607036500427879
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "孤鹜飞过秋水",
+      "line": "gexu",
+      "gold": {
+        "mood": "luoxia",
+        "focus": "guwu"
+      },
+      "via": "bge",
+      "best": {
+        "mood": {
+          "id": "luoxia",
+          "score": 0.6181109961464285
+        },
+        "focus": {
+          "id": "guwu",
+          "score": 0.6259233431624146
+        }
+      },
+      "ms": 15
+    },
+    {
+      "q": "暮时去祖堂",
+      "line": "kejia",
+      "gold": {
+        "hour": "dusk",
+        "room": "zutang"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "zutang",
+          "score": 0.4800610095818493
+        },
+        "hour": {
+          "id": "dusk",
+          "score": 0.5431849718361962
+        }
+      },
+      "ms": 15
+    },
+    {
+      "q": "夜宿角楼",
+      "line": "kejia",
+      "gold": {
+        "hour": "night",
+        "room": "jiaolou"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "jiaolou",
+          "score": 0.5327751045277425
+        },
+        "hour": {
+          "id": "night",
+          "score": 0.5046587848526785
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "晨入门楼",
+      "line": "kejia",
+      "gold": {
+        "hour": "dawn",
+        "room": "menlou"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "menlou",
+          "score": 0.5205723374748353
+        },
+        "hour": {
+          "id": "dawn",
+          "score": 0.5358077487609226
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "午时在禾坪",
+      "line": "kejia",
+      "gold": {
+        "hour": "noon",
+        "room": "heping"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "heping",
+          "score": 0.6095159859102007
+        },
+        "hour": {
+          "id": "noon",
+          "score": 0.5808166290035074
+        }
+      },
+      "ms": 15
+    },
+    {
+      "q": "暮色天井",
+      "line": "kejia",
+      "gold": {
+        "hour": "dusk",
+        "room": "tianjing"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "tianjing",
+          "score": 0.5328556504489168
+        },
+        "hour": {
+          "id": "dusk",
+          "score": 0.5057583777649646
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "巷道午后",
+      "line": "kejia",
+      "gold": {
+        "hour": "noon",
+        "room": "xiangdao"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "xiangdao",
+          "score": 0.5463522917013831
+        },
+        "hour": {
+          "id": "noon",
+          "score": 0.49775274485840165
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "祖堂清晨",
+      "line": "kejia",
+      "gold": {
+        "hour": "dawn",
+        "room": "zutang"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "zutang",
+          "score": 0.5395156833368101
+        },
+        "hour": {
+          "id": "dawn",
+          "score": 0.506725826191181
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "角楼黄昏",
+      "line": "kejia",
+      "gold": {
+        "hour": "dusk",
+        "room": "jiaolou"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "jiaolou",
+          "score": 0.5766436684913755
+        },
+        "hour": {
+          "id": "night",
+          "score": 0.3615865513006586
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "门楼夜里",
+      "line": "kejia",
+      "gold": {
+        "hour": "night",
+        "room": "menlou"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "menlou",
+          "score": 0.5540149923208293
+        },
+        "hour": {
+          "id": "night",
+          "score": 0.5351660979919438
+        }
+      },
+      "ms": 13
+    },
+    {
+      "q": "夜色中的巷道",
+      "line": "kejia",
+      "gold": {
+        "hour": "night",
+        "room": "xiangdao"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "xiangdao",
+          "score": 0.5598883462203564
+        },
+        "hour": {
+          "id": "night",
+          "score": 0.5422859681906281
+        }
+      },
+      "ms": 15
+    },
+    {
+      "q": "晨光门楼",
+      "line": "kejia",
+      "gold": {
+        "hour": "dawn",
+        "room": "menlou"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "menlou",
+          "score": 0.5027248992569577
+        },
+        "hour": {
+          "id": "dawn",
+          "score": 0.46320924681913145
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "夜到禾坪",
+      "line": "kejia",
+      "gold": {
+        "hour": "night",
+        "room": "heping"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "heping",
+          "score": 0.570229605190103
+        },
+        "hour": {
+          "id": "night",
+          "score": 0.5038108517586094
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "禾坪夜巡",
+      "line": "kejia",
+      "gold": {
+        "hour": "night",
+        "room": "heping"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "heping",
+          "score": 0.5513446285151762
+        },
+        "hour": {
+          "id": "night",
+          "score": 0.4753360338309802
+        }
+      },
+      "ms": 13
+    },
+    {
+      "q": "祖堂夜晚",
+      "line": "kejia",
+      "gold": {
+        "hour": "night",
+        "room": "zutang"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "zutang",
+          "score": 0.5342632975344099
+        },
+        "hour": {
+          "id": "night",
+          "score": 0.5228947185444474
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "想去天井看看",
+      "line": "kejia",
+      "gold": {
+        "room": "tianjing"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "tianjing",
+          "score": 0.6693657213469788
+        },
+        "hour": {
+          "id": "night",
+          "score": 0.3426900819853493
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "现在是暮时",
+      "line": "kejia",
+      "gold": {
+        "hour": "dusk"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "tianjing",
+          "score": 0.2851581713886328
+        },
+        "hour": {
+          "id": "dusk",
+          "score": 0.6076023711871154
+        }
+      },
+      "ms": 14
+    },
+    {
+      "q": "围屋角楼夜色",
+      "line": "kejia",
+      "gold": {
+        "hour": "night",
+        "room": "jiaolou"
+      },
+      "via": "bge",
+      "best": {
+        "room": {
+          "id": "jiaolou",
+          "score": 0.5252837473431933
+        },
+        "hour": {
+          "id": "night",
+          "score": 0.5093994929048354
+        }
+      },
+      "ms": 15
+    }
+  ]
+}
