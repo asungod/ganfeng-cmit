@@ -1,12 +1,12 @@
 # 第三方资源与许可清单（赣风 · 可对话的数字展）
 
-整理日期：2026-10-08。下表只列**随作品分发或运行时用到**的第三方资源；版本以 package-lock.json 为准。
+整理日期：2026-10-31（对齐 HEAD b3c1061 · 含 Poly Haven/Kenney/Quaternius CC0）。下表只列**随作品分发或运行时用到**的第三方资源；版本以 package-lock.json 为准。
 
 ## 一、运行时随包分发
 
 | 资源 | 版本 | 用途 | 许可 | 来源 |
 |---|---|---|---|---|
-| three.js | 0.170.0 | 瓷语展柜、阁序夜景的三维渲染（WebGL2） | MIT | https://github.com/mrdoob/three.js |
+| three.js | 0.170.0 | 四个展厅的三维渲染（WebGL2，含 postprocessing 泛光/调色与 RGBELoader） | MIT | https://github.com/mrdoob/three.js |
 | @huggingface/transformers（Transformers.js） | 4.2.0 | 在浏览器里运行 BGE 向量检索 | Apache-2.0 | https://github.com/huggingface/transformers.js |
 | onnxruntime-web | 1.26.0-dev.20260416 | Transformers.js 的 WASM 推理后端（public/ort） | MIT | https://github.com/microsoft/onnxruntime |
 | onnxruntime-common | 1.24.3 | 同上（依赖） | MIT | https://github.com/microsoft/onnxruntime |
@@ -17,6 +17,34 @@
 | Go 标准库 | Go 1.24 编译 | 便携静态服务器 ganfeng-server（本项目自写，仅用标准库） | BSD-3-Clause（Go 运行时） | https://go.dev/LICENSE |
 
 字体许可原文见 `public/fonts/OFL-*.txt`（离线包里在 `许可/` 目录）。
+
+
+## 一·补、三维素材 / 3D assets（2026-10-20 新增 · Added 2026-10-20）
+
+全部来自 Poly Haven，许可 CC0 1.0（公有领域贡献，无需署名，本作品仍主动致谢）。均为 1k 分辨率，未改动像素；在程序里按世界坐标平铺，并用颜色系数调色。随包位置：`public/assets3d/`（约 19MB），清单机读版 `public/assets3d/credits.json`，作品内「门厅 → 关于本作品」里有致谢列表。
+All from Poly Haven, CC0 1.0 (public domain; no attribution required, credited anyway). 1k resolution, pixels unmodified; tiled in world space and colour-tinted in code. Shipped in `public/assets3d/` (~19 MB); machine-readable list `public/assets3d/credits.json`; credits panel in-app under Lobby → About this work.
+
+| 素材 Asset | 类型 Type | 作者 Author(s) | 用途 Use | 许可 License | 来源 URL |
+|---|---|---|---|---|---|
+| Qwantani Dusk 2 (Pure Sky) | HDRI | Greg Zaal, Jarod Guest | 阁序天空与环境光 / Tengwang sky & lighting | CC0 1.0 | https://polyhaven.com/a/qwantani_dusk_2_puresky |
+| Qwantani Sunset (Pure Sky) | HDRI | Greg Zaal, Jarod Guest | 客家「暮」天空 / Hakka dusk sky | CC0 1.0 | https://polyhaven.com/a/qwantani_sunset_puresky |
+| Qwantani Night (Pure Sky) | HDRI | Greg Zaal, Jarod Guest | 客家、万寿宫夜间环境光 / night lighting (Hakka, Wanshou) | CC0 1.0 | https://polyhaven.com/a/qwantani_night_puresky |
+| Qwantani (Pure Sky) | HDRI | Greg Zaal, Jarod Guest | 客家「晨/午」、万寿宫日间天空 / day sky (Hakka, Wanshou) | CC0 1.0 | https://polyhaven.com/a/qwantani_puresky |
+| Clay Plaster | PBR texture | Amal Kumar | 围屋夯土墙 / rammed-earth walls | CC0 1.0 | https://polyhaven.com/a/clay_plaster |
+| Grey Roof Tiles | PBR texture | Rob Tuytel | 围屋瓦顶 / roof tiles | CC0 1.0 | https://polyhaven.com/a/grey_roof_tiles |
+| Ceramic Roof 01 | PBR texture | Rob Tuytel | 围屋瓦顶 / roof tiles (v18) | CC0 1.0 | https://polyhaven.com/a/ceramic_roof_01 |
+| Dark Wooden Planks | PBR texture | Amal Kumar | 木门、梁、楼板 / wood doors, beams, floors | CC0 1.0 | https://polyhaven.com/a/dark_wooden_planks |
+| Kenney Nature Kit（选树／竹／灌木） | 三维模型 glTF | Kenney | 客家／万寿宫／阁序岸边植被 | CC0 1.0 | https://kenney.nl/assets/nature-kit |
+| Quaternius Ultimate Nature Pack（CommonTree／Pine／Willow） | 三维模型 glTF | Quaternius | 客家／万寿宫／阁序柳树 | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
+| Quaternius Modular Men／Women | 三维模型 glTF | Quaternius | 万寿宫香客／观众／戏班（T 姿改挂臂，布料着色） | CC0 1.0 | https://quaternius.com/packs/ultimatemodularcharacters.html |
+| Stone Tiles | PBR texture | Christopher Melani | 台基、地面、天井 / platforms, paving, skywells | CC0 1.0 | https://polyhaven.com/a/stone_tiles |
+| Brown Mud Dry | PBR texture | Rob Tuytel | 禾坪外地面、江岸 / ground, riverbank | CC0 1.0 | https://polyhaven.com/a/brown_mud_dry |
+| Red Plaster Weathered | PBR texture | Amal Kumar | 万寿宫红墙 / temple red walls | CC0 1.0 | https://polyhaven.com/a/red_plaster_weathered |
+| Lacquered Cherry Wood | PBR texture | Jenelle van Heerden, Rico Cilliers | 朱漆柱、供桌 / lacquered columns, altar | CC0 1.0 | https://polyhaven.com/a/lacquered_cherry_wood |
+| Weathered Planks | PBR texture | Dario Barresi, Dimitrios Savva | （备用，未直接使用）/ spare, not used | CC0 1.0 | https://polyhaven.com/a/weathered_planks |
+
+建筑、人物、香烟、灯笼、水面、山体等几何均为本项目程序生成，未使用第三方三维模型。
+Architecture, incense smoke, lanterns, water, hills and 阁序 birds are project-authored. Trees/bamboo and 万寿宫 people use Quaternius + Kenney CC0 glTF (listed above); procedural fallbacks remain if assets fail to load.
 
 ## 二、仅开发/构建时使用（不进运行包）
 
@@ -37,3 +65,14 @@
 
 - 开发阶段：AI 编程助手按作者要求生成了大部分代码与文案初稿；通义千问（访客模式）用于作品评审意见与批评。
 - 运行阶段：只有 BGE-small-zh 做语义检索，没有生成式模型，也不联网。
+
+---
+## English summary — Third-party resources and licenses
+Work title in English: **Ganfeng: A Conversational Digital Exhibition**.
+Bundled at runtime: three.js 0.170.0 (MIT); Transformers.js 4.2.0 (Apache-2.0); onnxruntime-web / onnxruntime-common (MIT); BAAI/bge-small-zh-v1.5, ONNX q8 build by Xenova (MIT; used for embedding retrieval only, never generates text); Ma Shan Zheng, Noto Serif SC, Noto Sans SC (SIL OFL 1.1, subset); Go standard library for the self-written portable server (BSD-3-Clause). Build-time only: Vite 5.4.21 (MIT), TypeScript 5.9.3 (Apache-2.0), @types/three (MIT), fontTools + brotli (MIT). Text sources: see the source-verification table (09); classical texts used are public domain (no copyright applies because of their age). No artifact photos, third-party 3D models, or third-party audio/video are used.
+
+## 本项目自制/衍生资源（v18–v19）
+
+- earth_grey_* / plaster_grey_*：由 Poly Haven Brown Mud Dry、Clay Plaster（CC0 1.0）去饱和得到的衍生贴图，用于围屋夯土墙，沿用 CC0。
+- water_normal_gen.jpg：本项目用程序生成的水面法线贴图（无第三方来源）。
+- 水面渲染用 three.js 自带的 Water.js（MIT，随 three.js 发布）。
