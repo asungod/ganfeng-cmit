@@ -1,9 +1,12 @@
-/** 馆方讲解：浏览器 SpeechSynthesis，无云端、无 Key。默认关闭，避免未手势被拦。 */
+/** 馆方讲解：浏览器 SpeechSynthesis，无云端、无 Key。默认开启；顶栏可关。未手势时先入队，afterUserGesture 补播。 */
 
 export class Guide {
-  enabled = false;
+  enabled = true;
   private voice: SpeechSynthesisVoice | null = null;
   private lineEl: HTMLElement | null = null;
+  /** Text waiting for a user gesture when autoplay policy blocks speak(). */
+  private queued: string | null = null;
+  private gestureReady = false;
 
   attachLine(el: HTMLElement): void {
     this.lineEl = el;
@@ -13,6 +16,7 @@ export class Guide {
     this.enabled = !this.enabled;
     if (!this.enabled) {
       this.hardCancel();
+      this.queued = null;
       if (this.lineEl) this.lineEl.textContent = "";
     } else {
       this.warm();
@@ -24,6 +28,7 @@ export class Guide {
 
   stop(): void {
     this.hardCancel();
+    this.queued = null;
     if (this.lineEl) this.lineEl.textContent = "";
   }
 
@@ -33,9 +38,27 @@ export class Guide {
     // Visitor default: no floating bubble over the 3D stage unless 讲解 is on.
     if (!this.enabled) {
       if (this.lineEl) this.lineEl.textContent = "";
+      this.queued = null;
       return;
     }
     if (this.lineEl) this.lineEl.textContent = clean;
+    this.queued = clean;
+    if (!this.gestureReady) return;
+    this.speakNow(clean);
+  }
+
+  /** Call after a user gesture so autoplay-blocked SpeechSynthesis can start / flush queue. */
+  afterUserGesture(): void {
+    this.gestureReady = true;
+    this.warm();
+    if (!this.enabled || !this.queued) return;
+    const synth = window.speechSynthesis;
+    // Already playing / queued in the engine — don't hardCancel-restart on every click.
+    if (synth && (synth.speaking || synth.pending)) return;
+    this.speakNow(this.queued);
+  }
+
+  private speakNow(clean: string): void {
     const synth = window.speechSynthesis;
     if (!synth) return;
     this.hardCancel();
@@ -46,6 +69,9 @@ export class Guide {
     u.pitch = 1;
     u.volume = 1;
     if (this.voice) u.voice = this.voice;
+    u.onstart = () => {
+      if (this.queued === clean) this.queued = null;
+    };
     synth.speak(u);
   }
 
@@ -91,7 +117,7 @@ export class Guide {
 export const guide = new Guide();
 
 export const lines = {
-  hall: "欢迎来到赣风。三条线：瓷语（景德镇器型与釉色的时代约束）、阁序（《滕王阁序》原句钉在夜阁上）、客家（可走进的赣南围屋）。请打开讲解，再选一门。建议顺序：阁序 → 瓷语 → 客家。每一步出处均可在审计面板展开。",
+  hall: "欢迎来到赣风。三条线：瓷语（景德镇器型与釉色的时代约束）、阁序（《滕王阁序》原句钉在夜阁上）、客家（可走进的赣南围屋）。讲解默认开启，可在顶栏关闭。建议顺序：阁序 → 瓷语 → 客家。每一步出处均可在审计面板展开。",
   ciyu: "瓷语展柜。先锁定时代，再选器型与釉色。冲突不会生成「好看的错」，而会改锁并说明理由。眼前是程序复原的梅瓶，不是馆藏原件。",
   lock: (era: string, shape: string, glaze: string, note: string) =>
     note

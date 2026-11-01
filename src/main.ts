@@ -87,7 +87,7 @@ function ensureChrome(): void {
     <div class="chrome-btns">
       <button type="button" class="mute" data-lang title="">EN</button>
       <button type="button" class="mute is-on" data-mute>${t("chrome.muteOn")}</button>
-      <button type="button" class="mute" data-guide>${t("chrome.guideOff")}</button>
+      <button type="button" class="mute is-on" data-guide>${t("chrome.guideOn")}</button>
     </div>
   `;
   document.body.appendChild(bar);
@@ -129,17 +129,21 @@ function ensureChrome(): void {
 }
 
 
-/** Browsers block AudioContext until a gesture; unlock once then re-apply current bed. */
+/** Browsers block AudioContext / SpeechSynthesis until a gesture.
+ *  Ambience unlocks once; guide may flush a queued 朗读 on a later gesture
+ *  (e.g. speak scheduled after hashchange from the same click). */
 function armAmbienceGesture(): void {
-  const once = () => {
-    window.removeEventListener("pointerdown", once, true);
-    window.removeEventListener("keydown", once, true);
-    window.removeEventListener("touchstart", once, true);
-    void ambience.afterUserGesture();
+  let ambienceUnlocked = false;
+  const onGesture = () => {
+    if (!ambienceUnlocked) {
+      ambienceUnlocked = true;
+      void ambience.afterUserGesture();
+    }
+    guide.afterUserGesture();
   };
-  window.addEventListener("pointerdown", once, true);
-  window.addEventListener("keydown", once, true);
-  window.addEventListener("touchstart", once, true);
+  window.addEventListener("pointerdown", onGesture, true);
+  window.addEventListener("keydown", onGesture, true);
+  window.addEventListener("touchstart", onGesture, true);
 }
 
 window.addEventListener("hashchange", () => mount(parseRoute(location.hash)));

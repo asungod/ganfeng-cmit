@@ -426,7 +426,8 @@ export function mountTengwang(root: HTMLElement): () => void {
     }
     if (firstVisit) {
       firstVisit = false;
-      guide.speak(lines.gexu);
+      // 进厅即朗读序文选段（公有领域）；讲解关闭仍可 hard-stop。
+      guide.speak(poemLines.join(""));
     } else {
       guide.speak(lines.verse(motif.name, motif.couplet));
     }
