@@ -2,4 +2,4 @@
 Repo: asungod/ganfeng-cmit
 Branch: main (site root)
 Review video: /review/
-Built from cmit-ganfeng tip 830429f — soundscape ON by default + first-gesture unlock
+Built from cmit-ganfeng tip 8e0be12 — guide ON by default; 阁序 auto-reads 滕王阁序
