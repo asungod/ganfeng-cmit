@@ -24,7 +24,7 @@ const POSES: Record<RoomId | "overview", Pose> = {
 const HOURS: Record<HourId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; lamp: number }> = {
   dawn: { sun: [-30, 9, 18], col: 0xffc7a0, I: 2.2, hemi: 0.35, env: 0.6, exp: 0.95, fog: 0xb7b0b4, hdri: "qwantani_puresky", lamp: 0.2 },
   noon: { sun: [12, 40, 14], col: 0xfff2dc, I: 3.95, hemi: 1.05, env: 1.22, exp: 1.14, fog: 0xc8d2dc, hdri: "qwantani_puresky", lamp: 0.14 }, // v53r7: brighter noon hall, cut lamp orbs
-  dusk: { sun: [34, 9, 10], col: 0xf0dcc8, I: 2.55, hemi: 0.95, env: 1.0, exp: 1.12, fog: 0x8a8078, hdri: "qwantani_sunset_puresky", lamp: 0.55 },
+  dusk: { sun: [34, 9, 10], col: 0xf2c8a0, I: 2.7, hemi: 0.88, env: 0.95, exp: 1.1, fog: 0x8a7060, hdri: "qwantani_sunset_puresky", lamp: 0.7 }, // v54: warmer 暮 lantern-readable dusk
   night: { sun: [-14, 30, -10], col: 0x8aa4ff, I: 0.35, hemi: 0.12, env: 0.25, exp: 1.15, fog: 0x10131e, hdri: "qwantani_night_puresky", lamp: 2.6 },
 };
 

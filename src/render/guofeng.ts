@@ -111,7 +111,7 @@ export function paintedTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "cam
         stroke(x, p, 0.18, 0.04, "#2a2018", r); tips.push(...p.slice(2));
       }
       // 点叶: layered blue-green dabs (石绿 / 花青), dark ink accents
-      const cols = ["#3e5a3a", "#4f6e46", "#5f7f52", "#355038", "#6f8c5c"];
+      const cols = ["#2f4a3e", "#3a5c48", "#4a6e52", "#2a4838", "#5a7a58", "#3e5a62"]; // v54: 石绿/花青
       for (let i = 0; i < (low() ? 900 : 2200); i++) {
         const [tx, ty] = tips[Math.floor(r() * tips.length)];
         const rr = 0.25 + r() * 0.9, a = r() * Math.PI * 2;
@@ -164,7 +164,7 @@ export function paintedTree(seed = 1, scale = 1, kind: "camphor" | "pine" = "cam
   });
   const R = kind === "pine" ? 2.4 : 3.0;
   const topTex = paint(`treetop-${kind}-${seed % 4}`, R * 2, R * 2, low() ? 30 : 60, (x) => {
-    const cols = kind === "pine" ? ["#1e3222", "#2e4a34", "#3e5e42"] : ["#3e5a3a", "#4f6e46", "#5f7f52", "#355038", "#6f8c5c"];
+    const cols = kind === "pine" ? ["#1e3222", "#2e4a34", "#3e5e42"] : ["#2f4a3e", "#3a5c48", "#4a6e52", "#2a4838", "#5a7a58", "#3e5a62"];
     for (let i = 0; i < (low() ? 500 : 1400); i++) {
       const a = r() * Math.PI * 2, rr = Math.sqrt(r()) * (R - 0.3);
       x.fillStyle = cols[Math.floor(r() * cols.length)]; x.globalAlpha = 0.8;
