@@ -106,6 +106,9 @@ export class WeiwuScene {
     const lac = phMat("lacquered_cherry_wood", [1, 1], { color: 0x7a5638 }); // v54: pillars mid 红木棕
     const stone = phMat("stone_tiles", [1, 1], { color: 0xb0a898 });
     const ground = phMat("stone_tiles", [18, 18], { color: 0x8a8884 }); // v24: cool grey stone yard (was warm brown mud)
+    // v55: 门楼单独用暖夯土/深红木，和冷灰围墙拉开；近景要能看出门钉、门环、石阶
+    const gateEarth = phMat("plaster_grey", [1, 1], { color: 0x8a7a62 });
+    const gateWood = phMat("dark_wooden_planks", [2, 1], { color: 0x5a3426 });
 
     const g = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), ground);
     g.rotation.x = -Math.PI / 2;
@@ -184,19 +187,61 @@ export class WeiwuScene {
     const gate = new THREE.Group();
     const gw = 3.4;
     for (const sx of [-1, 1]) {
-      const p = wbox(0.7, 4.8, 1.4, earth);
+      const p = wbox(0.7, 4.8, 1.4, gateEarth);
       p.position.set(sx * (gw / 2 + 0.35), 2.4, 0);
       gate.add(p); this.solids.push(p);
     }
-    const lintel = wbox(gw + 1.4, 0.9, 1.4, earth);
+    const lintel = wbox(gw + 1.4, 0.9, 1.4, gateEarth);
     lintel.position.y = 4.45;
     gate.add(lintel);
-    const doorFrame = wbox(gw, 3.3, 0.12, wood);
-    doorFrame.position.set(0, 1.65, -0.45);
+    // v55: 柱础 / 门枕石 / 雀替 — give the gate落地构造，而不是三块悬浮方盒
     for (const sx of [-1, 1]) {
-      const leaf = wbox(gw / 2 - 0.08, 3.1, 0.1, wood);
-      leaf.position.set(sx * (gw / 4 + 0.32), 1.55, -0.35);
+      const base = wbox(0.86, 0.18, 1.56, stone);
+      base.position.set(sx * (gw / 2 + 0.35), 0.09, 0);
+      gate.add(base); this.solids.push(base);
+      const pillow = wbox(0.36, 0.4, 0.6, stone);
+      pillow.position.set(sx * 1.5, 0.2, 0.05);
+      gate.add(pillow); this.solids.push(pillow);
+      const bracket = wbox(0.6, 0.18, 0.2, gateWood);
+      bracket.position.set(sx * 1.45, 3.95, 0.35);
+      bracket.rotation.z = sx * 0.35;
+      gate.add(bracket);
+    }
+    // v55: 门框归位（此前建了却没 add），门扇改为闭合尺寸，外缘不再插进柱子
+    const doorFrame = wbox(gw, 3.3, 0.12, gateWood);
+    doorFrame.position.set(0, 1.65, -0.46);
+    gate.add(doorFrame);
+    const leafW = gw / 2 - 0.04;
+    for (const sx of [-1, 1]) {
+      const leaf = wbox(leafW, 3.1, 0.1, gateWood);
+      leaf.position.set(sx * (leafW / 2 + 0.005), 1.55, -0.35);
       gate.add(leaf);
+    }
+    // 门槛 + 门前三级石阶：让门楼落地，而不是插在土里
+    const sill = wbox(gw - 0.1, 0.16, 0.45, stone);
+    sill.position.set(0, 0.08, -0.24);
+    gate.add(sill); this.solids.push(sill);
+    for (let i = 0; i < 3; i++) {
+      const step = wbox(gw + 0.9 - i * 0.3, 0.13, 0.62 - i * 0.1, stone);
+      step.position.set(0, 0.065 + i * 0.13, 0.86 - i * 0.16);
+      gate.add(step); this.solids.push(step);
+    }
+    // 门钉（两扇各 4×5，一朵 InstancedMesh）+ 铺首门环
+    const studMat = new THREE.MeshStandardMaterial({ color: 0xc6a15b, roughness: 0.34, metalness: 0.55, emissive: 0x2a1a06, emissiveIntensity: 0.35 });
+    const studs = new THREE.InstancedMesh(new THREE.SphereGeometry(0.036, 8, 6), studMat, 40);
+    const sm = new THREE.Matrix4();
+    let si = 0;
+    for (const sx of [-1, 1]) for (let row = 0; row < 5; row++) for (let col = 0; col < 4; col++) {
+      sm.makeTranslation(sx * (0.22 + col * 0.34), 1.02 + row * 0.38, -0.288);
+      studs.setMatrixAt(si++, sm);
+    }
+    studs.instanceMatrix.needsUpdate = true;
+    studs.frustumCulled = false;
+    gate.add(studs);
+    for (const sx of [-1, 1]) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.082, 0.018, 6, 16), studMat);
+      ring.position.set(sx * 0.2, 1.52, -0.282);
+      gate.add(ring);
     }
     const plaque = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.55, 0.06), [
       new THREE.MeshStandardMaterial({ color: 0x3a140e, roughness: 0.6 }),
@@ -443,7 +488,13 @@ export class WeiwuScene {
       }
     }
     // v38: wall coping in earth tone (not 瓦 ridge) + rear split so no flat "roof bar" behind 上堂
-    for (const [x, z, w, d] of [[0, D / 2, W + 0.8, T + 0.8], [-W / 2, 0, T + 0.8, D + 0.8], [W / 2, 0, T + 0.8, D + 0.8]] as [number, number, number, number][]) {
+    // v55: front coping split into two stubs — the old full-width bar cut through the 披屋 roofs in bird's-eye
+    for (const sx of [-1, 1]) {
+      const cap = wbox(3.2, 0.14, T + 0.8, earth);
+      cap.position.set(sx * 4.15, H + 0.07, D / 2);
+      S.add(cap);
+    }
+    for (const [x, z, w, d] of [[-W / 2, 0, T + 0.8, D + 0.8], [W / 2, 0, T + 0.8, D + 0.8]] as [number, number, number, number][]) {
       const cap = wbox(w, 0.14, d, earth); cap.position.set(x, H + 0.07, z); S.add(cap);
     }
     for (const sx of [-1, 1]) {
