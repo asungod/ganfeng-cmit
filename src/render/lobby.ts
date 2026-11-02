@@ -33,16 +33,17 @@ export class LobbyScene {
       const c = document.createElement("canvas"); c.width = 512; c.height = 128;
       const x = c.getContext("2d")!;
       const g = x.createLinearGradient(0, 128, 0, 0);
-      g.addColorStop(0, "rgba(255,220,140,0.95)"); g.addColorStop(0.35, "rgba(240,100,55,0.85)");
-      g.addColorStop(0.7, "rgba(140,50,90,0.35)"); g.addColorStop(1, "rgba(40,30,70,0)");
+      g.addColorStop(0, "rgba(255,205,135,0.70)"); g.addColorStop(0.35, "rgba(226,96,56,0.68)");
+      g.addColorStop(0.7, "rgba(140,50,90,0.32)"); g.addColorStop(1, "rgba(40,30,70,0)");
       x.fillStyle = g; x.fillRect(0, 0, 512, 128);
       const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
-      const band = new THREE.Mesh(new THREE.PlaneGeometry(160, 28), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.9, depthWrite: false, fog: false, depthTest: false }));
-      band.position.set(-8, 10, -48); band.renderOrder = -2; this.scene.add(band);
+      // v55: depthTest on + pushed behind the hills — old additive band painted over 阁/山/水
+      const band = new THREE.Mesh(new THREE.PlaneGeometry(160, 28), new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.68, depthWrite: false, fog: false, depthTest: true }));
+      band.position.set(-8, 10, -70); band.renderOrder = -2; this.scene.add(band);
     }
     this.water = new THREE.Mesh(
       new THREE.PlaneGeometry(300, 300, 1, 1),
-      new THREE.MeshStandardMaterial({ color: 0x4a5060, roughness: 0.08, metalness: 0.9, envMapIntensity: 1.3 }),
+      new THREE.MeshStandardMaterial({ color: 0x3d302c, roughness: 0.22, metalness: 0.45, envMapIntensity: 0.9 }), // v55: 接住落霞的暖水面，不再是不锈钢
     );
     this.water.rotation.x = -Math.PI / 2;
     this.scene.add(this.water);
@@ -59,7 +60,7 @@ export class LobbyScene {
     this.scene.add(this.lanterns.points);
     this.mist = particles(120, new THREE.Box3(new THREE.Vector3(-40, 0.3, -40), new THREE.Vector3(40, 2.5, -5)), 0xe8c8c0, 4, 0.06, "mist");
     this.scene.add(this.mist.points);
-    this.post = makePost(this.renderer, this.scene, this.camera, 0.5, 0.85);
+    this.post = makePost(this.renderer, this.scene, this.camera, 0.2, 0.9); // v55: was 0.5/0.85 — horizon band bloomed into a white haze
     this.resize();
     this.loop();
   }
