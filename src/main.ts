@@ -48,14 +48,17 @@ function mount(route: Route): void {
 function boot(): void {
   const overlay = document.createElement("div");
   overlay.className = "boot";
+  // v54: first-open bilingual for intl judges — CN title + EN gloss; lang toggle stays in chrome
   overlay.innerHTML = `
-    <p class="boot-k">${t("boot.k")}</p>
+    <p class="boot-k">夜展开启 · Opening</p>
     <p class="boot-t">赣风</p>
-    <p class="boot-s">${t("boot.s")}</p>
+    <p class="boot-s">可对话的数字展</p>
+    <p class="boot-en">Ganfeng · A Conversational Digital Exhibition</p>
+    <p class="boot-hint">顶栏 EN / 中文 · Guide &amp; soundscape ON by default</p>
   `;
   document.body.appendChild(overlay);
-  window.setTimeout(() => overlay.classList.add("is-out"), 900);
-  window.setTimeout(() => overlay.remove(), 1600);
+  window.setTimeout(() => overlay.classList.add("is-out"), 1200);
+  window.setTimeout(() => overlay.remove(), 1900);
 }
 
 function paintGuideBtn(btn: HTMLButtonElement): void {

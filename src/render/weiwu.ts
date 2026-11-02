@@ -103,7 +103,7 @@ export class WeiwuScene {
     const tile = qingwaMat([3, 2]); // v23: 小青瓦
     const ridge = new THREE.MeshStandardMaterial({ color: 0x3e3e44, roughness: 0.7 });
     const wood = phMat("dark_wooden_planks", [1, 1]);
-    const lac = phMat("lacquered_cherry_wood", [1, 1], { color: 0x6e4c34 }); // v53r10: pillars browner mid 红木
+    const lac = phMat("lacquered_cherry_wood", [1, 1], { color: 0x7a5638 }); // v54: pillars mid 红木棕
     const stone = phMat("stone_tiles", [1, 1], { color: 0xb0a898 });
     const ground = phMat("stone_tiles", [18, 18], { color: 0x8a8884 }); // v24: cool grey stone yard (was warm brown mud)
 
@@ -712,15 +712,15 @@ function makeFurniture(wood: THREE.Material, lac: THREE.Material) {
   const brick = new THREE.MeshStandardMaterial({ color: 0x8a6a58, roughness: 0.95 });
   const iron = new THREE.MeshStandardMaterial({ color: 0x1e1c1a, roughness: 0.5, metalness: 0.6 });
   const pot = new THREE.MeshStandardMaterial({ color: 0x4a3426, roughness: 0.35 });
-  // v53r9: mid 红木 browner-readable — noon table not charcoal, not scarlet
-  const grain = woodGrainMap("#a08058", "#5c3e26");
+  // v54: mid 红木棕 — warm readable under noon, still wood not plastic scarlet
+  const grain = woodGrainMap("#b08a5c", "#5a3820");
   const rose = (lac as THREE.MeshStandardMaterial).clone();
-  rose.map = grain; rose.color = new THREE.Color(0x826848); rose.roughness = 0.93; rose.metalness = 0;
-  rose.envMapIntensity = 0.08;
+  rose.map = grain; rose.color = new THREE.Color(0x8a6a48); rose.roughness = 0.9; rose.metalness = 0.02;
+  rose.envMapIntensity = 0.1;
   const L = rose;
   const apron = (lac as THREE.MeshStandardMaterial).clone();
-  apron.map = grain; apron.color = new THREE.Color(0x5e4630); apron.roughness = 0.94; apron.metalness = 0;
-  apron.envMapIntensity = 0.07;
+  apron.map = grain; apron.color = new THREE.Color(0x6a4c32); apron.roughness = 0.92; apron.metalness = 0.02;
+  apron.envMapIntensity = 0.09;
   const A = apron;
   const addHoof = (g: THREE.Group, x: number, z: number, m: THREE.Material) => {
     g.add(box(0.12, 0.045, 0.12, m, x, 0.03, z));

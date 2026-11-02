@@ -9,6 +9,7 @@ import { wanshouRule } from "../data/evidenceRules";
 import { preloadGltfKit } from "../render/gltfKit";
 import { TempleScene } from "../render/temple";
 import { ambience } from "../render/ambience";
+import { guide } from "../app/guide";
 import { acts, actCompat, preferredSlot, slotByAct, slots, type ActId, type SlotId } from "../data/wanshou";
 
 export function mountWanshou(root: HTMLElement): () => void {
@@ -60,6 +61,8 @@ export function mountWanshou(root: HTMLElement): () => void {
       await preloadGltfKit();
       scene = new TempleScene(canvasEl);
       scene.set(act, slot, true);
+      // v54: 进厅一句庙会导览（可顶栏关）；不打断默认声景
+      guide.speak("万寿宫庙会扩展线。活动与时段互相约束：点戏班演出可听锣鼓。眼前是程序复原示意，不是测绘原址。");
     } catch (err) {
       console.warn("wanshou temple: WebGL unavailable", err);
     }

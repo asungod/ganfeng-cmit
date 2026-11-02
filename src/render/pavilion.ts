@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { inkGoose } from "./guofeng";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Water } from "three/examples/jsm/objects/Water.js";
-import { lowPower, shadowSize, Flight, loadHdri, makePost, particles, phMat, skyBand, type Post } from "./kit";
+import { lowPower, shadowSize, Flight, loadHdri, makePost, makeTree, particles, phMat, skyBand, type Post } from "./kit";
 import type { ImageId, MoodId } from "../data/tengwang";
 
 const MARK: Record<ImageId, THREE.Vector3> = {
@@ -113,6 +113,25 @@ export class PavilionScene {
     this.scene.add(pavilion);
     // riverbank: terraced mud + stone face + willow fringe (not a flat box)
     this.scene.add(makeRiverbank());
+    // v54: 国风岸树 — camphor/pine behind & beside 阁楼 (willow-fringe comment had no trees)
+    {
+      const grove: [number, number, number, "camphor" | "pine", number][] = [
+        // behind / flanks of 阁楼 (z≈-12.5); leave far dusk ribbon (z≈-38) clear
+        [8.8, -16.8, 1.28, "camphor", 21],
+        [11.2, -14.6, 1.08, "camphor", 22],
+        [-0.8, -17.8, 1.18, "camphor", 23],
+        [13.6, -13.2, 0.98, "pine", 24],
+        [-2.9, -15.4, 0.92, "pine", 25],
+        [6.4, -19.2, 1.32, "camphor", 26],
+        [15.4, -16.0, 1.12, "camphor", 27],
+        [-4.6, -13.8, 0.88, "camphor", 28],
+      ];
+      for (const [x, z, sc, kind, seed] of grove) {
+        const tr = makeTree(seed, sc, kind);
+        tr.position.set(x, 0, z);
+        this.scene.add(tr);
+      }
+    }
     this.markers.set("feige", pavilion);
 
     this.scene.add(makeBoats());
@@ -130,10 +149,10 @@ export class PavilionScene {
     void skyBand;
     // v52: wide flat 国风 dusk wash — vermilion→gold ribbon along horizon, not an orb
     // v52c: bands BEHIND far hills (z<-34) so terrain never clips them into a sun-disc silhouette
-    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(260, 1.65), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffc898, transparent: true, opacity: 0.68, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r9: thin horizontal ribbon only
+    this.glow = new THREE.Mesh(new THREE.PlaneGeometry(280, 2.05), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffc090, transparent: true, opacity: 0.74, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v54: slightly taller 落霞 ribbon, still band not ball
     this.glow.position.set(0, 4.55, -58); // v53r6: pin on hill crest
     this.glow.rotation.set(0, 0, 0); this.glow.renderOrder = -2;
-    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(220, 1.2), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe8c0, transparent: true, opacity: 0.70, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v53r9 thinner
+    this.horizonBand = new THREE.Mesh(new THREE.PlaneGeometry(240, 1.45), new THREE.MeshBasicMaterial({ map: luoxiaSky(), color: 0xffe4b8, transparent: true, opacity: 0.72, depthWrite: false, side: THREE.DoubleSide, fog: false, depthTest: true })); // v54 soft gold under-band
     this.horizonBand.position.set(0, 4.3, -55); this.horizonBand.rotation.set(0, 0, 0); this.horizonBand.renderOrder = -2; // v53r6
     this.glowRefl = new THREE.Mesh(new THREE.PlaneGeometry(48, 22), new THREE.MeshBasicMaterial({ map: luoxiaRefl(), transparent: true, opacity: 0.18, depthWrite: false, fog: false })); // v53r9: softer river catch — no disk
     this.glowRefl.rotation.x = -Math.PI / 2; this.glowRefl.position.set(-4, 0.06, -10); this.glowRefl.renderOrder = 2;
@@ -411,7 +430,7 @@ function makeWater(): THREE.Group {
   g.add(deep);
   const path = new THREE.Mesh(
     new THREE.PlaneGeometry(4.2, 28),
-    new THREE.MeshBasicMaterial({ color: 0xffd0a0, transparent: true, opacity: 0.28, depthWrite: false, alphaMap: glitterAlpha() }),
+    new THREE.MeshBasicMaterial({ color: 0xffc898, transparent: true, opacity: 0.22, depthWrite: false, alphaMap: glitterAlpha() }),
   );
   path.rotation.x = -Math.PI / 2;
   path.position.set(-6.4, 0.08, -4.2);

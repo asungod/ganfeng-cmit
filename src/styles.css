@@ -82,6 +82,8 @@ a { color: var(--gold); }
 .boot-k { letter-spacing: 0.5em; color: var(--gold); font-size: 0.75rem; }
 .boot-t { font-family: var(--serif); font-size: 3.4rem; margin: 0.2rem 0; letter-spacing: 0.6em; }
 .boot-s { color: var(--paper-dim); letter-spacing: 0.28em; }
+.boot-en { margin: 0.55rem 0 0; color: rgba(243,232,207,0.78); font-size: 0.78rem; letter-spacing: 0.14em; }
+.boot-hint { margin: 0.35rem 0 0; color: rgba(198,161,91,0.85); font-size: 0.64rem; letter-spacing: 0.08em; }
 
 .global-chrome {
   position: fixed;
@@ -102,7 +104,8 @@ a { color: var(--gold); }
   font-size: 0.68rem;
   letter-spacing: 0.12em;
 }
-.mute.is-on { color: var(--gold); }
+.mute.is-on { color: var(--gold); border-color: rgba(198, 161, 91, 0.55); background: rgba(42, 28, 18, 0.55); }
+.mute[data-lang] { letter-spacing: 0.18em; font-weight: 600; }
 .guide-line {
   position: fixed;
   left: 50%;
@@ -115,11 +118,13 @@ a { color: var(--gold); }
   font-size: 0.8rem;
   line-height: 1.55;
   letter-spacing: 0.08em;
-  color: var(--paper-dim);
-  background: rgba(11, 9, 7, 0.78);
-  border: 1px solid var(--line);
-  padding: 0.42rem 0.9rem;
+  color: #f3e8cf;
+  background: linear-gradient(180deg, rgba(42, 28, 18, 0.92), rgba(18, 12, 8, 0.88));
+  border: 1px solid rgba(198, 161, 91, 0.42);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(246,236,216,0.06);
+  padding: 0.48rem 1rem;
   pointer-events: none;
+  font-family: var(--serif, "Noto Serif SC", serif);
 }
 .guide-line:empty { display: none; }
 

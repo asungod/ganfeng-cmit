@@ -307,8 +307,8 @@ function paintFace(x: Ctx, kind: Face, skin: string, cy: number, seed: number): 
   blush.addColorStop(0, child || woman ? "rgba(230,110,100,0.65)" : "rgba(220,90,80,0.5)");
   blush.addColorStop(1, "rgba(220,90,80,0)");
   for (const s of [-1, 1]) { x.save(); x.translate(s * (child ? 0.038 : 0.042), cy - (child ? 0.022 : 0.03)); x.fillStyle = blush; x.beginPath(); x.arc(0, 0, blushR, 0, Math.PI * 2); x.fill(); x.restore(); }
-  const smile = r() < 0.55; // 含蓄 — open eyes + slight mouth curve, not closed-eye cartoon grin
-  const ey = cy + 0.004 + r() * 0.012, es = 0.028 + r() * 0.008, open = child ? 1.15 : 0.9 + r() * 0.25;
+  const smile = r() < 0.68; // v54: more 含蓄 smiles so mid-shot crowd feels alive
+  const ey = cy + 0.004 + r() * 0.012, es = 0.028 + r() * 0.008, open = child ? 1.18 : 0.98 + r() * 0.28;
   for (const s of [-1, 1]) {
     folkEye(x, s * es, ey, open, child);
     if (smile) line(x, [[s * (es + 0.006), ey - 0.008], [s * es, ey - 0.011], [s * (es - 0.008), ey - 0.007]], 0.0022, shade(sk, -0.35)); // under-eye crescent
@@ -338,7 +338,7 @@ function paintFace(x: Ctx, kind: Face, skin: string, cy: number, seed: number): 
   // mouth: 含蓄 smile curve or calm line
   if (child || smile || r() < 0.45) {
     const my = cy - (child ? 0.046 : 0.05);
-    shape(x, [[-0.015, my], [0, my + 0.005], [0.015, my], [0, my - 0.01]], child ? "#c84840" : "#b23a30", 0.002);
+    shape(x, [[-0.018, my], [0, my + 0.006], [0.018, my], [0, my - 0.011]], child ? "#c84840" : "#c04034", 0.0025);
   } else line(x, [[-0.016, cy - 0.05], [0, cy - (smile ? 0.056 : 0.053)], [0.016, cy - 0.05]], 0.004, "#7a3020");
   if (elder) { // white beard + moustache
     shape(x, [[-0.045, cy - 0.055], [0, cy - 0.065], [0.045, cy - 0.055], [0.03, cy - 0.13], [0, cy - 0.17], [-0.03, cy - 0.13]], "#efebe2", 0.0025, "#9a9488");
@@ -580,7 +580,7 @@ function faceCam(rig: { root: THREE.Group; turn: THREE.Group }, maxYaw: number):
   if (Math.abs(yaw) > Math.PI * 0.75) yaw = yaw - Math.sign(yaw) * Math.PI;
   yaw = Math.max(-maxYaw, Math.min(maxYaw, yaw)); // v51: clamp — crowd keeps stage facing, slight peek to cam
   let d = yaw - rig.turn.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
-  rig.turn.rotation.y += d * 0.22; // v50: snappier face-cam so oblique 看戏 still shows faces
+  rig.turn.rotation.y += d * 0.28; // v54: snappier face-cam — side/oblique 看戏 reads 工笔 faces
   const rootW = rig.root.getWorldPosition(new THREE.Vector3());
   const dx = camW.x - rootW.x, dy = camW.y - rootW.y, dz = camW.z - rootW.z;
   const elev = Math.atan2(dy, Math.hypot(dx, dz)); // 0 horizon … ~1.4 nadir
@@ -870,7 +870,7 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
   const set = (a: typeof A, up: number, lo: number, fs = 1) => { a.up.rotation.z = a.s * up; a.lo.rotation.z = lo; a.lo.scale.y += (fs - a.lo.scale.y) * 0.2; };
   const anim = (t0: number) => {
     // v51: villagers peek toward cam (≤0.38) so stage-facing crowd still readable mid/overview
-    faceCam(rig, watching ? 0.22 : 0.38); // v52: less cam peek — keep stage facing
+    faceCam(rig, watching ? 0.34 : 0.42); // v54: mid/side 看戏 still reads 年画 faces without flattening stage yaw
     const t = t0 * sp + ph;
     head.position.x = Math.sin(t * 0.23) * 0.006;
     if (mode !== 6 && mode !== 7) { body.scale.y += (1 - body.scale.y) * 0.25; body.rotation.x += (0 - body.rotation.x) * 0.25; }

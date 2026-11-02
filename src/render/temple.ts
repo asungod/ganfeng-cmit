@@ -22,6 +22,50 @@ const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, n
   guanzhong: { eye: [-3.6, 1.55, 7.2], look: [0.6, 0.85, 5.2] }, // v53r6: lower hip-line on sit crowd
 };
 
+
+/** v54: 万寿宫旗帜 — 朱红底金边竖排字，侧看也是书法旗而非色块布 */
+function paintBannerTex(seed: number, wPx = 256, hPx = 420): THREE.CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = wPx; c.height = hPx;
+  const g = c.getContext("2d")!;
+  const grd = g.createLinearGradient(0, 0, 0, hPx);
+  grd.addColorStop(0, "#a8281c");
+  grd.addColorStop(0.5, "#8a1c14");
+  grd.addColorStop(1, "#5e120e");
+  g.fillStyle = grd;
+  g.fillRect(0, 0, wPx, hPx);
+  g.strokeStyle = "#c9a45a";
+  g.lineWidth = 10;
+  g.strokeRect(8, 8, wPx - 16, hPx - 16);
+  g.strokeStyle = "#e8d09a";
+  g.lineWidth = 2;
+  g.strokeRect(16, 16, wPx - 32, hPx - 32);
+  const words = [["万", "寿"], ["赣", "戏"], ["万", "寿"], ["戏", "台"]][seed % 4];
+  g.font = `bold ${Math.floor(hPx * 0.2)}px "Noto Serif SC","Songti SC","SimSun",serif`;
+  g.textAlign = "center";
+  g.textBaseline = "middle";
+  words.forEach((ch, i) => {
+    const y = hPx * (0.34 + i * 0.26);
+    g.fillStyle = "rgba(20,8,4,0.4)";
+    g.fillText(ch, wPx / 2 + 2, y + 2);
+    g.fillStyle = "#f6ecd8";
+    g.fillText(ch, wPx / 2, y);
+  });
+  g.globalAlpha = 0.1;
+  for (let i = 0; i < 14; i++) {
+    g.strokeStyle = i % 2 ? "#4a100c" : "#c9a45a";
+    g.beginPath();
+    g.moveTo(30 + (i * 13) % (wPx - 60), 36);
+    g.lineTo(30 + (i * 19) % (wPx - 60), hPx - 36);
+    g.stroke();
+  }
+  g.globalAlpha = 1;
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  return tex;
+}
+
 export class TempleScene {
   private renderer: THREE.WebGLRenderer;
   private scene = new THREE.Scene();
@@ -235,14 +279,15 @@ export class TempleScene {
     const sroof = curvedRoof(11, 8, 2.0, roofTile, gold, true);
     sroof.position.y = 6.55; // v37c: more headroom so high polar never clips 生旦净
     stage.add(sroof);
-    // v50b: soft hanging banners under 戏台 eaves (muted crimson, never harsh yellow)
-    const softBan = new THREE.MeshStandardMaterial({
-      color: 0x5a2018, roughness: 0.98, metalness: 0, side: THREE.DoubleSide, transparent: true, opacity: 0.7,
-    });
-    for (const bx of [-2.6, 0, 2.6]) {
-      const ban = wbox(0.55, 1.35, 0.02, softBan);
+    // v54: soft hanging banners under 戏台 eaves — calligraphy cloth, not flat crimson slabs
+    for (const [bi, bx] of [[0, -2.6], [1, 0], [2, 2.6]] as const) {
+      const softBan = new THREE.MeshStandardMaterial({
+        map: paintBannerTex(bi + 1), roughness: 0.88, metalness: 0.04, side: THREE.DoubleSide, transparent: true, opacity: 0.92,
+      });
+      const ban = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 1.35), softBan);
       ban.position.set(bx, 5.35, -2.35);
       ban.rotation.z = (bx === 0 ? 0 : bx > 0 ? 0.05 : -0.05);
+      ban.castShadow = true;
       stage.add(ban);
     }
     // performers — apron-forward, depth-staggered so side/oblique still reads faces
@@ -286,23 +331,24 @@ export class TempleScene {
       for (const i of [-3, 3]) this.addLantern(
         new THREE.Vector3(i * 2.6, 5.1 - Math.cos((i / 3) * 1.2) * 0.4, z));
     }
-    // banners — soft crimson cloth (never harsh yellow plastic)
-    const bannerMat = new THREE.MeshStandardMaterial({
-      color: 0x4a1814, roughness: 0.98, metalness: 0, side: THREE.DoubleSide,
-      transparent: true, opacity: 0.72,
-    });
-    const bannerEdge = new THREE.MeshStandardMaterial({ color: 0x2e100e, roughness: 0.95 });
+    // v54: courtyard banners — calligraphy 万寿/赣戏 cloth on poles
+    const bannerEdge = new THREE.MeshStandardMaterial({ color: 0xc9a45a, roughness: 0.55, metalness: 0.35 });
+    let banSeed = 0;
     for (const x of [-10, 10]) for (const z of [-5, 5]) {
       const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 7, 8), wood);
       pole.position.set(x, 3.5, z);
       pole.castShadow = true;
       S.add(pole);
-      const flag = wbox(0.75, 2.8, 0.025, bannerMat);
+      const bannerMat = new THREE.MeshStandardMaterial({
+        map: paintBannerTex(banSeed++), roughness: 0.82, metalness: 0.05, side: THREE.DoubleSide,
+      });
+      const flag = new THREE.Mesh(new THREE.PlaneGeometry(0.78, 2.8), bannerMat);
       flag.position.set(x + (x > 0 ? -0.45 : 0.45), 4.7, z);
       flag.rotation.y = (x > 0 ? -0.08 : 0.08);
       flag.rotation.z = (x > 0 ? 0.04 : -0.04);
+      flag.castShadow = true;
       S.add(flag);
-      const trim = wbox(0.78, 0.08, 0.03, bannerEdge);
+      const trim = wbox(0.82, 0.08, 0.04, bannerEdge);
       trim.position.set(flag.position.x, 6.12, z);
       S.add(trim);
     }
