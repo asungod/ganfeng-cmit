@@ -19,7 +19,7 @@ const POSE: Record<ActId | "overview" | "kanxi" | "guanzhong", { eye: [number, n
   // judge views: actors from the front row, crowd faces from the stage apron
   // v25: further back, aim stage-right so trio clears left ws-panel
   kanxi: { eye: [2.15, 3.35, 1.4], look: [2.15, 2.85, 11.6] }, // v42: pull back from stage apron
-  guanzhong: { eye: [-3.6, 1.55, 7.2], look: [0.6, 0.85, 5.2] }, // v53r6: lower hip-line on sit crowd
+  guanzhong: { eye: [-3.2, 3.0, 9.4], look: [0.2, 0.8, 4.8] }, // v55: raised stage-side view — crowd, not one back
 };
 
 
@@ -100,7 +100,7 @@ export class TempleScene {
     this.controls.enableDamping = true;
     this.controls.maxPolarAngle = Math.PI * 0.49;
     this.controls.minPolarAngle = Math.PI * 0.32; // v40: keep mid-high floor
-    this.controls.minDistance = 8; // v36: keep orbits out of foliage
+    this.controls.minDistance = 4.0; // v55: 台上望众 designed at 4.7m — 8m clamp pulled it 70% away // v36: keep orbits out of foliage
     this.controls.maxDistance = 55;
     this.controls.target.set(...POSE.overview.look);
     this.flight = new Flight(this.camera, this.controls.target);
@@ -363,29 +363,21 @@ export class TempleScene {
     S.add(this.procession);
     // audience facing the stage — keep clear of stage apron / roof drip line
     // v51: seed i*3+2 cycles pose modes 0..7 (sit/lean/clap/…); yaw toward stage center
-    const crowdColors = [0x2e4a6a, 0x6a3a2a, 0x3a5a4a, 0x7a6040, 0x4a3a5a, 0x8a7a60, 0x5a2a2a, 0x3a4048];
+    const crowdColors = [0xb23a2e, 0x2f5f8a, 0x3f6b52, 0xd0a24a, 0x8a3f2a, 0xe8ddc8, 0x2a2f38, 0x6a4a7a]; // v55: 年画色，压掉灰蓝
     for (let i = 0; i < 28; i++) {
+      if (i === 11 || i === 19) continue; // v55: two gaps — break the 4x7 parade grid
       const row = Math.floor(i / 7), col = i % 7;
       const seed = i * 3 + 2; // mode = floor(seed/3)%8 = i%8 — even mix of sit/lean/idle/…
-      const sc = (row === 0 ? 1.0 : 0.94) + (i % 5) * 0.02; // front row slightly larger for mid-shot faces
+      const sc = (row === 0 ? 1.0 : 0.94) + (i % 5 - 2) * 0.018; // v55: jitter both ways
       const f = makeFigure(crowdColors[i % crowdColors.length], seed, sc, "crowd");
       // v37: start further from stage (was 6.5) so high-angle never clips heads through 戏台 eaves
-      const x = -4.8 + col * 1.6 + (row % 2) * 0.5 + Math.sin(i * 7.1) * 0.3;
-      const z = 4.8 - row * 1.2 + Math.cos(i * 3.3) * 0.2;
-      f.position.set(x, 0.04, z); // v53r10: plant hips on stool — kill float gap
+      // v55: loose arc + bigger jitter — reads as a crowd, not a formation
+      const x = -4.8 + col * 1.6 + (row % 2) * 0.5 + Math.sin(i * 7.1) * 0.55;
+      const z = 4.6 - row * 1.15 + Math.cos(i * 3.3) * 0.35 - Math.abs(col - 3) * 0.1;
+      f.position.set(x, 0.015, z); // v55: feet on ground (was 0.04, contact shadow floated)
       // v52: yaw firmly at stage apron (z=11.5); tiny personal offset only
       f.rotation.y = Math.atan2(-x, 11.5 - z) + (col - 3) * 0.025;
       this.audience.add(f);
-      // v53r1: stools under sit+lean (modes 6,7 dominate watching map)
-      if (i % 8 === 0 || i % 8 === 4 || i % 8 === 1 || i % 8 === 5 || i % 8 === 6) {
-        const stool = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.26, 0.28, 0.26, 8),
-          new THREE.MeshStandardMaterial({ color: 0x6a4a32, roughness: 0.92, metalness: 0.04 }),
-        );
-        stool.position.set(x, 0.13, z + 0.02); // v53r10: shorter stool under planted hips
-        stool.castShadow = true;
-        this.audience.add(stool);
-      }
     }
     S.add(this.audience);
     // ancient camphor trees behind the hall + pines outside the walls

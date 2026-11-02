@@ -557,15 +557,25 @@ function actorRig(role: ActorRole, _color: number): Rig {
     a.up.scale.x = s;
     body.add(a.up);
     arms.push({ s, up: a.up, lo: a.lo });
-    if (role !== "jing") { // 水袖 silk
-      const len = role === "dan" ? 0.7 : 0.38;
+    if (role !== "jing") { // 水袖 silk — v55: 收窄成垂坠绸片，去掉“白卡片”感
+      const len = role === "dan" ? 0.56 : 0.36;
       const w = part("shuixiu-" + role, [-0.09, -len, 0.12, 0.02], P * 0.6, (x) => {
-        const sh: P2[] = [[-0.06, 0.0], [0.1, 0.0], [0.11, -len * 0.5], [0.09, -len], [-0.07, -len], [-0.065, -len * 0.5]];
-        const g = x.createLinearGradient(0, 0, 0, -len); g.addColorStop(0, "#fbfbf6"); g.addColorStop(1, "#eef0ee");
-        shape(x, sh, g, 0.003, "#9aa0a0");
-        x.save(); x.globalAlpha = 0.25; for (let k = 0; k < 5; k++) line(x, [[-0.04 + k * 0.03, -0.01], [-0.045 + k * 0.032, -len * 0.5], [-0.05 + k * 0.034, -len + 0.01]], 0.004, "#a0a8a8"); x.restore();
-      }, { back: false, seg: [2, 14] });
-      w.g.position.set(0.02, role === "dan" ? -0.36 : -0.4, 0.018);
+        const sh: P2[] = [
+          [-0.05, 0.0], [0.075, 0.0], [0.088, -len * 0.32], [0.098, -len * 0.66],
+          [0.078, -len * 0.9], [0.03, -len], [-0.028, -len * 0.97], [-0.062, -len * 0.74],
+          [-0.058, -len * 0.34],
+        ];
+        const g = x.createLinearGradient(0, 0, 0, -len); g.addColorStop(0, "#f2ede2"); g.addColorStop(0.55, "#fbf7ec"); g.addColorStop(1, "#ddd8cb");
+        shape(x, sh, g, 0.003, "#8a8f8c");
+        x.save(); path(x, sh); x.clip();
+        // 6 道垂褶 + 底部压暗：读成丝，不是一块纯白矩形
+        for (let k = 0; k < 6; k++) line(x, [[-0.042 + k * 0.019, -0.01], [-0.05 + k * 0.021, -len * 0.5], [-0.036 + k * 0.019, -len * 0.96]], 0.0032, "#9a9d97");
+        const vg = x.createLinearGradient(0, -len * 0.55, 0, -len);
+        vg.addColorStop(0, "#f4efe4"); vg.addColorStop(1, "#cdc7b8");
+        x.fillStyle = vg; x.fillRect(-0.1, -len, 0.22, len * 0.45);
+        x.restore();
+      }, { back: true, seg: [2, 14] }); // v55: back layer + closer to cuff — no floating white card in side/high views
+      w.g.position.set(0.02, role === "dan" ? -0.32 : -0.36, 0.008);
       a.lo.add(w.g); extra["xiu" + s] = w;
     }
   }
@@ -787,7 +797,8 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
   const arms: Rig["arms"] = [];
   // v51b: watching crowd — denser sit/lean/clap/point (not all identical idle/拱手)
   const raw = Math.floor(seed / 3) % 8;
-  const mode = watching ? [6, 6, 6, 6, 6, 6, 7, 6][raw] : raw; // v53r5: sit-dominant (lean only 1/8) — audience read as seated
+  // v55: stand-watch mix — fan/chat/clap/lean break up the old two-pose crowd
+  const mode = watching ? [6, 2, 6, 5, 6, 7, 1, 6][raw] : raw;
   // v25: cloth-like 拱手/clap sleeves — wide hanging folds, not tube-to-tube
   const thickArm = mode === 1 || mode === 3;
   for (const s of [-1, 1]) {
@@ -898,22 +909,21 @@ export function makeVillager(color: number, seed: number, scale: number, watchin
       body.position.y = Math.sin(t * 1.3) * 0.004;
       set(A, 0.08, -0.4); set(B, 0.08, -0.4);
       head.rotation.z = Math.sin(t * 0.6) * 0.14;
-    } else if (mode === 6) { // v52 sit-watch — plant on stool, stronger squat
-      body.position.y = -0.34 + Math.sin(t * 1.1) * 0.003; // v53r10: hips meet stool — no float
-      body.scale.y += (0.86 - body.scale.y) * 0.28;
-      body.rotation.x += (0.14 - body.rotation.x) * 0.28; // seated watch, not deep bow
-      set(A, -0.9 + Math.sin(t * 0.7) * 0.03, -1.7, 0.6);
-      set(B, -0.82 + Math.sin(t * 0.9) * 0.03, -1.62, 0.6);
+    } else if (mode === 6) { // v55 stand-watch: no sunk slab, no stool-as-pedestal
+      body.position.y = Math.sin(t * 1.1) * 0.003;
+      body.scale.y += (1 - body.scale.y) * 0.28;
+      body.rotation.x += (0.06 - body.rotation.x) * 0.28;
+      set(A, 0.03 + Math.sin(t * 0.7) * 0.025, -0.3, 0.9);
+      set(B, -0.02 + Math.sin(t * 0.9) * 0.025, -0.24, 0.9);
       head.position.y = 1.4;
-      head.rotation.z = 0.07 + Math.sin(t * 0.45) * 0.05;
-    } else if (mode === 7) { // v51 lean-watch — soft crouch lean (not full stand)
-      body.position.y = -0.14 + Math.sin(t * 1.3) * 0.004; // v53r6
-      body.rotation.x += (0.12 - body.rotation.x) * 0.25;
+      head.rotation.z = 0.05 + Math.sin(t * 0.45) * 0.05;
+    } else if (mode === 7) { // v55 lean-watch: feet stay planted, soft forward lean
+      body.position.y = Math.sin(t * 1.3) * 0.004;
+      body.rotation.x += (0.09 - body.rotation.x) * 0.25;
       set(A, -0.22 + Math.sin(t * 0.8) * 0.04, -0.95, 0.65);
       set(B, -0.08 + Math.sin(t * 0.7) * 0.03, -0.55, 0.8);
       head.position.y = 1.4;
       head.rotation.z = 0.08 + Math.sin(t * 0.5) * 0.04;
-      // v52: slight chin tip only — no body lean that lifts feet
       head.rotation.z = 0.1 + Math.sin(t * 0.5) * 0.04;
     } else { // idle watch — soft sway, slight asymmetric head tip toward stage
       body.position.y = Math.sin(t * 1.3) * 0.004;
