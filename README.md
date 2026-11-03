@@ -5,7 +5,7 @@
 本仓库参加全国大学生数字媒体科技作品及创意竞赛（CMIT）**第十四届（2026）指定命题「科技+创意，讲好中国故事」**（国际赛道口径：auditable constraints / checkable sources / on-device guide）。
 
 - 离线一键运行：见 [运行环境.md](运行环境.md)（`sh scripts/package.sh` 生成 `release/赣风-离线版.zip`，Windows 双击 start.bat）。
-- 出处登记：`src/data/sources.ts`（20 条，19 条已直接核对，1 条部分核对）；第三方许可：[THIRD_PARTY.md](THIRD_PARTY.md)。
+- 出处登记：`src/data/sources.ts`（25 条，全部已直接打开页面核对；其中 2 条为二手资料，文内注明）；第三方许可：[THIRD_PARTY.md](THIRD_PARTY.md)。
 
 > 事实性说明均绑定公开出处（审计面板可展开原文摘录）；核不到的条目标「待核 / 示例」。器型是程序模型、围屋平面是示意图，不是馆藏实物或实地测绘。
 

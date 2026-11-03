@@ -773,15 +773,15 @@ function makeFurniture(wood: THREE.Material, lac: THREE.Material) {
   const brick = new THREE.MeshStandardMaterial({ color: 0x8a6a58, roughness: 0.95 });
   const iron = new THREE.MeshStandardMaterial({ color: 0x1e1c1a, roughness: 0.5, metalness: 0.6 });
   const pot = new THREE.MeshStandardMaterial({ color: 0x4a3426, roughness: 0.35 });
-  // v54: mid 红木棕 — warm readable under noon, still wood not plastic scarlet
-  const grain = woodGrainMap("#b08a5c", "#5a3820");
+  // v56: 再压一档红木棕——近景椅背/供桌在烛光下不再发橙
+  const grain = woodGrainMap("#a07a4e", "#4e301a");
   const rose = (lac as THREE.MeshStandardMaterial).clone();
-  rose.map = grain; rose.color = new THREE.Color(0x8a6a48); rose.roughness = 0.9; rose.metalness = 0.02;
-  rose.envMapIntensity = 0.1;
+  rose.map = grain; rose.color = new THREE.Color(0x76502f); rose.roughness = 0.9; rose.metalness = 0.02;
+  rose.envMapIntensity = 0.07;
   const L = rose;
   const apron = (lac as THREE.MeshStandardMaterial).clone();
-  apron.map = grain; apron.color = new THREE.Color(0x6a4c32); apron.roughness = 0.92; apron.metalness = 0.02;
-  apron.envMapIntensity = 0.09;
+  apron.map = grain; apron.color = new THREE.Color(0x5a3e26); apron.roughness = 0.92; apron.metalness = 0.02;
+  apron.envMapIntensity = 0.06;
   const A = apron;
   const addHoof = (g: THREE.Group, x: number, z: number, m: THREE.Material) => {
     g.add(box(0.12, 0.045, 0.12, m, x, 0.03, z));

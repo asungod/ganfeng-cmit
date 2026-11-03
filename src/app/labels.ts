@@ -232,6 +232,8 @@ export function mountAsk(
   }
 
   function show(res: AskResult): void {
+    // v56: 切馆后旧的异步答案不再写入新展柜，也不再从新馆喇叭朗读
+    if (!box.isConnected) return;
     const trace = box.querySelector("[data-ask-trace]") as HTMLElement | null;
     if (trace) {
       const via = res.via ?? "none";
