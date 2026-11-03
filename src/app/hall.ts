@@ -50,23 +50,23 @@ export function mountHall(root: HTMLElement): () => void {
             <span class="door-index">02</span>
             <span class="door-en">${L("Tengwang", "Tengwang Preface")}</span>
           </span>
-          <span data-no-tr class="door-v" aria-label="Tengwang Preface / 阁序" title="Tengwang Pavilion Preface"><span>阁</span><span>序</span></span>
+          <span data-no-tr class="door-v" aria-label="${routeName("gexu")}" title="Tengwang Pavilion Preface"><span>阁</span><span>序</span></span>
           <span class="door-rule" aria-hidden="true"></span>
-          <span class="door-desc">${L("点落霞、孤鹜、秋水，画面钉回王勃原句。", "Tap sunset clouds, lone duck, autumn water; each view pins to Wang Bo's line.")}</span>
+          <span class="door-desc">${L("点落霞、孤鹜、秋水，画面钉回王勃原句。", "Tap sunset clouds, the lone wild duck, autumn water; each view pins to Wang Bo's line.")}</span>
         </button>
         <button type="button" class="door" data-go="kejia">
           <span class="door-head">
             <span class="door-index">03</span>
-            <span class="door-en">${L("Gannan", "Hakka Walled House")}</span>
+            <span class="door-en">${L("Gannan", "Hakka Weiwu")}</span>
           </span>
-          <span data-no-tr class="door-v" aria-label="Hakka Weiwu / 客家" title="Hakka Walled Residences"><span>客</span><span>家</span></span>
+          <span data-no-tr class="door-v" aria-label="${routeName("kejia")}" title="Hakka Walled Residences"><span>客</span><span>家</span></span>
           <span class="door-rule" aria-hidden="true"></span>
           <span class="door-desc">${L("按时辰走进围屋的每一个房间。", "Walk room by room through a weiwu (walled house), hour by hour.")}</span>
         </button>
         <button type="button" class="door door-demo" data-go="wanshou">
           <span class="door-head">
             <span class="door-index">04</span>
-            <span class="door-en">${L("Wanshou", "Wanshou Fair")}</span>
+            <span class="door-en">${L("Wanshou", "Wanshou Palace · Demo")}</span>
           </span>
           <span data-no-tr class="door-v" aria-label="${routeName("wanshou")}"><span>万</span><span>寿</span><span>宫</span></span>
           <span class="door-rule" aria-hidden="true"></span>

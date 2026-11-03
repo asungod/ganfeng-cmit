@@ -1,5 +1,10 @@
 /** 馆方讲解：浏览器 SpeechSynthesis，无云端、无 Key。默认开启；顶栏可关。未手势时先入队，afterUserGesture 补播。 */
 
+import { getLang } from "./i18n";
+import { HAN, tr } from "../i18n/contentEn";
+
+export type SpeakOpts = { keepZh?: boolean };
+
 export class Guide {
   enabled = true;
   private voice: SpeechSynthesisVoice | null = null;
@@ -32,9 +37,11 @@ export class Guide {
     if (this.lineEl) this.lineEl.textContent = "";
   }
 
-  speak(text: string): void {
-    const clean = text.replace(/\s+/g, " ").trim();
-    if (!clean) return;
+  speak(text: string, opts: SpeakOpts = {}): void {
+    const raw = text.replace(/\s+/g, " ").trim();
+    if (!raw) return;
+    // v55: EN mode uses the same string for the caption and the voice; classical lines can opt out.
+    const clean = opts.keepZh || getLang() !== "en" ? raw : (tr(raw) ?? raw);
     // Visitor default: no floating bubble over the 3D stage unless 讲解 is on.
     if (!this.enabled) {
       if (this.lineEl) this.lineEl.textContent = "";
@@ -63,12 +70,14 @@ export class Guide {
     if (!synth) return;
     this.hardCancel();
     this.warm();
+    const en = getLang() === "en" && !HAN.test(clean);
     const u = new SpeechSynthesisUtterance(clean);
-    u.lang = "zh-CN";
-    u.rate = 0.92;
+    u.lang = en ? "en-US" : "zh-CN";
+    u.rate = en ? 0.96 : 0.92;
     u.pitch = 1;
     u.volume = 1;
-    if (this.voice) u.voice = this.voice;
+    // Only pin a voice that matches the target language; otherwise let the browser pick by u.lang.
+    if (this.voice && (en ? this.voice.lang.startsWith("en") : this.voice.lang.startsWith("zh"))) u.voice = this.voice;
     u.onstart = () => {
       if (this.queued === clean) this.queued = null;
     };
@@ -104,6 +113,13 @@ export class Guide {
     if (!synth) return;
     const pick = () => {
       const list = synth.getVoices();
+      if (getLang() === "en") {
+        this.voice =
+          list.find((v) => v.lang.startsWith("en") && /female|Samantha|Zira|Aria|Jenny|Google US English/i.test(v.name)) ??
+          list.find((v) => v.lang.startsWith("en")) ??
+          null;
+        return;
+      }
       this.voice =
         list.find((v) => /zh-CN|zh_CN/.test(v.lang) && /female|Xiaoxiao|Xiaoyi|Tingting|Huihui|Yaoyao|Chinese/.test(v.name)) ??
         list.find((v) => v.lang.startsWith("zh")) ??

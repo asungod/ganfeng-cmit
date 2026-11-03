@@ -426,10 +426,10 @@ export function mountTengwang(root: HTMLElement): () => void {
     }
     if (firstVisit) {
       firstVisit = false;
-      // 进厅即朗读序文选段（公有领域）；讲解关闭仍可 hard-stop。
-      guide.speak(poemLines.join(""));
+      // 进厅即朗读序文选段（公有领域）；讲解关闭仍可 hard-stop。v55: 古文始终中文吟诵
+      guide.speak(poemLines.join(""), { keepZh: true });
     } else {
-      guide.speak(lines.verse(motif.name, motif.couplet));
+      guide.speak(lines.verse(motif.name, motif.couplet), { keepZh: true });
     }
     if (kind === "mood") {
       await pipe.run(`把画面节令锁为「${m.name}」：${m.line}`);

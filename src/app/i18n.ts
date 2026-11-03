@@ -92,29 +92,29 @@ const ZH: Dict = {
 
 const EN: Dict = {
   "ask.send": "Ask",
-  "ws.camK": "Viewing spot",
-  "ws.camKanxi": "Close to stage",
-  "ws.camCrowd": "Stage view of crowd",
+  "ws.camK": "Opera-view camera",
+  "ws.camKanxi": "Opera stage close-up",
+  "ws.camCrowd": "Audience seen from the stage",
   "boot.k": "Opening",
   "boot.s": "A Conversational Digital Exhibition",
-  "chrome.muteOff": "Sound off",
-  "chrome.muteOn": "Sound on",
+  "chrome.muteOff": "Soundscape off",
+  "chrome.muteOn": "Soundscape on",
   "chrome.guideOff": "Guide off",
   "chrome.guideOn": "Guide on",
   "chrome.lang": "中文",
-  "chrome.langTitle": "切换为中文 / Switch to Chinese",
+  "chrome.langTitle": "Switch to Chinese",
   "route.hall": "Lobby",
   "route.ciyu": "Porcelain Whispers",
   "route.gexu": "Tengwang Preface",
   "route.kejia": "Hakka Weiwu",
-  "route.wanshou": "Wanshou Palace (demo)",
+  "route.wanshou": "Wanshou Palace · demo",
   "route.guide": "Honesty statement",
   "compat.ok": "Compatible",
   "compat.stretch": "Borderline",
   "compat.conflict": "Conflict",
   "sys.lockNone": "No exhibit locked",
   "sys.stateOk": "OK",
-  "sys.stateRewrite": "Resolved",
+  "sys.stateRewrite": "Re-locked",
   "sys.retrieve.lex": "lexical",
   "sys.retrieve.loading": "loading",
   "sys.retrieve.idle": "idle",
@@ -138,7 +138,7 @@ const EN: Dict = {
   "ask.hint.kejia": "Try: Are weiwu (walled houses) and tulou the same?",
   "ask.via.bge": "Path: on-device retrieval",
   "ask.via.lex": "Path: lexical search",
-  "ask.via.slip": "Path: bank question",
+  "ask.via.slip": "Path: exact question-bank match",
   "ask.via.none": "Path: not in bank",
   "ask.diff.same": "Diff: same hit",
   "ask.diff.diff": "Diff: different hits",
@@ -159,7 +159,7 @@ const EN: Dict = {
   "ev.claim": "Rule basis",
   "ev.none": "No publicly checkable excerpt (design note or pending).",
   "ev.verify": "Verify · similar cases",
-  "ev.verifyHint": "Click Try it to replay on the factory table and compare.",
+  "ev.verifyHint": "Click Try it to replay with the default constraint table and compare against the basis.",
   "ev.try": "Try it",
   "ev.expect": "Expected",
   "ev.drift": "Table now reads",
@@ -199,11 +199,18 @@ export function routeName(id: string): string {
   return t(`route.${id}` in ZH ? `route.${id}` : "route.hall");
 }
 
+const TITLE_ZH = "赣风 · 可对话的数字展";
+const TITLE_EN = "Ganfeng · A Conversational Digital Exhibition";
+function applyTitle(): void {
+  document.title = lang === "en" ? TITLE_EN : TITLE_ZH;
+}
+
 export function setLang(next: Lang): void {
   if (next === lang) return;
   lang = next;
   localStorage.setItem("gf-lang", next);
   document.documentElement.lang = next === "en" ? "en" : "zh-CN";
+  applyTitle();
   listeners.forEach((fn) => fn());
 }
 
@@ -224,4 +231,4 @@ export function tagLabel(tag: string): string {
   return tag;
 }
 
-if (lang === "en") document.title = "Ganfeng · A Conversational Digital Exhibition";
+applyTitle();
