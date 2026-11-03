@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { inkGoose } from "./guofeng";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Water } from "three/examples/jsm/objects/Water.js";
-import { lowPower, shadowSize, Flight, loadHdri, makePost, makeTree, particles, phMat, skyBand, type Post } from "./kit";
+import { disposeScene, lowPower, shadowSize, Flight, loadHdri, makePost, makeTree, particles, phMat, skyBand, type Post } from "./kit";
 import type { ImageId, MoodId } from "../data/tengwang";
 
 const MARK: Record<ImageId, THREE.Vector3> = {
@@ -56,13 +56,15 @@ export class PavilionScene {
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: !lowPower() }); // v55: 低端机省 MSAA
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower() ? 1 : 1.5));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 0.7; // v51: clearer dusk gradient + 阁 silhouette
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = lowPower() ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap; // v55: 低端用 PCF
+    // v55: 静景阴影冻结，applyMood 时 needsUpdate 一次
+    this.renderer.shadowMap.autoUpdate = false;
 
     this.scene = new THREE.Scene();
     this.fog = new THREE.FogExp2(0xb0744a, 0.006); // v51: warmer thinner — 江面 catch not muddied
@@ -201,13 +203,9 @@ export class PavilionScene {
     this.disposed = true;
     cancelAnimationFrame(this.raf);
     this.controls.dispose();
-    this.scene.traverse((obj) => {
-      if (obj instanceof THREE.Mesh) {
-        obj.geometry.dispose();
-        const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
-        for (const m of mats) m.dispose();
-      }
-    });
+    // v55: 释放后处理链 + 环境/背景贴图（disposeScene 内含）
+    this.post?.dispose();
+    disposeScene(this.scene);
     this.renderer.dispose();
   }
 
@@ -358,6 +356,8 @@ export class PavilionScene {
       this.flight.go(eye, look, 2.0);
     }
     if (this.started) this.lastKey = key;
+    // v55: 心情/焦点切换会改阳光方向与强度，重建一次冻结的阴影贴图
+    this.renderer.shadowMap.needsUpdate = true;
   }
 }
 

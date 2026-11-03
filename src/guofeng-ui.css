@@ -58,7 +58,6 @@ html[lang="en"] .ex-bar .ex-crumb span { display: block; max-width: 34rem; white
 .immersive .plan-wrap .plan-wall { stroke: #8a2a1c; stroke-width: 1.6; }
 .immersive .plan-wrap .plan-inner { stroke: rgba(90,60,40,0.55); fill: rgba(47,95,138,0.06); }
 .immersive .plan-wrap .plan-room rect { stroke: rgba(90,60,40,0.5); fill: rgba(255,250,236,0.35); }
-.immersive .plan-wrap .plan-room text { fill: #4a3426; }
 .immersive .plan-wrap .plan-room text { fill: #3a2c22; font-size: 3.5px; font-weight: 700; }
 .immersive .plan-wrap .plan-room.is-on rect { fill: rgba(138,42,28,0.16); stroke: #8a2a1c; }
 .immersive .plan-wrap .plan-room.is-on text { fill: #2a1d14; }
@@ -92,4 +91,11 @@ html[lang="en"] .ex-bar .ex-crumb span { display: block; max-width: 34rem; white
 /* v55: 门厅序号在宣纸上的对比度（原金 on 纸约 1.9:1） */
 .door .door-index { color: #8a2a1c; }
 .hall .door { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; border-radius: 2px; }
+/* 瓷语仍是深色玻璃左栏：折叠标题用亮金，不套宣纸浅底 */
+.wall-left details > summary,
+.wall-left .matrix-sum {
+  color: #e8c890 !important;
+  background: rgba(255, 240, 210, 0.06) !important;
+  border-bottom: 1px solid rgba(232, 200, 144, 0.2) !important;
+}
 

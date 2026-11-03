@@ -158,41 +158,44 @@ export function contactShadow(w = 0.75, d = 0.42): THREE.Mesh {
 }
 /** Cardboard thickness — side/close read an edge; high elev must NOT show pale slab tops. */
 const BOARD = 0.145; // v50: thicker cardboard — side/oblique reads edge, not flat paper
-function part(key: string, b: [number, number, number, number], ppm: number, draw: Draw, opts: { back?: boolean; seg?: [number, number]; z?: number } = {}): Part {
+function part(key: string, b: [number, number, number, number], ppm: number, draw: Draw, opts: { back?: boolean; seg?: [number, number]; z?: number; rim?: boolean; shadow?: boolean } = {}): Part {
   const [x0, y0, x1, y1] = b;
   const seg = opts.seg ?? [1, 1];
   const geo = new THREE.PlaneGeometry(x1 - x0, y1 - y0, seg[0], seg[1]);
   geo.translate((x0 + x1) / 2, (y0 + y1) / 2, 0);
   const g = new THREE.Group();
   const z0 = opts.z ?? 0;
-  const front = paperTexMesh(key + ":f", b, ppm, (x) => draw(x, false), geo, opts.back === false ? THREE.DoubleSide : THREE.FrontSide);
+  const front = paperTexMesh(key + ":f", b, ppm, (x) => draw(x, false), geo, opts.back === false ? THREE.DoubleSide : THREE.FrontSide, opts.shadow !== false);
   front.position.z = z0 + BOARD / 2;
   g.add(front);
   if (opts.back !== false) {
-    const back = paperTexMesh(key + ":b", b, ppm, (x) => draw(x, true), geo, THREE.BackSide);
+    const back = paperTexMesh(key + ":b", b, ppm, (x) => draw(x, true), geo, THREE.BackSide, opts.shadow !== false);
     back.position.z = z0 - BOARD / 2;
     g.add(back);
   }
-  const rim = rimMat(front.material as THREE.MeshStandardMaterial);
-  // v40: thickness fill ONLY — no oversized outline (was harsh black alpha fringe)
-  const layers = 3; // v50: denser rim sandwich so side silhouette holds
-  for (let i = 0; i < layers; i++) {
-    const m = new THREE.Mesh(geo, rim);
-    m.position.z = z0 - BOARD / 2 + (i + 0.5) * (BOARD / layers);
-    m.scale.set(1.0, 1.0, 1);
-    m.renderOrder = -1;
-    m.userData.paperEdge = true;
-    g.add(m);
+  // v56: optional thickness rim — thin 皮影 side-face cards skip it (no black edge line)
+  if (opts.rim !== false) {
+    const rim = rimMat(front.material as THREE.MeshStandardMaterial);
+    // v40: thickness fill ONLY — no oversized outline (was harsh black alpha fringe)
+    const layers = 3; // v50: denser rim sandwich so side silhouette holds
+    for (let i = 0; i < layers; i++) {
+      const m = new THREE.Mesh(geo, rim);
+      m.position.z = z0 - BOARD / 2 + (i + 0.5) * (BOARD / layers);
+      m.scale.set(1.0, 1.0, 1);
+      m.renderOrder = -1;
+      m.userData.paperEdge = true;
+      g.add(m);
+    }
   }
   // v40b: no solid bbox end-grain caps — they read as black bars/frames at mid-high.
   // Cardboard thickness = silhouette-matched rim sandwich only (alphaTest).
   return { g, geo, base: Float32Array.from(geo.attributes.position.array as Float32Array) };
 }
-function paperTexMesh(key: string, b: [number, number, number, number], ppm: number, draw: (x: Ctx) => void, geo: THREE.BufferGeometry, side: THREE.Side): THREE.Mesh {
+function paperTexMesh(key: string, b: [number, number, number, number], ppm: number, draw: (x: Ctx) => void, geo: THREE.BufferGeometry, side: THREE.Side, cast = true): THREE.Mesh {
   const map = paintTex(key, b, ppm, draw);
   const m = new THREE.Mesh(geo, paperMat(map, side));
-  m.castShadow = true;
-  m.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map, alphaTest: 0.58, side: THREE.DoubleSide });
+  m.castShadow = cast;
+  if (cast) m.customDepthMaterial = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map, alphaTest: 0.58, side: THREE.DoubleSide });
   return m;
 }
 /** flowing cloth: displace vertices by distance from pivot */
@@ -347,6 +350,133 @@ function paintFace(x: Ctx, kind: Face, skin: string, cy: number, seed: number): 
 }
 
 /* ------------------------------------------------------------------ actors */
+/** v56: narrow 皮影 side-face card. Canonical profile faces +x; side>0 is mirrored
+ *  so the painted face turns toward the head side the card is mounted on. */
+function paintProfileFace(x: Ctx, role: ActorRole, skin: string, cy: number, side: number): void {
+  x.save();
+  if (side > 0) x.scale(-1, 1);
+  const base = role === "jing" ? "#e0402e" : skin;
+  // neck first, so the jaw/beard layers sit over it
+  shape(x, [[-0.034, cy - 0.072], [0.016, cy - 0.080], [0.022, cy - 0.205], [-0.038, cy - 0.205]], shade(base, -0.16), 0.002);
+  // profile silhouette: forehead → brow → nose → lips → chin → jaw → back skull
+  const prof: P2[] = [
+    [0.006, cy + 0.118], [0.031, cy + 0.090], [0.041, cy + 0.042], [0.032, cy + 0.016],
+    [0.051, cy - 0.006], [0.037, cy - 0.024], [0.041, cy - 0.034], [0.046, cy - 0.043],
+    [0.040, cy - 0.053], [0.031, cy - 0.078], [0.010, cy - 0.098], [-0.012, cy - 0.104],
+    [-0.029, cy - 0.118], [-0.040, cy - 0.100], [-0.047, cy - 0.040], [-0.046, cy + 0.030],
+    [-0.038, cy + 0.080], [-0.016, cy + 0.113],
+  ];
+  shape(x, prof, base, 0.003);
+  // soft side shading toward the back of the skull (clipped to the face)
+  x.save(); path(x, prof); x.clip();
+  const sideSh = x.createLinearGradient(-0.047, 0, 0.018, 0);
+  sideSh.addColorStop(0, role === "jing" ? "rgba(70,10,8,0.26)" : "rgba(96,54,34,0.20)");
+  sideSh.addColorStop(0.62, "rgba(96,54,34,0)");
+  x.fillStyle = sideSh; x.fillRect(-0.06, cy - 0.13, 0.11, 0.27);
+  x.restore();
+  if (role !== "jing") { // 胭脂 / 血色 — same palette as paintFace
+    x.save(); x.translate(0.018, cy + 0.004); x.scale(1, 1.15);
+    const g = x.createRadialGradient(0, 0, 0.004, 0, 0, 0.058);
+    g.addColorStop(0, role === "dan" ? "rgba(232,96,120,0.85)" : "rgba(220,110,90,0.52)");
+    g.addColorStop(0.7, role === "dan" ? "rgba(236,120,140,0.42)" : "rgba(220,120,100,0.2)");
+    g.addColorStop(1, "rgba(240,140,150,0)");
+    x.fillStyle = g; x.beginPath(); x.arc(0, 0, 0.058, 0, Math.PI * 2); x.fill(); x.restore();
+    ell(x, 0.034, cy + 0.028, 0.0038, 0.024, "rgba(255,250,245,0.7)", 0); // nose-bridge highlight
+  }
+  // nose bridge / tip / nostril
+  line(x, [[0.033, cy + 0.036], [0.035, cy + 0.010], [0.043, cy - 0.002], [0.051, cy - 0.007]], 0.0025, shade(base, -0.35));
+  ell(x, 0.045, cy - 0.019, 0.0032, 0.0018, shade(base, -0.46), 0);
+  line(x, [[0.037, cy - 0.023], [0.047, cy - 0.021]], 0.0018, shade(base, -0.3));
+  if (role === "jing") {
+    // 花脸 side: black eye socket + white eye patch, 印堂 stripe, cheek swirl, mouth patch
+    shape(x, [[0.003, cy + 0.058], [0.031, cy + 0.066], [0.047, cy + 0.040], [0.043, cy + 0.006], [0.024, cy - 0.014], [0.005, cy + 0.002]], "#151012", 0.005, "#fbf4e6");
+    shape(x, [[0.012, cy + 0.040], [0.032, cy + 0.044], [0.042, cy + 0.026], [0.036, cy + 0.012], [0.018, cy + 0.014]], "#fbf6ee", 0);
+    ell(x, 0.028, cy + 0.024, 0.0068, 0.0062, "#100806", 0.002);
+    ell(x, 0.030, cy + 0.026, 0.0024, 0.0024, "#ffffff", 0);
+    shape(x, [[0.020, cy + 0.112], [0.031, cy + 0.112], [0.038, cy + 0.056], [0.024, cy + 0.048], [0.016, cy + 0.058]], "#f4efe6", 0);
+    shape(x, [[0.024, cy + 0.104], [0.029, cy + 0.104], [0.032, cy + 0.062], [0.023, cy + 0.062]], "#e0202a", 0);
+    line(x, [[0.030, cy - 0.038], [0.044, cy - 0.044], [0.050, cy - 0.066]], 0.007, "#151012");
+    line(x, [[0.034, cy + 0.060], [0.046, cy + 0.082]], 0.005, "#151012");
+    shape(x, [[0.024, cy - 0.046], [0.043, cy - 0.042], [0.041, cy - 0.062], [0.030, cy - 0.068], [0.022, cy - 0.058]], "#151012", 0.004, "#fbf4e6");
+    shape(x, [[0.030, cy - 0.052], [0.038, cy - 0.050], [0.034, cy - 0.060]], "#e0202a", 0);
+  } else {
+    // single 丹凤眼 / 老生眼 (outer corner flicks up toward the temple, -x in canonical space)
+    const ex = 0.026, ey = cy + 0.018;
+    path(x, [[ex + 0.014, ey + 0.003], [ex + 0.004, ey + 0.010], [ex - 0.014, ey + 0.015], [ex - 0.020, ey + 0.022], [ex - 0.010, ey - 0.001], [ex + 0.006, ey - 0.004]]);
+    x.fillStyle = "#fbf7f0"; x.fill(); x.lineWidth = 0.0032; x.strokeStyle = INK; x.stroke();
+    ell(x, ex + 0.001, ey + 0.005, 0.0065, 0.0064, "#1a1008", 0);
+    ell(x, ex + 0.001, ey + 0.005, 0.0036, 0.0038, "#080402", 0);
+    ell(x, ex + 0.0035, ey + 0.0075, 0.0018, 0.0018, "#ffffff", 0);
+    line(x, [[ex + 0.014, ey + 0.006], [ex + 0.002, ey + 0.011], [ex - 0.014, ey + 0.017], [ex - 0.024, ey + 0.025]], 0.0034, INK);
+    if (role === "dan") {
+      path(x, [[0.010, cy + 0.036], [0.026, cy + 0.045], [0.041, cy + 0.049], [0.035, cy + 0.039], [0.019, cy + 0.031]]);
+    } else {
+      path(x, [[0.008, cy + 0.038], [0.027, cy + 0.051], [0.045, cy + 0.055], [0.036, cy + 0.040], [0.017, cy + 0.031]]);
+    }
+    x.fillStyle = INK; x.fill();
+    if (role === "dan") { // 樱桃小口
+      shape(x, [[0.026, cy - 0.043], [0.034, cy - 0.039], [0.043, cy - 0.043], [0.035, cy - 0.052], [0.028, cy - 0.049]], "#c8102e", 0.0015);
+    } else { // 老生: thin lip line, moustache, 法令纹, forehead creases
+      line(x, [[0.024, cy - 0.043], [0.035, cy - 0.046], [0.044, cy - 0.042]], 0.0045, "#8a2a20");
+      line(x, [[0.036, cy - 0.034], [0.044, cy - 0.040], [0.047, cy - 0.055]], 0.003, "#151214");
+      line(x, [[0.034, cy - 0.030], [0.026, cy - 0.058]], 0.0022, shade(skin, -0.3));
+      line(x, [[0.030, cy - 0.012], [0.040, cy - 0.020]], 0.0018, shade(skin, -0.3));
+      for (const dy of [0.078, 0.090, 0.101]) line(x, [[0.012, cy + dy], [0.032, cy + dy - 0.004]], 0.0016, shade(skin, -0.22));
+    }
+  }
+  if (role === "dan") {
+    // 大头 side: black hair cap, 大柳 side lock, pearls, 点翠 flowers, 发簪, 流苏
+    shape(x, [[-0.048, cy + 0.030], [-0.042, cy + 0.085], [-0.016, cy + 0.122], [0.008, cy + 0.116], [0.020, cy + 0.096], [0.002, cy + 0.078], [-0.008, cy + 0.030], [-0.012, cy - 0.015], [-0.030, cy - 0.005], [-0.038, cy + 0.020]], "#0e0b0c", 0.002, "#3a3036");
+    ell(x, -0.008, cy + 0.002, 0.013, 0.021, shade(skin, -0.03), 0.0025); // ear
+    line(x, [[-0.012, cy + 0.010], [-0.004, cy + 0.008], [-0.002, cy - 0.006], [-0.008, cy - 0.012]], 0.002, shade(skin, -0.3));
+    shape(x, [[0.004, cy + 0.082], [0.020, cy + 0.070], [0.028, cy + 0.030], [0.022, cy - 0.012], [0.012, cy - 0.006], [0.016, cy + 0.032], [0.008, cy + 0.064]], "#0e0b0c", 0.002, "#3a3036");
+    line(x, [[0.014, cy + 0.060], [0.018, cy + 0.020], [0.014, cy - 0.004]], 0.002, "rgba(120,110,130,0.5)");
+    for (let k = 0; k < 4; k++) ell(x, 0.014 - k * 0.012, cy + 0.118 - k * 0.002, 0.006, 0.006, "#f4f4f8", 0.0015, "#8890a0");
+    for (const [px, py, rr] of [[-0.020, cy + 0.125, 0.018], [-0.040, cy + 0.082, 0.014]] as const) {
+      for (let p = 0; p < 6; p++) { const a = (p / 6) * Math.PI * 2; ell(x, px + Math.cos(a) * rr * 0.6, py + Math.sin(a) * rr * 0.6, rr * 0.42, rr * 0.42, "#2a7ab0", 0.0015, "#163a60"); }
+      ell(x, px, py, rr * 0.33, rr * 0.33, "#f0d8e0", 0.0015);
+    }
+    line(x, [[-0.024, cy + 0.135], [-0.055, cy + 0.195]], 0.004, GOLD_D);
+    line(x, [[-0.030, cy + 0.146], [-0.057, cy + 0.200]], 0.002, GOLD);
+    ell(x, -0.056, cy + 0.196, 0.007, 0.007, "#f0d8e0", 0.002, GOLD_D);
+    for (let k = 0; k < 3; k++) {
+      line(x, [[-0.030 - k * 0.006, cy + 0.050], [-0.032 - k * 0.007, cy - 0.010]], 0.002, "#c8ccd8");
+      ell(x, -0.032 - k * 0.007, cy - 0.014, 0.003, 0.003, "#f4f4f8", 0.001, "#8890a0");
+    }
+  } else if (role === "laosheng") {
+    // 纱帽 side: black gauze cap, gold band, jade, 帽翅 wing, 鬓髯 + 三绺髯 side
+    shape(x, [[-0.050, cy + 0.030], [-0.047, cy + 0.108], [-0.020, cy + 0.150], [0.012, cy + 0.142], [0.032, cy + 0.108], [0.014, cy + 0.090], [-0.018, cy + 0.083], [-0.034, cy + 0.055]], "#18161a", 0.003, "#4a4650");
+    line(x, [[0.030, cy + 0.088], [-0.044, cy + 0.086]], 0.007, GOLD);
+    ell(x, -0.008, cy + 0.118, 0.012, 0.012, "#7ac0a0", 0.0025, GOLD);
+    ell(x, -0.034, cy + 0.157, 0.036, 0.019, "#1c1a20", 0.004, GOLD);
+    ell(x, -0.034, cy + 0.157, 0.024, 0.011, null, 0.002, "#5a5660");
+    ell(x, -0.008, cy + 0.002, 0.013, 0.021, shade(skin, -0.03), 0.0025); // ear
+    line(x, [[-0.012, cy + 0.010], [-0.004, cy + 0.008], [-0.002, cy - 0.006], [-0.008, cy - 0.012]], 0.002, shade(skin, -0.3));
+    shape(x, [[-0.004, cy + 0.024], [0.014, cy + 0.010], [0.016, cy - 0.030], [-0.002, cy - 0.062], [-0.014, cy - 0.030], [-0.010, cy + 0.008]], "#151214", 0);
+    for (const [ox, len, w] of [[0.020, 0.125, 0.014], [0.000, 0.150, 0.017], [-0.022, 0.115, 0.013]] as const) {
+      x.beginPath(); x.moveTo(ox - w, cy - 0.055);
+      x.quadraticCurveTo(ox - w * 1.05, cy - 0.055 - len * 0.55, ox, cy - 0.055 - len);
+      x.quadraticCurveTo(ox + w * 1.05, cy - 0.055 - len * 0.55, ox + w, cy - 0.055);
+      x.fillStyle = "#151214"; x.fill(); x.lineWidth = 0.002; x.strokeStyle = "#151214"; x.stroke();
+    }
+    line(x, [[-0.006, cy - 0.032], [0.030, cy - 0.036]], 0.005, "#151214");
+    for (let k = 0; k < 7; k++) line(x, [[-0.020 + k * 0.007, cy - 0.060], [-0.018 + k * 0.006, cy - 0.165]], 0.0018, "rgba(140,130,140,0.5)");
+  } else {
+    // 净: 帅盔 side (gold scale dome, red band, side flap + silver disc, 绒球, 鬓发)
+    shape(x, [[-0.050, cy + 0.060], [-0.047, cy + 0.165], [-0.020, cy + 0.240], [0.012, cy + 0.258], [0.040, cy + 0.232], [0.050, cy + 0.170], [0.044, cy + 0.060], [0.018, cy + 0.088], [-0.018, cy + 0.084]], GOLD, 0.005);
+    x.save(); path(x, [[-0.050, cy + 0.060], [-0.047, cy + 0.165], [-0.020, cy + 0.240], [0.012, cy + 0.258], [0.040, cy + 0.232], [0.050, cy + 0.170], [0.044, cy + 0.060]]); x.clip(); scales(x, -0.06, 0.06, cy + 0.07, cy + 0.25, GOLD_D, 0.014); x.restore();
+    line(x, [[0.043, cy + 0.082], [-0.046, cy + 0.079]], 0.010, "#c02a20");
+    shape(x, [[-0.012, cy + 0.055], [-0.045, cy + 0.045], [-0.052, cy - 0.030], [-0.036, cy - 0.055], [-0.014, cy - 0.035]], GOLD, 0.004, GOLD_D);
+    ell(x, -0.033, cy + 0.000, 0.014, 0.014, "#e8e8ee", 0.002);
+    const pg = x.createRadialGradient(-0.028, cy + 0.248, 0.004, -0.030, cy + 0.240, 0.022);
+    pg.addColorStop(0, "#ff7a6a"); pg.addColorStop(1, "#b0141a");
+    ell(x, -0.030, cy + 0.240, 0.022, 0.022, pg, 0.0025, "#7a1014");
+    shape(x, [[-0.046, cy + 0.060], [-0.050, cy + 0.020], [-0.042, cy - 0.020], [-0.030, cy - 0.005], [-0.034, cy + 0.040]], "#151012", 0.002);
+    ell(x, -0.032, cy + 0.292, 0.007, 0.016, GOLD, 0.002, GOLD_D); // 顶 spike (top rim)
+  }
+  x.restore();
+}
+
 export type ActorRole = "jing" | "dan" | "laosheng";
 interface Rig { root: THREE.Group; turn: THREE.Group; body: THREE.Group; head: THREE.Group; arms: { s: number; up: THREE.Group; lo: THREE.Group }[]; extra: Record<string, Part>; }
 
@@ -503,6 +633,21 @@ function actorRig(role: ActorRole, _color: number): Rig {
     }
   });
   head.add(hp.g);
+  // ---------- v56: narrow 皮影 side-face cards (戏台演员 only)
+  // Two thin painted profile cards inside the head group, angled ±54° round Y.
+  // Front/back keep the original head art; faceCam reveals only the camera-side
+  // card at oblique yaw, so the front view never shows a stray paper edge.
+  for (const s of [-1, 1]) {
+    const p = part("profile-" + role + (s > 0 ? "r" : "l"), [-0.058, cy - 0.22, 0.058, cy + 0.30], P * 1.9, (x, back) => {
+      if (!back) paintProfileFace(x, role, skin, cy, s);
+    }, { back: false, rim: false, shadow: false });
+    p.g.position.set(s * 0.118, 0, 0.028); // v56: outboard + forward of the face slab; inner edge tucks in
+    p.g.rotation.y = s * 0.9; // 52° — card normal turns outward to the head side
+    p.g.visible = false; // faceCam toggles per camera side (no per-frame allocation)
+    p.g.userData.profileCard = true;
+    extra[s > 0 ? "profileR" : "profileL"] = p;
+    head.add(p.g);
+  }
   if (role === "jing") for (const s of [-1, 1]) { // 翎子 pheasant plumes
     const l = part("lingzi", [-0.03, -0.02, 0.6, 1.25], P * 0.55, (x) => {
       x.strokeStyle = "#6a4a2a"; x.lineWidth = 0.012; path(x, [[0, 0], [0.08, 0.4], [0.25, 0.85], [0.52, 1.18]], false); x.stroke();
@@ -582,18 +727,27 @@ function actorRig(role: ActorRole, _color: number): Rig {
   return { root, turn, body, head, arms, extra };
 }
 
-function faceCam(rig: { root: THREE.Group; turn: THREE.Group }, maxYaw: number): void {
+function faceCam(rig: { root: THREE.Group; turn: THREE.Group; extra?: Record<string, Part> }, maxYaw: number): void {
   if (!CAM) return;
   const camW = CAM.getWorldPosition(new THREE.Vector3());
   const v = rig.root.worldToLocal(camW.clone());
   let yaw = Math.atan2(v.x, v.z);
   if (Math.abs(yaw) > Math.PI * 0.75) yaw = yaw - Math.sign(yaw) * Math.PI;
+  const relYaw = yaw; // v56: camera side in root space, before the face-cam clamp
   yaw = Math.max(-maxYaw, Math.min(maxYaw, yaw)); // v51: clamp — crowd keeps stage facing, slight peek to cam
   let d = yaw - rig.turn.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d));
   rig.turn.rotation.y += d * 0.28; // v54: snappier face-cam — side/oblique 看戏 reads 工笔 faces
   const rootW = rig.root.getWorldPosition(new THREE.Vector3());
   const dx = camW.x - rootW.x, dy = camW.y - rootW.y, dz = camW.z - rootW.z;
   const elev = Math.atan2(dy, Math.hypot(dx, dz)); // 0 horizon … ~1.4 nadir
+  // v56: profile cards only for genuine oblique/side views — hide at front (edge-on
+  // sliver), behind the back, and near birdseye (avoids a top-view paper cross).
+  const pr = rig.extra?.profileR, pl = rig.extra?.profileL;
+  if (pr && pl) {
+    const showProf = Math.abs(relYaw) > 0.34 && Math.abs(relYaw) < 2.45 && elev < 0.5;
+    pr.g.visible = showProf && relYaw > 0;
+    pl.g.visible = showProf && relYaw < 0;
+  }
   // v39b: NEVER tip flat (elev*0.92→1.15 laid figures on the ground = beige slabs).
   // Hide board tops only near nadir (birdseye); mid-high/side keep dark cardboard edge.
   // Soft lean ≤0.34 so 工笔 faces stay readable without tipping flat.
@@ -626,7 +780,7 @@ export function makeOperaActor(color: number, seed: number, scale: number): THRE
   const [A, B] = arms; // A = screen-left (s=-1), B = screen-right
   const set = (a: typeof A, up: number, lo: number) => { a.up.rotation.z = a.s * up; a.lo.rotation.z = lo; };
   const anim = (t: number) => {
-    faceCam(rig, 0.5);
+    faceCam(rig, 0.18); // v56: body holds stage-facing; the 54° profile cards carry side/oblique heads
     if (role === "jing") { // 起霸 → 亮相 → 云手, 6 s
       const c = (t % 6) / 6;
       const raise = sm(0.05, 0.25, c) * (1 - sm(0.8, 0.98, c));

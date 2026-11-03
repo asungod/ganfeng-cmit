@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import type { EraId, GlazeId, ShapeId } from "../data/porcelain";
+import { lowPower } from "./kit";
 
 const TEX = typeof navigator !== "undefined" && (navigator.hardwareConcurrency ?? 4) >= 6 ? 4096 : 2048; // v29: sharper 青花 up close
 const LATHE_SEGS = 160;
@@ -55,14 +56,16 @@ export class PorcelainVitrine {
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer = new THREE.WebGLRenderer({ canvas, antialias: !lowPower(), alpha: false }); // v55: 低端机省 MSAA
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowPower() ? 1 : 2)); // v55: 低端 DPR 锁 1
     this.renderer.setClearColor(0x050505, 1);
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.05; // v52: read form + glaze
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.shadowMap.type = lowPower() ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap; // v55: 低端用 PCF
+    // v55: 展柜与器物静态，阴影冻结；器物重建时再 needsUpdate
+    this.renderer.shadowMap.autoUpdate = false;
 
     this.scene = new THREE.Scene();
     this.scene.background = museumGradient();
@@ -142,7 +145,7 @@ export class PorcelainVitrine {
     this.key = new THREE.SpotLight(0xd4e0ee, 24, 18, 0.46, 0.4, 1.7); // v53r10: cooler key — inkier 青花
     this.key.position.set(2.05, 3.72, 2.05);
     this.key.castShadow = true;
-    this.key.shadow.mapSize.set(2048, 2048);
+    this.key.shadow.mapSize.set(lowPower() ? 1024 : 2048, lowPower() ? 1024 : 2048); // v55: 低端机半分辨率阴影
     this.key.shadow.radius = 3.2;
     this.key.shadow.blurSamples = 12;
     this.key.shadow.bias = -0.00035;
@@ -157,6 +160,7 @@ export class PorcelainVitrine {
     this.well = new THREE.PointLight(0xd8e4f0, 0.32, 3.0, 2.2); // v53r9: cooler/dimmer well — inkier 青花
     this.well.position.set(0, 1.7, 0);
     this.scene.add(this.amb, hemi, this.key, this.key.target, this.rim, this.fill, this.well);
+    this.renderer.shadowMap.needsUpdate = true; // v55: 首帧生成一次冻结阴影
 
     this.resize();
     this.loop();
@@ -311,6 +315,7 @@ export class PorcelainVitrine {
     }
     this.well.position.set(0, height * 0.92, 0);
     this.relight(glaze, height);
+    this.renderer.shadowMap.needsUpdate = true; // v55: 器物重建后刷新一次冻结阴影
 
     if (this.rampMode === "instant") {
       // Timer covers geometry jump only (no fake setTimeout delay); maps already prepared.
@@ -360,6 +365,7 @@ export class PorcelainVitrine {
     this.piece.add(inner);
     this.applyWireState();
     this.emitStats();
+    this.renderer.shadowMap.needsUpdate = true; // v55: 内壁加入/线框切换后刷新阴影
     if (this.growthLoop) {
       const id = window.setTimeout(() => {
         if (!this.growthLoop || gen !== this.buildGen) return;
@@ -392,6 +398,7 @@ export class PorcelainVitrine {
       }
     });
     this.envRT.dispose();
+    this.scene.environment = null; // v55: 环境 RT 已释放，断开引用
     this.renderer.dispose();
   }
 

@@ -18,8 +18,9 @@ export class LobbyScene {
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = makeRenderer(canvas, 0.75);
     this.renderer.shadowMap.enabled = false;
-    this.scene.fog = new THREE.FogExp2(0x6a4a50, 0.016);
-    this.scene.background = new THREE.Color(0x241830);
+    // v55: 雾从紫灰转暖褐、密度减薄；背景提一点蓝紫，远山不再糊成一团
+    this.scene.fog = new THREE.FogExp2(0x7d4b3d, 0.0115);
+    this.scene.background = new THREE.Color(0x2a2340);
     // v52: env only — dusk HDRI sun disc looked like 落霞球 behind cards
     loadHdri(this.renderer, this.scene, "qwantani_dusk_2_puresky", false);
     this.scene.environmentIntensity = 0.55;
@@ -88,6 +89,7 @@ export class LobbyScene {
   dispose(): void {
     this.disposed = true;
     cancelAnimationFrame(this.raf);
+    this.post.dispose(); // v55: release composer/bloom render targets on route switch
     disposeScene(this.scene);
     this.renderer.dispose();
   }

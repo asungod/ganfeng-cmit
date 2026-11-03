@@ -5,7 +5,7 @@ import type { ActId, SlotId } from "../data/wanshou";
 import { curvedRoof } from "./pavilion";
 import { setPaperCamera } from "./paperFigure";
 import { qingwaMat, xuandeLu } from "./guofeng";
-import { makeFigure, makeTree, shadowSize, Flight, disposeScene, lantern, loadHdri, makePost, makeRenderer, particles, phMat, wbox, type Post , wisps } from "./kit";
+import { makeFigure, makeTree, shadowSize, Flight, disposeScene, lantern, loadHdri, lowPower, makePost, makeRenderer, particles, phMat, wbox, type Post , wisps } from "./kit";
 
 const SLOT: Record<SlotId, { sun: [number, number, number]; col: number; I: number; hemi: number; env: number; exp: number; fog: number; hdri: string; bg: number; lamp: number }> = {
   chendan: { sun: [-30, 12, 20], col: 0xffc4a0, I: 2.6, hemi: 0.45, env: 0.8, exp: 1.0, fog: 0xa89aa4, hdri: "qwantani_puresky", bg: 0.8, lamp: 0.5 },
@@ -92,6 +92,8 @@ export class TempleScene {
 
   constructor(private canvas: HTMLCanvasElement) {
     this.renderer = makeRenderer(canvas, 0.9);
+    // v55: 戏台演员/香客有逐帧动画，阴影不能冻结 —— 本场景恢复每帧更新（其余静态馆保持冻结）
+    this.renderer.shadowMap.autoUpdate = true;
     (window as unknown as { __temple: unknown }).__temple = this;
     this.scene.fog = new THREE.Fog(0xa89aa4, 35, 160);
     this.scene.background = new THREE.Color(0x1a1418);
@@ -354,22 +356,29 @@ export class TempleScene {
     }
     // procession: worshippers on the open courtyard axis only (v37: never under 戏台/殿 roofs)
     // v39: fewer pilgrims, slightly larger, looser spacing — readable cluster not slab grid
+    const lowCrowd = lowPower(); // v55: 低端机观众/香客不投实时阴影（保留脚下 contactShadow），省 draw call 与阴影 pass
+    const dropCastShadow = (f: THREE.Group) => {
+      if (lowCrowd) f.traverse((o) => { if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).castShadow = false; });
+    };
     const pilgrimColors = [0x8a5a3a, 0x6a4a2a, 0xa07040, 0x5a4830, 0x9a6840];
     for (let i = 0; i < 8; i++) {
       const f = makeFigure(pilgrimColors[i % pilgrimColors.length], i + 7, 1.08, "robed");
       f.position.set((i % 2 ? 1.05 : -1.05) + (i % 4 - 1.5) * 0.08, 0, 5.6 - i * 0.85);
+      dropCastShadow(f);
       this.procession.add(f);
     }
     S.add(this.procession);
     // audience facing the stage — keep clear of stage apron / roof drip line
     // v51: seed i*3+2 cycles pose modes 0..7 (sit/lean/clap/…); yaw toward stage center
     const crowdColors = [0xb23a2e, 0x2f5f8a, 0x3f6b52, 0xd0a24a, 0x8a3f2a, 0xe8ddc8, 0x2a2f38, 0x6a4a7a]; // v55: 年画色，压掉灰蓝
-    for (let i = 0; i < 28; i++) {
+    const crowdN = lowPower() ? 16 : 28; // v55: 低端机 28→16（保留座位弧线/配色），中高端不变
+    for (let i = 0; i < crowdN; i++) {
       if (i === 11 || i === 19) continue; // v55: two gaps — break the 4x7 parade grid
       const row = Math.floor(i / 7), col = i % 7;
       const seed = i * 3 + 2; // mode = floor(seed/3)%8 = i%8 — even mix of sit/lean/idle/…
       const sc = (row === 0 ? 1.0 : 0.94) + (i % 5 - 2) * 0.018; // v55: jitter both ways
       const f = makeFigure(crowdColors[i % crowdColors.length], seed, sc, "crowd");
+      dropCastShadow(f); // v55: 低端机不投实时阴影
       // v37: start further from stage (was 6.5) so high-angle never clips heads through 戏台 eaves
       // v55: loose arc + bigger jitter — reads as a crowd, not a formation
       const x = -4.8 + col * 1.6 + (row % 2) * 0.5 + Math.sin(i * 7.1) * 0.55;
@@ -428,13 +437,19 @@ export class TempleScene {
     if (this.hdri !== c.hdri) {
       this.hdri = c.hdri;
       loadHdri(this.renderer, this.scene, c.hdri, !(slot === "yewan"));
-      if (slot === "yewan") this.scene.background = new THREE.Color(0x0b0d16);
+      if (slot === "yewan") {
+        // v55: 背景改纯色前释放上一档 HDR 背景，避免换时辰泄漏
+        if (this.scene.background && (this.scene.background as THREE.Texture).isTexture) (this.scene.background as THREE.Texture).dispose();
+        this.scene.background = new THREE.Color(0x0b0d16);
+      }
     }
     this.scene.backgroundIntensity = c.bg;
     for (const l of this.lamps) l.intensity = c.lamp * 1.2; // v53r4: daytime wall orbs
     for (const m of this.lampMeshes) (m.material as THREE.MeshStandardMaterial).emissiveIntensity = (slot === "yewan" ? 0.35 : 0.02) + c.lamp * 0.55; // v53r8
     for (const l of this.lanterns) l.visible = slot === "yewan" || c.lamp > 0.4; // v53r9: hide daytime hanging lanterns (were wall orbs)
     this.post.bloom.strength = slot === "yewan" ? 0.35 : 0.02; // v53r7: daytime almost no bloom circles
+    // v55: 灯光/演员可见性变化后主动重建一次静态阴影（本场景 autoUpdate=true，这一行是给未来冻结预留的安全阀）
+    this.renderer.shadowMap.needsUpdate = true;
     this.procession.visible = act === "kaichao";
     this.audience.visible = act === "xiban";
     this.smoke.material.opacity = act === "kaichao" ? 0.1 : 0.05; // v53r6: less chalk plume
@@ -513,6 +528,8 @@ export class TempleScene {
     this.disposed = true;
     cancelAnimationFrame(this.raf);
     this.controls.dispose();
+    // v55: 释放后处理链的 RT/材质，避免切换展馆时显存堆积
+    this.post.dispose();
     disposeScene(this.scene);
     this.renderer.dispose();
   }

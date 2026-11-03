@@ -22,13 +22,16 @@ export function shadowSize(): number {
 }
 
 export function makeRenderer(canvas: HTMLCanvasElement, exposure = 1.0): THREE.WebGLRenderer {
-  const r = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+  // v55: 低端机关闭 MSAA（DPR 已锁 1，省带宽；中高端保持原样）
+  const r = new THREE.WebGLRenderer({ canvas, antialias: !lowPower(), powerPreference: "high-performance" });
   r.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower() ? 1 : 1.5));
   r.shadowMap.type = lowPower() ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
   r.toneMapping = THREE.ACESFilmicToneMapping;
   r.toneMappingExposure = exposure;
   r.outputColorSpace = THREE.SRGBColorSpace;
   r.shadowMap.enabled = true;
+  // v55: 静态场景阴影只渲染一次，由各场景在灯光/布局变化时置 needsUpdate（演员动画的 temple 会显式改回 autoUpdate）
+  r.shadowMap.autoUpdate = false;
   return r;
 }
 
@@ -57,14 +60,15 @@ const GradeShader = {
     }`,
 };
 
-export type Post = { composer: EffectComposer; bloom: UnrealBloomPass; grade: ShaderPass; render: () => void; setSize: (w: number, h: number) => void };
+export type Post = { composer: EffectComposer; bloom: UnrealBloomPass; grade: ShaderPass; render: () => void; setSize: (w: number, h: number) => void; dispose: () => void };
 
 export function makePost(renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera, bloomStrength = 0.6, threshold = 0.82): Post {
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new UnrealBloomPass(new THREE.Vector2(512, 512), bloomStrength, 0.5, threshold);
   composer.addPass(bloom);
-  composer.addPass(new OutputPass());
+  const output = new OutputPass();
+  composer.addPass(output);
   const grade = new ShaderPass(GradeShader);
   composer.addPass(grade);
   const t0 = performance.now();
@@ -81,6 +85,13 @@ export function makePost(renderer: THREE.WebGLRenderer, scene: THREE.Scene, came
       if (lowPower()) return;
       composer.setSize(w, h);
       bloom.setSize(w / 2, h / 2);
+    },
+    // v55: 释放 composer 的离屏 RT 与各 pass 的材质/RT，场景切换时不再泄漏显存
+    dispose: () => {
+      composer.dispose();
+      bloom.dispose();
+      grade.dispose();
+      output.dispose();
     },
   };
 }
@@ -373,16 +384,26 @@ export function disposeScene(scene: THREE.Scene): void {
     if (m.geometry) m.geometry.dispose();
     const mats = m.material ? (Array.isArray(m.material) ? m.material : [m.material]) : [];
     for (const x of mats) {
+      // v55: 贴图照常按场景释放（缓存只复用 Texture 对象/source，下次使用时 three 会重新上传，避免跨场景常驻显存）
       for (const k of ["map", "normalMap", "roughnessMap", "emissiveMap"] as const) (x as THREE.MeshStandardMaterial)[k]?.dispose?.();
       x.dispose();
     }
   });
+  // v55: 环境/背景贴图由各场景独立创建（loadHdri 每次生成独立 PMREM），场景销毁时一并释放
+  const env = scene.environment;
+  const bg = scene.background;
+  scene.environment = null;
+  scene.background = null;
+  env?.dispose();
+  if (bg && (bg as THREE.Texture).isTexture) (bg as THREE.Texture).dispose();
 }
 
 // ---------- CC0 assets (Poly Haven), lazy-loaded per hall ----------
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 const ASSET = "./assets3d/";
 const texLoader = new THREE.TextureLoader();
+// v55: phMat 纹理缓存 — 同一馆内相同 name/通道/repeat/color 复用 Texture 对象，省去重复下载/解码
+const phTexCache = new Map<string, THREE.Texture>();
 
 export function loadHdri(renderer: THREE.WebGLRenderer, scene: THREE.Scene, name: string, bg = true, onDone?: () => void): void {
   scene.userData.hdri = name;
@@ -390,9 +411,22 @@ export function loadHdri(renderer: THREE.WebGLRenderer, scene: THREE.Scene, name
     if (scene.userData.hdri !== name) return tex.dispose(); // a newer request won the race
     tex.mapping = THREE.EquirectangularReflectionMapping;
     const pm = new THREE.PMREMGenerator(renderer);
-    scene.environment = pm.fromEquirectangular(tex).texture;
+    const nextEnv = pm.fromEquirectangular(tex).texture;
+    const prevEnv = scene.environment;
+    const prevBg = scene.background;
+    scene.environment = nextEnv;
     pm.dispose();
-    if (bg) scene.background = tex;
+    // v55: 替换前释放旧 PMREM 环境图，避免换时辰反复加载 HDRI 时泄漏
+    if (prevEnv && prevEnv !== nextEnv) prevEnv.dispose();
+    if (bg) {
+      // v55: 旧背景若是 HDR 纹理（换天/换时辰）也一并释放
+      if (prevBg && (prevBg as THREE.Texture).isTexture && prevBg !== tex) (prevBg as THREE.Texture).dispose();
+      scene.background = tex;
+    } else if (prevBg && (prevBg as THREE.Texture).isTexture) {
+      // v55: 调用方随后会设置纯色背景（夜景/落霞），先释放不再引用的 HDR 背景
+      (prevBg as THREE.Texture).dispose();
+      scene.background = null;
+    }
     onDone?.();
   });
 }
@@ -400,11 +434,16 @@ export function loadHdri(renderer: THREE.WebGLRenderer, scene: THREE.Scene, name
 /** Poly Haven PBR set (diff / nor_gl / rough, 1k jpg). */
 export function phMat(name: string, rep: [number, number], opts: THREE.MeshStandardMaterialParameters = {}): THREE.MeshStandardMaterial {
   const ld = (k: string, srgb: boolean) => {
+    // v55: key 只含 name/通道/repeat——color 是材质参数，不影响贴图，同图可共享
+    const key = `${name}_${k}_${rep[0]}x${rep[1]}`;
+    const hit = phTexCache.get(key);
+    if (hit) return hit;
     const t = texLoader.load(`${ASSET}${name}_${k}_1k.jpg`);
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     t.repeat.set(rep[0], rep[1]);
     t.anisotropy = 8;
     if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+    phTexCache.set(key, t);
     return t;
   };
   return new THREE.MeshStandardMaterial({ map: ld("diff", true), normalMap: ld("nor", false), roughnessMap: ld("rough", false), roughness: 1, metalness: 0, ...opts });

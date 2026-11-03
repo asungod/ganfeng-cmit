@@ -600,7 +600,11 @@ export class WeiwuScene {
     if (this.hdri !== c.hdri) {
       this.hdri = c.hdri;
       loadHdri(this.renderer, this.scene, c.hdri, !(h === "night"));
-      if (h === "night") this.scene.background = new THREE.Color(0x0b0d16);
+      if (h === "night") {
+        // v55: 背景改纯色前释放上一档 HDR 背景，避免换时辰泄漏
+        if (this.scene.background && (this.scene.background as THREE.Texture).isTexture) (this.scene.background as THREE.Texture).dispose();
+        this.scene.background = new THREE.Color(0x0b0d16);
+      }
     }
     this.scene.backgroundIntensity = h === "night" ? 0.5 : 1;
     for (const l of this.lamps) l.intensity = c.lamp * (h === "night" ? 1.6 : 0.9);
@@ -614,6 +618,8 @@ export class WeiwuScene {
     if (this.skyFill) this.skyFill.intensity = { dawn: 0.25, noon: 0.55, dusk: 0.22, night: 0 }[h]; // v53r10: softer noon skylight — no altar halo
     for (const m of this.winMats) m.emissiveIntensity = { dawn: 0.08, noon: 0.16, dusk: 0.5, night: 1.1 }[h]; // v53r9: kill noon lattice glow orb
     this.post.bloom.strength = h === "night" ? 0.7 : (h === "dusk" ? 0.12 : 0.04); // v53r9: noon almost no round bloom
+    // v55: 阴影已冻结（makeRenderer autoUpdate=false），换时辰后主动重建一次
+    this.renderer.shadowMap.needsUpdate = true;
   }
 
   setRoom(r: RoomId | "overview", instant = false): void {
@@ -629,6 +635,8 @@ export class WeiwuScene {
     this.controls.minDistance = r === "overview" ? 16 : 0.05; // v41: allow closer hall read
     this.controls.maxPolarAngle = r === "overview" ? Math.PI * 0.495 : Math.PI * 0.92;
     this.controls.minPolarAngle = r === "overview" ? Math.PI * 0.22 : (r === "tianjing" ? Math.PI * 0.08 : Math.PI * 0.2); // v53r4: 天井 may look up
+    // v55: 机位/房间切换时补一帧静态阴影（灯光不变，但保证首帧与跳转后阴影正确）
+    this.renderer.shadowMap.needsUpdate = true;
   }
 
   resize(): void {
@@ -683,6 +691,8 @@ export class WeiwuScene {
     this.disposed = true;
     cancelAnimationFrame(this.raf);
     this.controls.dispose();
+    // v55: 释放后处理链的 RT/材质
+    this.post.dispose();
     disposeScene(this.scene);
     this.renderer.dispose();
   }
