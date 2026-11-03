@@ -1,6 +1,6 @@
 # 第三方资源与许可清单（赣风 · 可对话的数字展）
 
-整理日期：2026-10-31（对齐 HEAD tip · 含 Poly Haven/Kenney/Quaternius CC0 + Freesound 戏曲场面锣鼓 CC-BY）。下表只列**随作品分发或运行时用到**的第三方资源；版本以 package-lock.json 为准。
+整理日期：2026-11-03（对齐 HEAD tip · 含 Poly Haven CC0 贴图/HDRI + Freesound 戏曲场面锣鼓 CC-BY）。下表只列**随作品分发或运行时用到**的第三方资源；版本以 package-lock.json 为准。
 
 ## 一、运行时随包分发
 
@@ -14,15 +14,15 @@
 | Ma Shan Zheng（马善政毛笔楷书） | Google Fonts 仓库版 | 标题毛笔字（已裁剪子集） | SIL OFL 1.1 | https://github.com/google/fonts/tree/main/ofl/mashanzheng |
 | Noto Serif SC（思源宋体） | Google Fonts 仓库版（可变字重） | 正文宋体（子集，字重 400–700） | SIL OFL 1.1 | https://github.com/google/fonts/tree/main/ofl/notoserifsc |
 | Noto Sans SC（思源黑体） | Google Fonts 仓库版（可变字重） | 界面黑体（子集 + GB2312 一级字，字重 300–600） | SIL OFL 1.1 | https://github.com/google/fonts/tree/main/ofl/notosanssc |
-| Go 标准库 | Go 1.24 编译 | 便携静态服务器 ganfeng-server（本项目自写，仅用标准库） | BSD-3-Clause（Go 运行时） | https://go.dev/LICENSE |
+| Go 标准库 | go.mod 声明 1.20，静态编译 | 便携静态服务器 ganfeng-server（本项目自写，仅用标准库） | BSD-3-Clause（Go 运行时） | https://go.dev/LICENSE |
 
 字体许可原文见 `public/fonts/OFL-*.txt`（离线包里在 `许可/` 目录）。
 
 
 ## 一·补、三维素材 / 3D assets（2026-10-20 新增 · Added 2026-10-20）
 
-全部来自 Poly Haven，许可 CC0 1.0（公有领域贡献，无需署名，本作品仍主动致谢）。均为 1k 分辨率，未改动像素；在程序里按世界坐标平铺，并用颜色系数调色。随包位置：`public/assets3d/`（约 19MB），清单机读版 `public/assets3d/credits.json`，作品内「门厅 → 关于本作品」里有致谢列表。
-All from Poly Haven, CC0 1.0 (public domain; no attribution required, credited anyway). 1k resolution, pixels unmodified; tiled in world space and colour-tinted in code. Shipped in `public/assets3d/` (~19 MB); machine-readable list `public/assets3d/credits.json`; credits panel in-app under Lobby → About this work.
+全部来自 Poly Haven，许可 CC0 1.0（公有领域贡献，无需署名，本作品仍主动致谢）。均为 1k 分辨率，未改动像素；在程序里按世界坐标平铺，并用颜色系数调色。随包位置：`public/assets3d/`（约 22 MB），清单机读版 `public/assets3d/credits.json`，作品内「门厅 → 关于本作品」里有致谢列表。
+All from Poly Haven, CC0 1.0 (public domain; no attribution required, credited anyway). 1k resolution, pixels unmodified; tiled in world space and colour-tinted in code. Shipped in `public/assets3d/` (~22 MB); machine-readable list `public/assets3d/credits.json`; credits panel in-app under Lobby → About this work.
 
 | 素材 Asset | 类型 Type | 作者 Author(s) | 用途 Use | 许可 License | 来源 URL |
 |---|---|---|---|---|---|
@@ -34,17 +34,14 @@ All from Poly Haven, CC0 1.0 (public domain; no attribution required, credited a
 | Grey Roof Tiles | PBR texture | Rob Tuytel | 围屋瓦顶 / roof tiles | CC0 1.0 | https://polyhaven.com/a/grey_roof_tiles |
 | Ceramic Roof 01 | PBR texture | Rob Tuytel | 围屋瓦顶 / roof tiles (v18) | CC0 1.0 | https://polyhaven.com/a/ceramic_roof_01 |
 | Dark Wooden Planks | PBR texture | Amal Kumar | 木门、梁、楼板 / wood doors, beams, floors | CC0 1.0 | https://polyhaven.com/a/dark_wooden_planks |
-| Kenney Nature Kit（选树／竹／灌木） | 三维模型 glTF | Kenney | 客家／万寿宫／阁序岸边植被 | CC0 1.0 | https://kenney.nl/assets/nature-kit |
-| Quaternius Ultimate Nature Pack（CommonTree／Pine／Willow） | 三维模型 glTF | Quaternius | 客家／万寿宫／阁序柳树 | CC0 1.0 | https://quaternius.com/packs/ultimatenature.html |
-| Quaternius Modular Men／Women | 三维模型 glTF | Quaternius | 万寿宫香客／观众／戏班（T 姿改挂臂，布料着色） | CC0 1.0 | https://quaternius.com/packs/ultimatemodularcharacters.html |
 | Stone Tiles | PBR texture | Christopher Melani | 台基、地面、天井 / platforms, paving, skywells | CC0 1.0 | https://polyhaven.com/a/stone_tiles |
 | Brown Mud Dry | PBR texture | Rob Tuytel | 禾坪外地面、江岸 / ground, riverbank | CC0 1.0 | https://polyhaven.com/a/brown_mud_dry |
 | Red Plaster Weathered | PBR texture | Amal Kumar | 万寿宫红墙 / temple red walls | CC0 1.0 | https://polyhaven.com/a/red_plaster_weathered |
 | Lacquered Cherry Wood | PBR texture | Jenelle van Heerden, Rico Cilliers | 朱漆柱、供桌 / lacquered columns, altar | CC0 1.0 | https://polyhaven.com/a/lacquered_cherry_wood |
 | Weathered Planks | PBR texture | Dario Barresi, Dimitrios Savva | （备用，未直接使用）/ spare, not used | CC0 1.0 | https://polyhaven.com/a/weathered_planks |
 
-建筑、人物、香烟、灯笼、水面、山体等几何均为本项目程序生成，未使用第三方三维模型。
-Architecture, incense smoke, lanterns, water, hills and 阁序 birds are project-authored. Trees/bamboo and 万寿宫 people use Quaternius + Kenney CC0 glTF (listed above); procedural fallbacks remain if assets fail to load.
+建筑、人物、植被、香烟、灯笼、水面、山体等几何均为本项目程序生成，未使用第三方三维模型；v24 起已停用此前的 Quaternius/Kenney GLB，仓库与离线包均不再包含 `.glb` 文件。
+All architecture, figures, vegetation, incense smoke, lanterns, water, hills and birds are project-authored. The earlier Quaternius/Kenney GLBs were retired in v24; no `.glb` ships in the repo or offline bundle.
 
 
 ## 一·补二、音频素材 / Audio（2026-10-31 新增）
